@@ -1,0 +1,105 @@
+<?php
+
+namespace App\VeryBadSplit\Modele\DataObject;
+
+use DateTime;
+
+class Depense
+{
+    public function __construct(
+        private int          $id,
+        private ?string      $titre = null,
+        private ?DateTime    $date = null,
+        private ?float      $montant = null,
+        private ?Utilisateur $payeur = null,
+        private ?Evenement   $evenement = null,
+        private ?array       $participants = [],
+    )
+    {
+    }
+
+    public function getId(): int
+    {
+        return $this->id;
+    }
+
+    public function getTitre(): ?string
+    {
+        return $this->titre;
+    }
+
+    public function setTitre(?string $titre): void
+    {
+        $this->titre = $titre;
+    }
+
+    public function getDate(): ?DateTime
+    {
+        return $this->date;
+    }
+
+    public function setDate(?DateTime $date): void
+    {
+        $this->date = $date;
+    }
+
+    public function getMontant(): ?float
+    {
+        return $this->montant;
+    }
+
+    public function setMontant(?float $montant): void
+    {
+        $this->montant = $montant;
+    }
+
+    public function getPayeur(): ?Utilisateur
+    {
+        return $this->payeur;
+    }
+
+    public function setPayeur(?Utilisateur $payeur): void
+    {
+        $this->payeur = $payeur;
+    }
+
+    public function getEvenement(): ?Evenement
+    {
+        return $this->evenement;
+    }
+
+    public function setEvenement(?Evenement $evenement): void
+    {
+        $this->evenement = $evenement;
+    }
+
+    /**
+     * @return Utilisateur[]|null
+     */
+    public function getParticipants(): ?array
+    {
+        return $this->participants;
+    }
+
+    /**
+     * @param Utilisateur[]|null $participants
+     */
+    public function setParticipants(?array $participants): void
+    {
+        $this->participants = $participants;
+    }
+
+    public function estPayeur($login): bool
+    {
+        return $this->payeur->getLogin() === $login;
+    }
+
+    public function estParticipant($login): bool {
+        foreach ($this->participants as $participant) {
+            if ($participant->getLogin() === $login) {
+                return true;
+            }
+        }
+        return false;
+    }
+}
