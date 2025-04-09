@@ -52,7 +52,7 @@
                                     <input id="mdp" name="mdp" class="input is-large" type="password" placeholder="********"
                                            minlength="6" maxlength="50"
                                            pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*_=+\-]).{6,50}"
-                                           title="6 à 50 caractères, au moins une minusle, une majuscule et un caractère spécial"
+                                           title="6 à 50 caractères, au moins une minuscule, une majuscule et un caractère spécial"
                                            required>
                                     <span class="icon is-small is-left"><ion-icon name="key"></ion-icon></span>
                                 </div>
