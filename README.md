@@ -61,7 +61,7 @@ Au niveau des droits d'accès, on notera que :
 
 Actuellement, l'application est **complètement fonctionnelle**, mais **uniquement codée en PHP** (pas de JavaScript). Donc, chaque action demande un chargement d'une nouvelle page.
 
-Le **SGBD** utilisé est **MySQL** (vous ne devez pas en changer).
+Le **SGBD** utilisé est **MySQL/MariaDB** (vous ne devez pas en changer).
 
 Concernant le style, le framework CSS utilisé est [Bulma](https://bulma.io/) (mais vous pourrez en changer, si besoin). Les icônes affichées à divers endroits de l'application ne sont pas stockées en locale et sont fournies par l'outil [ionicons](https://ionic.io/ionicons) dont le fonctionnement est possible grâce à des [scripts](https://ionic.io/ionicons/usage) importés dans les pages de l'application.
 
@@ -205,7 +205,7 @@ Après votre analyse, il vous est demandé d'**améliorer cette application** de
 
 Enfin, il faudra proposer une **virtualisation** multi-conteneur de votre projet avec un fichier `docker-compose.yml` permettant de déployer :
 
-* Un conteneur pour la base de données **MySQL** de l'application.
+* Un conteneur pour la base de données **MySQL/MariaDB** de l'application.
 * Un conteneur qui fait tourner l'application sur un **serveur web** (qui communiquera donc avec le premier conteneur).
 L'objectif est que votre application puisse être déployée sans problème en quelques commandes simples grâce à **Docker**.
 
@@ -224,12 +224,12 @@ En complément, l'application devra aussi être **déployée** et accessible sur
 ### Contenu du dépôt
 
 * Le code source site **Very Bad Split**.
-* Un fichier **VeryBadSplit.sql** pour créer la table unique de l'application dans une base de données **MySQL**.
+* Un fichier **VeryBadSplit.sql** pour créer la table unique de l'application dans une base de données **MySQL/MariaDB**.
 
 ### Installation et mise en route
 
 * Peut être installé dans le dépôt docker utilisé en cours de web de 2ᵉ année.
-* Il faut créer une base de données sous MySQL et exécuter le code contenu dans **VeryBadSplit.sql** afin de créer de la table **app_db**. Si, pendant le développement, vous souhaitez utiliser la base de données MySQL de l'IUT, c'est possible (informations disponibles sur [cette page](https://iutdepinfo.iutmontp.univ-montp2.fr/intranet/bases-de-donnees/).), mais retenez bien qu'à la fin (lors du rendu final), votre base de données devra être virtualisée et que votre application web sera liée à la base du conteneur correspondant.
+* Il faut créer une base de données sous MySQL (ou MariaDB) et exécuter le code contenu dans **VeryBadSplit.sql** afin de créer de la table **app_db**. Si, pendant le développement, vous souhaitez utiliser la base de données MariaDB de l'IUT, c'est possible (informations disponibles sur [cette page](https://iutdepinfo.iutmontp.univ-montp2.fr/intranet/bases-de-donnees/).), mais retenez bien qu'à la fin (lors du rendu final), votre base de données devra être virtualisée et que votre application web sera liée à la base du conteneur correspondant.
 * Il faut ensuite éditer les informations de connexion dans `src/Configuration/ConfigurationBaseDeDonnees.php`.
 
 ## Liens avec les différentes ressources et progression
