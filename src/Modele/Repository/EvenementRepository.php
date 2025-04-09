@@ -76,12 +76,8 @@ class EvenementRepository
         $pdoStatement = ConnexionBaseDeDonnees::getPdo()->prepare(
             "SELECT DISTINCT idEvenement, codeSecretEvenement, titreEvenement, dateEvenement,
                            loginProprietaire, nomProprietaire, prenomProprietaire, membresEvenement
-                        FROM app_db, 
-                             JSON_TABLE(app_db.membresEvenement,
-                                     '$[*]' 
-                                     COLUMNS(login VARCHAR(30) PATH '$.login')
-                            ) membres 
-                        WHERE membres.login = :login"
+                        FROM app_db
+                        WHERE JSON_CONTAINS(membresEvenement, JSON_OBJECT('login', :login))"
         );
         $pdoStatement->execute(['login' => $login]);
         $data = $pdoStatement->fetchAll(PDO::FETCH_ASSOC);

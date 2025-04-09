@@ -104,12 +104,8 @@ class DepenseRepository
             "SELECT DISTINCT idDepense, titreDepense, dateDepense, montantDepense, 
                                    loginPayeur, nomPayeur, prenomPayeur, 
                                    participantsDepense
-                        FROM app_db, 
-                             JSON_TABLE(app_db.participantsDepense,
-                                     '$[*]' 
-                                     COLUMNS(login VARCHAR(30) PATH '$.login')
-                            ) participants 
-                        WHERE participants.login = :login OR loginPayeur = '$login'");
+                        FROM app_db
+                        WHERE JSON_CONTAINS(participantsDepense, JSON_OBJECT('login', :login)) OR loginPayeur = '$login'");
         $pdoStatement->execute(['login' => $login]);
         $data = $pdoStatement->fetchAll(PDO::FETCH_ASSOC);
         if (!$data) {
