@@ -145,10 +145,10 @@ Le schéma initial (contenant seulement la table/relation `app_db`) n'est même 
 
 **Attention :** encore une fois, on insiste bien qu'on ne s'intéresse pas aux formes normales au-dessus de la 1ère pour le moment. Les tables que vous allez créer et les modifications que vous allez effectuer (sans justifier pour le moment) ont pour unique but de régler les problèmes qui empêchent le schéma d'être en 1ère forme normale et rien d'autre. Pour le passage aux formes supérieures (au-delà de la 1ere) il faut décomposer en justifiant, et c'est le but des étapes suivantes.
 
-#### Deuxième partie : lister les dépendances fonctionnelles et choisir des clés adaptées
+#### Deuxième partie : lister les dépendances fonctionnelles élementaires directes (DFED) et choisir des clés adaptées
 
 À partir du nouveau schéma obtenu à l'étape précédente (qui est normalement au moins en 1ère forme normale) vous devrez, pour chaque table :
-* Lister les dépendances fonctionnelles (à partir de votre analyse des règles de l'application).
+* Lister les dépendances fonctionnelles élémentaires directes (les DFED déduites à partir de votre analyse des règles de l'application).
 * Choisir une clé primaire adéquate (en justifiant).
 
 #### Troisième partie : décomposer le schéma pour atteindre la 3ᵉ forme normale.
