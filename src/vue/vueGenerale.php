@@ -3,7 +3,14 @@
 /** @var string $pagetitle */
 
 use App\VeryBadSplit\Lib\ConnexionUtilisateur;
+use App\VeryBadSplit\Lib\Conteneur;
+use Symfony\Component\HttpFoundation\UrlHelper;
+use Symfony\Component\Routing\Generator\UrlGenerator;
 
+/** @var UrlGenerator $generateurUrl */
+$generateurUrl = Conteneur::recupererService("generateurUrl");
+/** @var UrlHelper $assistantUrl */
+$assistantUrl = Conteneur::recupererService("assistantUrl");
 ?>
 <!DOCTYPE html>
 <html lang="fr" data-theme="dark">
@@ -11,9 +18,9 @@ use App\VeryBadSplit\Lib\ConnexionUtilisateur;
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title><?= htmlspecialchars($pagetitle) ?></title>
-    <link rel="stylesheet" href="../ressources/css/bulma.min.css">
-    <link rel="stylesheet" href="../ressources/css/styles.css">
-    <script type="text/javascript" src="../ressources/js/bulma.js" defer></script>
+    <link rel="stylesheet" href="<?php echo $assistantUrl->getAbsoluteUrl("../ressources/css/bulma.min.css") ?>">
+    <link rel="stylesheet" href="<?php echo $assistantUrl->getAbsoluteUrl("../ressources/css/styles.css") ?>">
+    <script type="text/javascript" src="<?php echo $assistantUrl->getAbsoluteUrl("../ressources/js/bulma.jsZz") ?>" defer></script>
 </head>
 <body>
     <section class="hero is-fullheight">
