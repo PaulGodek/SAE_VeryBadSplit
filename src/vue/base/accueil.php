@@ -18,8 +18,8 @@ use App\VeryBadSplit\Lib\ConnexionUtilisateur;
                 <?php } else { ?>
                     <p>
                         Pour créer des événements, commencez par vous
-                        <a href="controleurFrontal.php?action=afficherFormulaireConnexion&controleur=utilisateur">connecter</a>
-                        ou par <a href="controleurFrontal.php?action=afficherFormulaireCreation&controleur=utilisateur">créer un compte</a>!
+                        <a href="./connexion">connecter</a>
+                        ou par <a href="./inscription">créer un compte</a>!
                     </p>
                 <?php } ?>
             </div>

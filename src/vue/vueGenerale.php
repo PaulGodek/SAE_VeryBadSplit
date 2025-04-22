@@ -30,7 +30,7 @@ use App\VeryBadSplit\Lib\ConnexionUtilisateur;
                     </div>
                     <div id="navSite" class="navbar-menu">
                         <div class="navbar-start">
-                            <a href="controleurFrontal.php?action=accueil&controleur=base" class="navbar-item">Accueil</a>
+                            <a href="./" class="navbar-item">Accueil</a>
                             <?php
                             if (ConnexionUtilisateur::estConnecte()) {?>
                                 <a href="controleurFrontal.php?action=afficherListeMesEvenements&controleur=evenement"
@@ -46,11 +46,11 @@ use App\VeryBadSplit\Lib\ConnexionUtilisateur;
                                     Se déconnecter
                                 </a>
                             <?php } else { ?>
-                                <a href="controleurFrontal.php?action=afficherFormulaireConnexion&controleur=utilisateur"
+                                <a href="./connexion"
                                    class="navbar-item">
                                     Se connecter
                                 </a>
-                                <a href="controleurFrontal.php?action=afficherFormulaireCreation&controleur=utilisateur"
+                                <a href="./inscription"
                                    class="navbar-item">
                                     S'inscrire
                                 </a>

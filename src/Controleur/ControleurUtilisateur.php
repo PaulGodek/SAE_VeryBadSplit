@@ -12,6 +12,7 @@ use App\VeryBadSplit\Modele\HTTP\Cookie;
 use App\VeryBadSplit\Modele\Repository\DepenseRepository;
 use App\VeryBadSplit\Modele\Repository\EvenementRepository;
 use App\VeryBadSplit\Modele\Repository\UtilisateurRepository;
+use Symfony\Component\Routing\Attribute\Route;
 
 class ControleurUtilisateur extends ControleurGenerique
 {
@@ -28,6 +29,7 @@ class ControleurUtilisateur extends ControleurGenerique
         ]);
     }
 
+    #[Route(path: '/inscription', name: 'afficherFormulaireCreation', methods: ['GET'])]
     public static function afficherFormulaireCreation(): void
     {
         if(ConnexionUtilisateur::estConnecte()) {
@@ -230,6 +232,7 @@ class ControleurUtilisateur extends ControleurGenerique
         self::redirection("utilisateur", "afficherFormulaireConnexion");
     }
 
+    #[Route(path: '/connexion', name: 'afficherFormulaireConnexion', methods: ['GET'])]
     public static function afficherFormulaireConnexion(): void
     {
         if(ConnexionUtilisateur::estConnecte()) {
@@ -280,6 +283,7 @@ class ControleurUtilisateur extends ControleurGenerique
         self::redirection("base", "accueil");
     }
 
+    #[Route(path: '/recuperation', name: 'afficherFormulaireRecuperationCompte', methods: ['GET'])]
     public static function afficherFormulaireRecuperationCompte(): void {
         if(ConnexionUtilisateur::estConnecte()) {
             self::redirection("evenement", "afficherListeMesEvenements");

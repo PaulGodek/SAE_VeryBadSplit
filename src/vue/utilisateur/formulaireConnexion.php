@@ -28,7 +28,7 @@ use App\VeryBadSplit\Modele\HTTP\Cookie;
                         </div>
                     </div>
                     <div id="connexionOubli">
-                        <a href="controleurFrontal.php?action=afficherFormulaireRecuperationCompte&controleur=utilisateur">Login
+                        <a href="./recuperation">Login
                             et/ou mot de passe oubliés ?</a>
                     </div>
                     <input type='hidden' name='action' value='connecter'>
