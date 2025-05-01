@@ -1,6 +1,7 @@
 <?php
 
 use App\VeryBadSplit\Lib\ConnexionUtilisateur;
+use App\VeryBadSplit\Lib\Helper;
 use App\VeryBadSplit\Modele\DataObject\Evenement;
 /** @var Evenement $evenement */
 /** @var int $coutTotal */
@@ -28,17 +29,17 @@ $coutTotalEvenementHTML = htmlspecialchars(number_format($coutTotal,2));
                         </div>
                         <div class="buttons is-centered mt-2">
                             <?php if($evenement->estMembre(ConnexionUtilisateur::getLoginUtilisateurConnecte())) {?>
-                                <a class="button is-link" href="controleurFrontal.php?action=afficherFormulaireMiseAJourEvenement&controleur=evenement&idEvenement=<?= rawurlencode($evenement->getId()) ?>">
+                                <a class="button is-link" href="<?= Helper::url('evenements/modifier/' . rawurlencode($evenement->getId())) ?>">
                                     <span class="icon is-left"><ion-icon name="pencil"></ion-icon></span>
                                     <span>Editer</span>
                                 </a>
                                 <?php if($evenement->estProprietaire(ConnexionUtilisateur::getLoginUtilisateurConnecte())) {?>
-                                    <a class="button is-danger" href="controleurFrontal.php?action=supprimerEvenement&controleur=evenement&idEvenement=<?= rawurlencode($evenement->getId()) ?>">
+                                    <a class="button is-danger" href="<?= Helper::url('evenements/supprimer/' . rawurlencode($evenement->getId())) ?>">
                                         <span class="icon is-left"><ion-icon name="trash"></ion-icon></span>
                                         <span>Supprimer</span>
                                     </a>
                                 <?php } else {?>
-                                    <a class="button is-danger" href="controleurFrontal.php?action=quitterEvenement&controleur=evenement&idEvenement=<?= rawurlencode($evenement->getId()) ?>">
+                                    <a class="button is-danger" href="<?= Helper::url('evenements/quitter/' . rawurlencode($evenement->getId())) ?>">
                                         <span class="icon is-left"><ion-icon name="person-remove"></ion-icon></span>
                                         <span>Quitter</span>
                                     </a>
@@ -51,7 +52,7 @@ $coutTotalEvenementHTML = htmlspecialchars(number_format($coutTotal,2));
                             <div class="has-text-centered">
                                 <p class="is-size-4"><strong>Dépenses</strong></p>
                                 <?php if($evenement->estMembre(ConnexionUtilisateur::getLoginUtilisateurConnecte())) {?>
-                                    <a class="button has-background-black has-text-white-ter is-size-4" href="controleurFrontal.php?action=afficherFormulaireCreationDepense&controleur=depense&idEvenement=<?= rawurlencode($evenement->getId()) ?>">
+                                    <a class="button has-background-black has-text-white-ter is-size-4" href="<?= Helper::url("evenements/nouvelleDepense/" . rawurlencode($evenement->getId())) ?>">
                                         <span class="icon is-left"><ion-icon name="add-circle"></ion-icon></span>
                                         <span>Ajouter une dépense</span>
                                     </a>
@@ -95,7 +96,7 @@ $coutTotalEvenementHTML = htmlspecialchars(number_format($coutTotal,2));
                                     <p class="is-size-4"><strong>Membres</strong></p>
                                     <?php if($evenement->estMembre(ConnexionUtilisateur::getLoginUtilisateurConnecte())){?>
                                         <?php if($evenement->estProprietaire(ConnexionUtilisateur::getLoginUtilisateurConnecte())){?>
-                                            <a class="button has-background-black has-text-white-ter is-size-4" href="controleurFrontal.php?action=afficherFormulaireAjoutMembre&controleur=evenement&idEvenement=<?= rawurlencode($evenement->getId()) ?>">
+                                            <a class="button has-background-black has-text-white-ter is-size-4" href="<?= Helper::url("evenements/ajouterMembre/" . rawurlencode($evenement->getId())) ?>">
                                                 <span class="icon is-left"><ion-icon name="person-add"></ion-icon></span>
                                                 <span>Ajouter un membre</span>
                                             </a>
@@ -125,7 +126,7 @@ $coutTotalEvenementHTML = htmlspecialchars(number_format($coutTotal,2));
                                             </div>
                                             <div class="media-right">
                                                 <?php if($evenement->estProprietaire(ConnexionUtilisateur::getLoginUtilisateurConnecte()) && $evenement->getProprietaire()->getLogin() !== $membre->getLogin()){?>
-                                                    <a class="delete" href="controleurFrontal.php?action=supprimerMembre&controleur=evenement&idEvenement=<?=rawurlencode($evenement->getId())?>&login=<?=rawurlencode($membre->getLogin())?>"></a>
+                                                    <a class="delete" href="<?= Helper::url("evenements/supprimerMembre/" . rawurlencode($evenement->getId()) . "/" . rawurlencode($membre->getLogin())) ?>"></a>
                                                 <?php }?>
                                             </div>
                                         </div>
