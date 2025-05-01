@@ -3,7 +3,7 @@
         <div class="columns is-centered">
             <div class="column is-6 box has-background-black-ter">
                 <p class="is-size-2 has-text-centered has-text-white">Récupéreration de compte</p>
-                <form action="controleurFrontal.php" method="post">
+                <form action="<?= \App\VeryBadSplit\Lib\Helper::url("recuperation") ?>" method="post">
                     <div class="field">
                         <label class="label is-size-4" for="nomEvenement">Email du compte</label>
                         <div class="control has-icons-left">
@@ -12,8 +12,6 @@
                             <span class="icon is-left"><ion-icon name="mail"></ion-icon></span>
                         </div>
                     </div>
-                    <input type='hidden' name='action' value='recupererCompte'>
-                    <input type='hidden' name='controleur' value='utilisateur'>
                     <div class="buttons is-centered">
                         <button class="button has-background-black is-size-4">
                             <span class="icon is-left"><ion-icon name="person"></ion-icon></span>

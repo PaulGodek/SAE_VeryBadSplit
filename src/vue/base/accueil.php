@@ -10,7 +10,7 @@ use App\VeryBadSplit\Lib\ConnexionUtilisateur;
                 <p>Bienvenue sur <strong>Very Bad Split</strong>!</p>
                 <?php if (ConnexionUtilisateur::estConnecte()) { ?>
                     <div class="has-text-centered mt-3">
-                        <a class="button has-background-black is-size-3" href="controleurFrontal.php?action=afficherListeMesEvenements&controleur=evenement">
+                        <a class="button has-background-black is-size-3" href="./evenements">
                             <span class="icon is-left"><ion-icon name="eye"></ion-icon></span>
                             <span>Consulter mes événements</span>
                         </a>

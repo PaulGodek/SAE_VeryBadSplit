@@ -4,13 +4,11 @@
 
 use App\VeryBadSplit\Lib\ConnexionUtilisateur;
 use App\VeryBadSplit\Lib\Conteneur;
-use Symfony\Component\HttpFoundation\UrlHelper;
+use App\VeryBadSplit\Lib\Helper;
 use Symfony\Component\Routing\Generator\UrlGenerator;
 
 /** @var UrlGenerator $generateurUrl */
 $generateurUrl = Conteneur::recupererService("generateurUrl");
-/** @var UrlHelper $assistantUrl */
-$assistantUrl = Conteneur::recupererService("assistantUrl");
 ?>
 <!DOCTYPE html>
 <html lang="fr" data-theme="dark">
@@ -18,9 +16,9 @@ $assistantUrl = Conteneur::recupererService("assistantUrl");
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title><?= htmlspecialchars($pagetitle) ?></title>
-    <link rel="stylesheet" href="<?php echo $assistantUrl->getAbsoluteUrl("../ressources/css/bulma.min.css") ?>">
-    <link rel="stylesheet" href="<?php echo $assistantUrl->getAbsoluteUrl("../ressources/css/styles.css") ?>">
-    <script type="text/javascript" src="<?php echo $assistantUrl->getAbsoluteUrl("../ressources/js/bulma.jsZz") ?>" defer></script>
+    <link rel="stylesheet" href="<?= Helper::url("../ressources/css/bulma.min.css") ?>">
+    <link rel="stylesheet" href="<?= Helper::url("../ressources/css/styles.css") ?>">
+    <script type="text/javascript" src="<?= Helper::url("../ressources/js/bulma.jsZz") ?>" defer></script>
 </head>
 <body>
     <section class="hero is-fullheight">
@@ -40,25 +38,20 @@ $assistantUrl = Conteneur::recupererService("assistantUrl");
                             <a href="./" class="navbar-item">Accueil</a>
                             <?php
                             if (ConnexionUtilisateur::estConnecte()) {?>
-                                <a href="controleurFrontal.php?action=afficherListeMesEvenements&controleur=evenement"
-                                   class="navbar-item">
+                                <a href="<?= Helper::url('evenements'); ?>" class="navbar-item">
                                     Mes évenements
                                 </a>
-                                <a href="controleurFrontal.php?action=afficherDetail&controleur=utilisateur"
-                                   class="navbar-item">
+                                <a href="<?= Helper::url('compte'); ?>" class="navbar-item">
                                     Mon compte
                                 </a>
-                                <a href="controleurFrontal.php?action=deconnecter&controleur=utilisateur"
-                                   class="navbar-item">
+                                <a href="<?= Helper::url('deconnexion'); ?>" class="navbar-item">
                                     Se déconnecter
                                 </a>
                             <?php } else { ?>
-                                <a href="./connexion"
-                                   class="navbar-item">
+                                <a href="<?= Helper::url('connexion'); ?>" class="navbar-item">
                                     Se connecter
                                 </a>
-                                <a href="./inscription"
-                                   class="navbar-item">
+                                <a href="<?= Helper::url('inscription'); ?>" class="navbar-item">
                                     S'inscrire
                                 </a>
                                 <?php

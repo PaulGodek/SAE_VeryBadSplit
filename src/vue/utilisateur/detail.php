@@ -1,7 +1,7 @@
 <?php
 /** @var Utilisateur $utilisateur */
 
-use App\VeryBadSplit\Lib\ConnexionUtilisateur;
+use App\VeryBadSplit\Lib\Helper;
 use App\VeryBadSplit\Modele\DataObject\Utilisateur;
 
 $loginHTML = htmlspecialchars($utilisateur->getLogin());
@@ -54,11 +54,11 @@ $emailhtml = htmlspecialchars($utilisateur->getEmail());
                      </div>
                    </div>
                     <div class="buttons is-centered mt-5">
-                        <a class="button is-link" href="controleurFrontal.php?action=afficherFormulaireMiseAJour&controleur=utilisateur">
+                        <a class="button is-link" href="<?= Helper::url("compte/modifier") ?>">
                             <span class="icon is-left"><ion-icon name="pencil"></ion-icon></span>
                             <span>Mettre à jour le compte</span>
                         </a>
-                        <a class="button is-danger" href="controleurFrontal.php?action=supprimer&controleur=utilisateur&login=<?=$loginURL?>">
+                        <a class="button is-danger" href="<?= Helper::url("compte/supprimer/$loginURL"); ?>">
                             <span class="icon is-left"><ion-icon name="trash"></ion-icon></span>
                             <span>Supprimer le compte</span>
                         </a>

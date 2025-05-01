@@ -3,7 +3,7 @@
         <div class="columns is-centered">
             <div class="column is-8 box has-background-black-ter">
                 <p class="is-size-2 has-text-centered has-text-white">Inscription</p>
-                <form action="controleurFrontal.php" method="post">
+                <form action="<?= \App\VeryBadSplit\Lib\Helper::url("./inscription") ?>" method="post">
                     <div class="field is-horizontal">
                         <div class="field-body">
                             <div class="field">
@@ -68,8 +68,6 @@
                             </div>
                         </div>
                     </div>
-                    <input type='hidden' name='action' value='creerDepuisFormulaire'>
-                    <input type='hidden' name='controleur' value='utilisateur'>
                     <div class="buttons is-centered">
                         <button class="button has-background-black is-size-4">
                             <span class="icon is-left"><ion-icon name="person-add"></ion-icon></span>

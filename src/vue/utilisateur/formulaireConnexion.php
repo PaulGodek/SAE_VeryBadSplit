@@ -8,7 +8,7 @@ use App\VeryBadSplit\Modele\HTTP\Cookie;
         <div class="columns is-centered">
             <div class="column is-6 box has-background-black-ter">
                 <p class="is-size-2 has-text-centered has-text-white-ter">Connexion</p>
-                <form action="controleurFrontal.php" method="post">
+                <form action="<?= \App\VeryBadSplit\Lib\Helper::url("./connexion") ?>" method="post">
                     <div class="field">
                         <label class="label is-size-4" for="login">Nom d'utilisateur</label>
                         <div class="control has-icons-left">
@@ -31,8 +31,6 @@ use App\VeryBadSplit\Modele\HTTP\Cookie;
                         <a href="./recuperation">Login
                             et/ou mot de passe oubliés ?</a>
                     </div>
-                    <input type='hidden' name='action' value='connecter'>
-                    <input type='hidden' name='controleur' value='utilisateur'>
                     <div class="buttons is-centered">
                         <button class="button has-background-black is-size-4">
                             <span class="icon is-left"><ion-icon name="log-in"></ion-icon></span>
