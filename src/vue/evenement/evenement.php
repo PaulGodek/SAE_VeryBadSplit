@@ -82,8 +82,8 @@ $coutTotalEvenementHTML = htmlspecialchars(number_format($coutTotal,2));
                                         </div>
                                         <div class="media-right">
                                             <?php if($evenement->estMembre(ConnexionUtilisateur::getLoginUtilisateurConnecte())) {?>
-                                                <a class="icon-container" href="controleurFrontal.php?action=afficherFormulaireMiseAJourDepense&controleur=depense&idDepense=<?= rawurlencode($depense->getId()) ?>"><span class="icon pb-3"><ion-icon name="pencil"></ion-icon></span></a>
-                                                <a class="delete" href="controleurFrontal.php?action=supprimerDepense&controleur=depense&idDepense=<?= rawurlencode($depense->getId()) ?>"></a>
+                                                <a class="icon-container" href="<?= Helper::url("depense/modifier/" . rawurlencode($depense->getId())); ?>"><span class="icon pb-3"><ion-icon name="pencil"></ion-icon></span></a>
+                                                <a class="delete" href="<?= Helper::url("depense/supprimer/" . rawurlencode($depense->getId())); ?>"></a>
                                             <?php }?>
                                         </div>
                                     </div>
