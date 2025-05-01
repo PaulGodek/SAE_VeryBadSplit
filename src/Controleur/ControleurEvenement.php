@@ -3,6 +3,7 @@
 namespace App\VeryBadSplit\Controleur;
 
 use App\VeryBadSplit\Lib\ConnexionUtilisateur;
+use App\VeryBadSplit\Lib\Helper;
 use App\VeryBadSplit\Lib\MessageFlash;
 use App\VeryBadSplit\Modele\DataObject\Depense;
 use App\VeryBadSplit\Modele\DataObject\Evenement;
@@ -11,22 +12,19 @@ use App\VeryBadSplit\Modele\HTTP\Cookie;
 use App\VeryBadSplit\Modele\Repository\DepenseRepository;
 use App\VeryBadSplit\Modele\Repository\EvenementRepository;
 use App\VeryBadSplit\Modele\Repository\UtilisateurRepository;
+use Symfony\Component\Routing\Attribute\Route;
 
 class ControleurEvenement extends ControleurGenerique
 {
-    public static function afficherEvenement() : void
+    #[Route(path: "/evenements/{codeEvenement}", name:"Evenement", requirements: ['codeEvenement' => '[a-zA-Z0-9]{64}'])] 
+    public static function afficherEvenement(string $codeEvenement) : void
     {
-        if(!self::issetAndNotNull(["codeEvenement"])) {
-            MessageFlash::ajouter("warning", "Code d'évenement manquant");
-            self::redirection("base", "accueil");
-        }
-        $code = $_REQUEST["codeEvenement"];
         $evenementRepository = new EvenementRepository();
 
-        $evenement = $evenementRepository->recupererParCodeSecret($code);
+        $evenement = $evenementRepository->recupererParCodeSecret($codeEvenement);
         if(!$evenement) {
             MessageFlash::ajouter("warning", "Evenement inexistant");
-            self::redirection("base", "accueil");
+            self::redirection("");
         }
 
         $dettes = [];
@@ -60,10 +58,10 @@ class ControleurEvenement extends ControleurGenerique
         ]);
     }
 
-
+    #[Route(path: "/evenements", name: "MesEvenements")]
     public static function afficherListeMesEvenements() : void {
         if(!ConnexionUtilisateur::estConnecte()) {
-            self::redirection("utilisateur", "afficherFormulaireConnexion");
+            self::redirection("connexion");
         }
         $repository = new EvenementRepository();
         $login = ConnexionUtilisateur::getLoginUtilisateurConnecte();
@@ -75,9 +73,10 @@ class ControleurEvenement extends ControleurGenerique
         ]);
     }
 
+    #[Route(path: "/evenements/creation", name: "FormulaireCreationEvenement", methods: ['GET'])]
     public static function afficherFormulaireCreationEvenement(): void {
         if(!ConnexionUtilisateur::estConnecte()) {
-            self::redirection("utilisateur", "afficherFormulaireConnexion");
+            self::redirection("connexion");
         }
         self::afficherVue('vueGenerale.php', [
             "pagetitle" => "Ajout d'un événement",
@@ -85,14 +84,15 @@ class ControleurEvenement extends ControleurGenerique
         ]);
     }
 
+    #[Route(path: "/evenements/creation", name: "CreationEvenement", methods: ['POST'])]
     public static function creerEvenement(): void {
         if(!ConnexionUtilisateur::estConnecte()) {
-            self::redirection("utilisateur", "afficherFormulaireConnexion");
+            self::redirection("connexion");
         }
 
         if(!self::issetAndNotNull(["nomEvenement"])) {
             MessageFlash::ajouter("danger", "Le nom de l'événement est manquant");
-            self::redirection("evenement", "afficherFormulaireCreationEvenement");
+            self::redirection("evenements/creation");
         }
         /**
          * @var Utilisateur $utilisateur
@@ -124,32 +124,31 @@ class ControleurEvenement extends ControleurGenerique
         );
 
         if ($depenseRepository->ajouter($object)) {
-            self::redirection("evenement", "afficherEvenement", ["codeEvenement" => $object->getEvenement()->getCodeSecret()]);
-        }
-        else {
+            $codeSecret = $object->getEvenement()->getCodeSecret();
+            self::redirection("evenements/$codeSecret");
+        } else {
             MessageFlash::ajouter("warning", "Une erreur est survenue lors de la création de l'événement.");
-            self::redirection("utilisateur", "afficherFormulaireCreation");
+            self::redirection("evenements/creation");
         }
     }
 
-    public static function afficherFormulaireMiseAJourEvenement(): void {
+    #[Route(path: "/evenements/modifier/{idEvenement}", name: "FormulaireMiseAJourEvenement",
+        requirements: ['idEvenement' => '\d+'], methods: ['GET'])]
+    public static function afficherFormulaireMiseAJourEvenement(int $idEvenement): void {
         if(!ConnexionUtilisateur::estConnecte()) {
-            self::redirection("utilisateur", "afficherFormulaireConnexion");
-        }
-        if(!self::issetAndNotNull(["idEvenement"])) {
-            MessageFlash::ajouter("danger", "Identifiant d'événement manquant");
-            self::redirection("evenement", "afficherListeMesEvenements");
+            self::redirection("connexion");
         }
         $repository = new EvenementRepository();
 
-        $evenement = $repository->recuperer($_REQUEST["idEvenement"]);
+        $evenement = $repository->recuperer($idEvenement);
         if(!$evenement) {
             MessageFlash::ajouter("danger", "Evenement inexistant");
-            self::redirection("evenement", "afficherListeMesEvenements");
+            self::redirection("evenements");
         }
         if(!$evenement->estMembre(ConnexionUtilisateur::getLoginUtilisateurConnecte())) {
             MessageFlash::ajouter("danger", "Vous n'avez pas de droits d'éditions sur cet evenement.");
-            self::redirection("evenement", "afficherEvenement", ["codeEvenement" => $evenement->getCodeSecret()]);
+            $codeSecret = $evenement->getCodeSecret();
+            self::redirection("evenements/$codeSecret");
         }
         self::afficherVue('vueGenerale.php', [
             "pagetitle" => "Modification d'un événement",
@@ -158,87 +157,82 @@ class ControleurEvenement extends ControleurGenerique
         ]);
     }
 
-    public static function mettreAJourEvenement(): void {
+    #[Route(path: "/evenements/modifier/{idEvenement}", name: "mettreAJourEvenement",
+        requirements: ['idEvenement' => '\d+'], methods: ['POST'])]
+    public static function mettreAJourEvenement(int $idEvenement): void {
         if(!ConnexionUtilisateur::estConnecte()) {
-            self::redirection("utilisateur", "afficherFormulaireConnexion");
-        }
-        if(!self::issetAndNotNull(["idEvenement"])) {
-            MessageFlash::ajouter("danger", "Identifiant d'événement manquant");
-            self::redirection("utilisateur", "afficherListeMesEvenements");
+            self::redirection("connexion");
         }
         $repository = new EvenementRepository();
 
-        /**
-         * @var Evenement $evenement
-         */
-        $evenement = $repository->recuperer($_REQUEST["idEvenement"]);
-        if(!$evenement) {
-            MessageFlash::ajouter("danger", "Evenement inexistant");
-            self::redirection("utilisateur", "afficherListeMesEvenements");
-        }
-        if(!$evenement->estMembre(ConnexionUtilisateur::getLoginUtilisateurConnecte())) {
-            MessageFlash::ajouter("danger", "Vous n'avez pas de droits d'éditions sur cet événement");
-        }
-        if(!self::issetAndNotNull(["nomEvenement"])) {
-            MessageFlash::ajouter("danger", "Nom de l'évenement manquant");
-            self::redirection("utilisateur", "afficherFormulaireMiseAJourEvenement", ["idEvenement" => $_REQUEST["idEvenement"]]);
-        }
-
-        $evenement->setTitre($_REQUEST["nomEvenement"]);
-        $repository->mettreAJour($evenement);
-        self::redirection("evenement", "afficherEvenement", ["codeEvenement" => $evenement->getCodeSecret()]);
-    }
-
-    public static function supprimerEvenement(): void {
-        if(!ConnexionUtilisateur::estConnecte()) {
-            self::redirection("utilisateur", "afficherFormulaireConnexion");
-        }
-        if(!self::issetAndNotNull(["idEvenement"])) {
-            MessageFlash::ajouter("danger", "Identifiant d'événement manquant");
-            self::redirection("evenement", "afficherListeMesEvenements");
-        }
-        $repository = new EvenementRepository();
-        $idEvenement = $_REQUEST["idEvenement"];
         /**
          * @var Evenement $evenement
          */
         $evenement = $repository->recuperer($idEvenement);
         if(!$evenement) {
             MessageFlash::ajouter("danger", "Evenement inexistant");
-            self::redirection("evenement", "afficherListeMesEvenements");
+            self::redirection("evenements");
+        }
+        if(!$evenement->estMembre(ConnexionUtilisateur::getLoginUtilisateurConnecte())) {
+            MessageFlash::ajouter("danger", "Vous n'avez pas de droits d'éditions sur cet événement");
+        }
+        if(!self::issetAndNotNull(["nomEvenement"])) {
+            MessageFlash::ajouter("danger", "Nom de l'évenement manquant");
+            self::redirection("evenements/modifier/$idEvenement");
+        }
+
+        $evenement->setTitre($_REQUEST["nomEvenement"]);
+        $repository->mettreAJour($evenement);
+        $codeSecret = $evenement->getCodeSecret();
+        self::redirection("evenements/$codeSecret");
+    }
+
+    #[Route(path: "/evenements/supprimer/{idEvenement}", name: "SupprimerEvenement",
+        requirements: ['idEvenement' => '\d+'])]
+    public static function supprimerEvenement($idEvenement): void {
+        if(!ConnexionUtilisateur::estConnecte()) {
+            self::redirection("connexion");
+        }
+        $repository = new EvenementRepository();
+        /**
+         * @var Evenement $evenement
+         */
+        $evenement = $repository->recuperer($idEvenement);
+        if(!$evenement) {
+            MessageFlash::ajouter("danger", "Evenement inexistant");
+            self::redirection("evenements");
         }
         if(!$evenement->estProprietaire(ConnexionUtilisateur::getLoginUtilisateurConnecte())) {
             MessageFlash::ajouter("danger", "Vous n'êtes pas propriétaire de cet événement");
-            self::redirection("evenement", "afficherListeMesEvenements");
+            self::redirection("evenements");
         }
 
         if($repository->compterNombreEvenementProprietaire(ConnexionUtilisateur::getLoginUtilisateurConnecte()) == 1) {
             MessageFlash::ajouter("danger", "Vous ne pouvez pas supprimer cet événement car cela entrainera la supression du compte");
-            self::redirection("evenement", "afficherListeMesEvenements");
+            self::redirection("evenements");
         }
 
         $repository->supprimer($idEvenement);
         MessageFlash::ajouter("success", "Evenement supprimé");
-        self::redirection("evenement", "afficherListeMesEvenements");
+        self::redirection("evenements");
     }
 
-    public static function afficherFormulaireAjoutMembre(): void {
+    #[Route(path: "/evenements/ajouterMembre/{idEvenement}", name: "afficherFormulaireAjoutMembre",
+        requirements: ['idEvenement' => '\d+'], methods: ['GET'])]
+    public static function afficherFormulaireAjoutMembre(int $idEvenement): void {
         if(!ConnexionUtilisateur::estConnecte()) {
-            self::redirection("utilisateur", "afficherFormulaireConnexion");
-        }
-        if(!self::issetAndNotNull(["idEvenement"])) {
-            MessageFlash::ajouter("danger", "Identifiant de l'événement manquant");
-            self::redirection("base", "accueil");
+            self::redirection("connexion");
         }
         $repository = new EvenementRepository();
-        $evenement = $repository->recuperer($_REQUEST["idEvenement"]);
+        $evenement = $repository->recuperer($idEvenement);
         if(!$evenement) {
             MessageFlash::ajouter("danger", "Evenement inexistant");
-            self::redirection("base", "accueil");
+            self::redirection("");
         }
         if(!$evenement->estProprietaire(ConnexionUtilisateur::getLoginUtilisateurConnecte())) {
             MessageFlash::ajouter("danger", "Vous n'êtes pas propriétaire de cet événement");
-            self::redirection("evenement", "afficherEvenement", ["codeEvenement" => $evenement->getCodeSecret()]);
+            $codeSecret = $evenement->getCodeSecret();
+            self::redirection("evenements/$codeSecret");
         }
 
         $utilisateurRepository = new UtilisateurRepository();
@@ -247,7 +241,8 @@ class ControleurEvenement extends ControleurGenerique
 
         if(empty($filtredUtilisateurs)) {
             MessageFlash::ajouter("warning", "Il n'est pas possible d'ajouter plus de membre à cet événement.");
-            self::redirection("evenement", "afficherEvenement", ["codeEvenement" => $evenement->getCodeSecret()]);
+            $codeSecret = $evenement->getCodeSecret();
+            self::redirection("evenements/$codeSecret");
         }
 
         self::afficherVue('vueGenerale.php', [
@@ -258,23 +253,22 @@ class ControleurEvenement extends ControleurGenerique
         ]);
     }
 
-    public static function ajouterMembre(): void {
+    #[Route(path: "/evenements/ajouterMembre/{idEvenement}", name: "ajouterMembre",
+        requirements: ['idEvenement' => '\d+'], methods: ['POST'])]
+    public static function ajouterMembre(int $idEvenement): void {
         if(!ConnexionUtilisateur::estConnecte()) {
-            self::redirection("utilisateur", "afficherFormulaireConnexion");
-        }
-        if(!self::issetAndNotNull(["idEvenement"])) {
-            MessageFlash::ajouter("danger", "Identifiant de l'événement manquant");
-            self::redirection("base", "accueil");
+            self::redirection("connexion");
         }
         $repository = new EvenementRepository();
-        $evenement = $repository->recuperer($_REQUEST["idEvenement"]);
+        $evenement = $repository->recuperer($idEvenement);
         if(!$evenement) {
             MessageFlash::ajouter("danger", "Evenement inexistant");
-            self::redirection("base", "accueil");
+            self::redirection("");
         }
         if(!$evenement->estProprietaire(ConnexionUtilisateur::getLoginUtilisateurConnecte())) {
             MessageFlash::ajouter("danger", "Vous n'êtes pas propriétaire de cet événement");
-            self::redirection("evenement", "afficherEvenement", ["codeEvenement" => $evenement->getCodeSecret()]);
+            $codeSecret = $evenement->getCodeSecret();
+            self::redirection("evenements/$codeSecret");
         }
         if(!self::issetAndNotNull(["login"])) {
             MessageFlash::ajouter("danger", "Login du membre à ajouter manquant");
@@ -285,33 +279,33 @@ class ControleurEvenement extends ControleurGenerique
         $utilisateur = $utilisateurRepository->recuperer($_REQUEST["login"]);
         if(!$utilisateur) {
             MessageFlash::ajouter("danger", "Utlisateur inexistant");
-            self::redirection("evenement", "afficherEvenement", ["codeEvenement" => $evenement->getCodeSecret()]);
+            $codeSecret = $evenement->getCodeSecret();
+            self::redirection("evenements/$codeSecret");
         }
         if($evenement->estMembre($utilisateur->getLogin())) {
             MessageFlash::ajouter("warning", "Ce membre est déjà membre de l'événement");
-            self::redirection("evenement", "afficherEvenement", ["codeEvenement" => $evenement->getCodeSecret()]);
+            $codeSecret = $evenement->getCodeSecret();
+            self::redirection("evenements/$codeSecret");
         }
 
         $membres = $evenement->getMembres();
         $membres[] = $utilisateur;
         $evenement->setMembres($membres);
         $repository->mettreAJour($evenement);
-        self::redirection("evenement", "afficherEvenement", ["codeEvenement" => $evenement->getCodeSecret()]);
+        $codeSecret = $evenement->getCodeSecret();
+        self::redirection("evenements/$codeSecret");
     }
 
-    public static function quitterEvenement(): void {
+    #[Route(path: "/evenements/quitter/{idEvenement}", name: "QuitterEvenement", requirements: ['idEvenement' => '\d+'])]
+    public static function quitterEvenement(string $idEvenement): void {
         if(!ConnexionUtilisateur::estConnecte()) {
-            self::redirection("utilisateur", "afficherFormulaireConnexion");
-        }
-        if(!self::issetAndNotNull(["idEvenement"])) {
-            MessageFlash::ajouter("danger", "Identifiant de l'événement manquant");
-            self::redirection("base", "accueil");
+            self::redirection("connexion");
         }
         $repository = new EvenementRepository();
-        $evenement = $repository->recuperer($_REQUEST["idEvenement"]);
+        $evenement = $repository->recuperer($idEvenement);
         if(!$evenement) {
             MessageFlash::ajouter("danger", "Evenement inexistant");
-            self::redirection("base", "accueil");
+            self::redirection("");
         }
 
         $utilisateurRepository = new UtilisateurRepository();
@@ -319,11 +313,11 @@ class ControleurEvenement extends ControleurGenerique
 
         if($evenement->estProprietaire($utilisateur->getLogin())) {
             MessageFlash::ajouter("danger", "Vous ne pouvez pas quitter cet événement");
-            self::redirection("evenement", "afficherListeMesEvenements");
+            self::redirection("evenements");
         }
         if(!$evenement->estMembre(ConnexionUtilisateur::getLoginUtilisateurConnecte())) {
             MessageFlash::ajouter("danger", "Vous n'appartenez pas à cet événement");
-            self::redirection("evenement", "afficherListeMesEvenements");
+            self::redirection("evenements");
         }
 
         $membres = array_filter($evenement->getMembres(), function ($u) use ($utilisateur) {return $u->getLogin() !== $utilisateur->getLogin();});
@@ -346,47 +340,44 @@ class ControleurEvenement extends ControleurGenerique
                 }
             }
         }
-        self::redirection("evenement", "afficherListeMesEvenements");
+        self::redirection("evenements");
     }
 
-    public static function supprimerMembre(): void {
+    #[Route(path: "/evenements/supprimerMembre/{idEvenement}/{login}", name: "SupprimerMembre")]
+    public static function supprimerMembre(int $idEvenement, string $login): void {
         if(!ConnexionUtilisateur::estConnecte()) {
-            self::redirection("utilisateur", "afficherFormulaireConnexion");
-        }
-        if(!self::issetAndNotNull(["idEvenement"])) {
-            MessageFlash::ajouter("danger", "Identifiant de l'événement manquant");
-            self::redirection("base", "accueil");
+            self::redirection("connexion");
         }
         $repository = new EvenementRepository();
-        $evenement = $repository->recuperer($_REQUEST["idEvenement"]);
+        $evenement = $repository->recuperer($idEvenement);
         if(!$evenement) {
             MessageFlash::ajouter("danger", "Evenement inexistant");
-            self::redirection("base", "accueil");
+            self::redirection("");
         }
 
         if(!$evenement->estProprietaire(ConnexionUtilisateur::getLoginUtilisateurConnecte())) {
             MessageFlash::ajouter("danger", "Vous n'êtes pas propriétaire de cet événement");
-            self::redirection("evenement", "afficherEvenement", ["codeEvenement" => $evenement->getCodeSecret()]);
-        }
-        if(!self::issetAndNotNull(["login"])) {
-            MessageFlash::ajouter("danger", "Login du membre à supprimer manquant");
-            self::redirection("evenement", "afficherEvenement", ["codeEvenement" => $evenement->getCodeSecret()]);
+            $codeSecret = $evenement->getCodeSecret();
+            self::redirection("evenements/$codeSecret");
         }
 
         $utilisateurRepository = new UtilisateurRepository();
-        $utilisateur = $utilisateurRepository->recuperer($_REQUEST["login"]);
+        $utilisateur = $utilisateurRepository->recuperer($login);
 
         if(!$utilisateur) {
             MessageFlash::ajouter("danger", "Utlisateur inexistant");
-            self::redirection("evenement", "afficherEvenement", ["codeEvenement" => $evenement->getCodeSecret()]);
+            $codeSecret = $evenement->getCodeSecret();
+            self::redirection("evenements/$codeSecret");
         }
         if($evenement->estProprietaire($utilisateur->getLogin())) {
             MessageFlash::ajouter("danger", "Vous ne pouvez pas vous supprimer de cet événement.");
-            self::redirection("evenement", "afficherEvenement", ["codeEvenement" => $evenement->getCodeSecret()]);
+            $codeSecret = $evenement->getCodeSecret();
+            self::redirection("evenements/$codeSecret");
         }
         if(!$evenement->estMembre($utilisateur->getLogin())) {
             MessageFlash::ajouter("danger", "Cet utilisateur n'est pas membre de cet événemment.");
-            self::redirection("evenement", "afficherEvenement", ["codeEvenement" => $evenement->getCodeSecret()]);
+            $codeSecret = $evenement->getCodeSecret();
+            self::redirection("evenements/$codeSecret");
         }
 
         $membres = array_filter($evenement->getMembres(), function ($u) use ($utilisateur) {return $u->getLogin() !== $utilisateur->getLogin();});
@@ -409,6 +400,7 @@ class ControleurEvenement extends ControleurGenerique
                 }
             }
         }
-        self::redirection("evenement", "afficherEvenement", ["codeEvenement" => $evenement->getCodeSecret()]);
+        $codeSecret = $evenement->getCodeSecret();
+            self::redirection("evenements/$codeSecret");
     }
 }
