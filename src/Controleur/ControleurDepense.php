@@ -9,27 +9,28 @@ use App\VeryBadSplit\Modele\Repository\DepenseRepository;
 use App\VeryBadSplit\Modele\Repository\EvenementRepository;
 use App\VeryBadSplit\Modele\Repository\UtilisateurRepository;
 use DateTime;
+use Symfony\Component\Routing\Attribute\Route;
 
 class ControleurDepense extends ControleurGenerique
 {
-    public static function afficherFormulaireCreationDepense(): void {
+
+    #[Route(path: "/evenements/nouvelleDepense/{idEvenement}", name: "afficherFormulaireCreationDepense",
+        requirements: ['idEvenement' => '\d+'], methods: ['GET'])]
+    public static function afficherFormulaireCreationDepense(int $idEvenement): void {
         if(!ConnexionUtilisateur::estConnecte()) {
-            self::redirection("utilisateur", "afficherFormulaireConnexion");
-        }
-        if(!self::issetAndNotNull(["idEvenement"])) {
-            MessageFlash::ajouter("warning", "Identifiant d'événement manquant");
-            self::redirection("utilisateur", "afficherListeMesEvenements");
+            self::redirection("connexion");
         }
         $evenementRepository = new EvenementRepository();
 
-        $evenement = $evenementRepository->recuperer($_REQUEST["idEvenement"]);
+        $evenement = $evenementRepository->recuperer($idEvenement);
         if(!$evenement) {
             MessageFlash::ajouter("warning", "Evenement inexistant");
-            self::redirection("utilisateur", "afficherListeMesEvenements");
+            self::redirection("evenements");
         }
         if(!$evenement->estMembre(ConnexionUtilisateur::getLoginUtilisateurConnecte())) {
             MessageFlash::ajouter("danger", "Vous n'avez pas de droits d'éditions sur cet événement");
-            self::redirection("evenement", "afficherEvenement", ["codeEvenement" => $evenement->getCodeSecret()]);
+            $codeSecret = $evenement->getCodeSecret();
+            self::redirection("evenements/$codeSecret");
         }
         self::afficherVue('vueGenerale.php', [
             "pagetitle" => "Ajout d'une dépense",
@@ -38,31 +39,30 @@ class ControleurDepense extends ControleurGenerique
         ]);
     }
 
-    public static function creerDepense(): void {
+    #[Route(path: "/evenements/nouvelleDepense/{idEvenement}", name: "creerDepense",
+        requirements: ['idEvenement' => '\d+'], methods: ['POST'])]
+    public static function creerDepense(int $idEvenement): void {
         if(!ConnexionUtilisateur::estConnecte()) {
-            self::redirection("utilisateur", "afficherFormulaireConnexion");
-        }
-        if(!self::issetAndNotNull(["idEvenement"])) {
-            MessageFlash::ajouter("warning", "Identifiant d'événement manquant");
-            self::redirection("base", "accueil");
+            self::redirection("connexion");
         }
         $evenementRepository = new EvenementRepository();
-        $evenement = $evenementRepository->recuperer($_REQUEST["idEvenement"]);
+        $evenement = $evenementRepository->recuperer($idEvenement);
         if(!$evenement) {
             MessageFlash::ajouter("warning", "Evenement inexistant");
-            self::redirection("base", "accueil");
+            self::redirection("");
         }
         if(!self::issetAndNotNull(["titre", "montant", "payeur", "participants"])) {
             MessageFlash::ajouter("danger", "Attributs manquants");
-            self::redirection("depense", "afficherFormulaireCreationDepense", ["idEvenement" => $_REQUEST["idEvenement"]]);
+            self::redirection("/evenements/nouvelleDepense/$idEvenement");
         }
         if(empty($_REQUEST["participants"])) {
             MessageFlash::ajouter("danger", "Il faut au moins un participant.");
-            self::redirection("depense", "afficherFormulaireCreationDepense", ["idEvenement" => $_REQUEST["idEvenement"]]);
+            self::redirection("/evenements/nouvelleDepense/$idEvenement");
         }
         if(!$evenement->estMembre(ConnexionUtilisateur::getLoginUtilisateurConnecte())) {
             MessageFlash::ajouter("danger", "Vous n'avez pas de droits d'éditions sur cet événement");
-            self::redirection("evenement", "afficherEvenement", ["codeEvenement" => $evenement->getCodeSecret()]);
+            $codeSecret = $evenement->getCodeSecret();
+            self::redirection("evenements/$codeSecret");
         }
         $participants = [];
         $utilisateurRepository = new UtilisateurRepository();
@@ -70,22 +70,22 @@ class ControleurDepense extends ControleurGenerique
         $payeur = $utilisateurRepository->recuperer($_REQUEST["payeur"]);
         if(!$payeur) {
             MessageFlash::ajouter("danger", "Le payeur n'existe pas");
-            self::redirection("depense", "afficherFormulaireCreationDepense", ["idEvenement" => $_REQUEST["idEvenement"]]);
+            self::redirection("/evenements/nouvelleDepense/$idEvenement");
         }
         if(!$evenement->estMembre($payeur->getLogin())) {
             MessageFlash::ajouter("danger", "Le payeur n'est pas membre de l'événement.");
-            self::redirection("depense", "afficherFormulaireCreationDepense", ["idEvenement" => $_REQUEST["idEvenement"]]);
+            self::redirection("/evenements/nouvelleDepense/$idEvenement");
         }
 
         foreach ($_REQUEST["participants"] as $loginParticipant) {
             $utilisateur = $utilisateurRepository->recuperer($loginParticipant);
             if(!$utilisateur) {
                 MessageFlash::ajouter("danger", "Un des membres affecté à la dépense n'existe pas");
-                self::redirection("depense", "afficherFormulaireCreationDepense", ["idEvenement" => $_REQUEST["idEvenement"]]);
+                self::redirection("/evenements/nouvelleDepense/$idEvenement");
             }
             if(!$evenement->estMembre($utilisateur->getLogin())) {
                 MessageFlash::ajouter("danger", "Un des membres affecté à la dépense n'est pas membre de l'événement.");
-                self::redirection("depense", "afficherFormulaireCreationDepense", ["idEvenement" => $_REQUEST["idEvenement"]]);
+                self::redirection("/evenements/nouvelleDepense/$idEvenement");
             }
             $participants[] = $utilisateur;
         }
@@ -100,27 +100,27 @@ class ControleurDepense extends ControleurGenerique
             participants: $participants
         );
         $depenseRepository->ajouter($depense);
-        self::redirection("evenement", "afficherEvenement", ["codeEvenement" => $evenement->getCodeSecret()]);
+        $codeSecret = $evenement->getCodeSecret();
+            self::redirection("evenements/$codeSecret");
     }
 
-    public static function afficherFormulaireMiseAJourDepense(): void {
+    #[Route(path: "/depense/modifier/{idDepense}", name: "afficherFormulaireMiseAJourDepense",
+        requirements: ['idDepense' => '\d+'], methods: ['GET'])]
+    public static function afficherFormulaireMiseAJourDepense(int $idDepense): void {
         if(!ConnexionUtilisateur::estConnecte()) {
-            self::redirection("utilisateur", "afficherFormulaireConnexion");
-        }
-        if(!self::issetAndNotNull(["idDepense"])) {
-            MessageFlash::ajouter("warning", "Identifiant de la dépense manquant");
-            self::redirection("base", "accueil");
+            self::redirection("connexion");
         }
         $depensesRepository = new DepenseRepository();
-        $depense = $depensesRepository->recuperer($_REQUEST["idDepense"]);
+        $depense = $depensesRepository->recuperer($idDepense);
         if(!$depense) {
             MessageFlash::ajouter("warning", "Dépense inexistante");
-            self::redirection("base", "accueil");
+            self::redirection("");
         }
         $evenement = $depense->getEvenement();
         if(!$evenement->estMembre(ConnexionUtilisateur::getLoginUtilisateurConnecte())) {
             MessageFlash::ajouter("danger", "Vous n'avez pas de droits d'éditions sur cet événement");
-            self::redirection("evenement", "afficherEvenement", ["codeEvenement" => $evenement->getCodeSecret()]);
+            $codeSecret = $evenement->getCodeSecret();
+            self::redirection("evenements/$codeSecret");
         }
         self::afficherVue('vueGenerale.php', [
             "pagetitle" => "Edition d'une dépense",
@@ -129,34 +129,33 @@ class ControleurDepense extends ControleurGenerique
         ]);
     }
 
-    public static function mettreAJourDepense(): void {
+    #[Route(path: "/depense/modifier/{idDepense}", name: "mettreAJourDepense", 
+        requirements: ['idDepense' => '\d+'], methods: ['POST'])]
+    public static function mettreAJourDepense(int $idDepense): void {
         if(!ConnexionUtilisateur::estConnecte()) {
-            self::redirection("utilisateur", "afficherFormulaireConnexion");
-        }
-        if(!self::issetAndNotNull(["idDepense"])) {
-            MessageFlash::ajouter("warning", "Identifiant de la dépense manquant");
-            self::redirection("base", "accueil");
+            self::redirection("connexion");
         }
         $depensesRepository = new DepenseRepository();
-        $depense = $depensesRepository->recuperer($_REQUEST["idDepense"]);
+        $depense = $depensesRepository->recuperer($idDepense);
         if(!$depense) {
             MessageFlash::ajouter("warning", "Dépense inexistante");
-            self::redirection("base", "accueil");
+            self::redirection("");
         }
         $evenement = $depense->getEvenement();
 
         if(!$evenement->estMembre(ConnexionUtilisateur::getLoginUtilisateurConnecte())) {
             MessageFlash::ajouter("danger", "Vous n'avez pas de droits d'éditions sur cet événement");
-            self::redirection("evenement", "afficherEvenement", ["codeEvenement" => $evenement->getCodeSecret()]);
+            $codeSecret = $evenement->getCodeSecret();
+            self::redirection("evenements/$codeSecret");
         }
 
         if(!self::issetAndNotNull(["titre", "montant", "payeur", "participants"])) {
             MessageFlash::ajouter("danger", "Attributs manquants");
-            self::redirection("depense", "afficherFormulaireMiseAJourDepense", ["idDepense" => $_REQUEST["idDepense"]]);
+            self::redirection("depense/modifier/$idDepense");
         }
         if(empty($_REQUEST["participants"])) {
             MessageFlash::ajouter("danger", "Il faut au moins un participant.");
-            self::redirection("depense", "afficherFormulaireMiseAJourDepense", ["idDepense" => $_REQUEST["idDepense"]]);
+            self::redirection("depense/modifier/$idDepense");
         }
 
         $depense->setTitre($_REQUEST["titre"]);
@@ -168,12 +167,12 @@ class ControleurDepense extends ControleurGenerique
         $payeur = $utilisateurRepository->recuperer($_REQUEST["payeur"]);
         if(!$payeur) {
             MessageFlash::ajouter("danger", "Le payeur n'existe pas");
-            self::redirection("depense", "afficherFormulaireMiseAJourDepense", ["idDepense" => $_REQUEST["idDepense"]]);
+            self::redirection("depense/modifier/$idDepense");
         }
 
         if(!$evenement->estMembre($payeur->getLogin())) {
             MessageFlash::ajouter("danger", "Le payeur n'est pas membre de l'événement.");
-            self::redirection("depense", "afficherFormulaireMiseAJourDepense", ["idDepense" => $_REQUEST["idDepense"]]);
+            self::redirection("depense/modifier/$idDepense");
         }
         $depense->setPayeur($payeur);
 
@@ -182,46 +181,46 @@ class ControleurDepense extends ControleurGenerique
             $utilisateur = $utilisateurRepository->recuperer($loginParticipant);
             if(!$utilisateur) {
                 MessageFlash::ajouter("danger", "Un des membres affecté à la dépense n'existe pas");
-                self::redirection("depense", "afficherFormulaireMiseAJourDepense", ["idDepense" => $_REQUEST["idDepense"]]);
+                self::redirection("depense/modifier/$idDepense");
             }
             if(!$evenement->estMembre($utilisateur->getLogin())) {
                 MessageFlash::ajouter("danger", "Un des membres affecté à la dépense n'est pas membre de l'événement.");
-                self::redirection("depense", "afficherFormulaireMiseAJourDepense", ["idDepense" => $_REQUEST["idDepense"]]);
+                self::redirection("depense/modifier/$idDepense");
             }
             $participants[] = $utilisateur;
         }
         $depense->setParticipants($participants);
         $depensesRepository->mettreAJour($depense);
-        self::redirection("evenement", "afficherEvenement", ["codeEvenement" => $evenement->getCodeSecret()]);
+        $codeSecret = $evenement->getCodeSecret();
+            self::redirection("evenements/$codeSecret");
     }
 
-    public static function supprimerDepense(): void {
+    #[Route(path: "/depense/supprimer/{idDepense}", name: "supprimerDepense", requirements: ['idDepense' => '\d+'], methods: ['POST'])]
+    public static function supprimerDepense(int $idDepense): void {
         if(!ConnexionUtilisateur::estConnecte()) {
-            self::redirection("utilisateur", "afficherFormulaireConnexion");
-        }
-        if(!self::issetAndNotNull(["idDepense"])) {
-            MessageFlash::ajouter("warning", "Identifiant de dépense manquant");
-            self::redirection("base", "accueil");
+            self::redirection("connexion");
         }
         $depensesRepository = new DepenseRepository();
-        $idDepense = $_REQUEST["idDepense"];
         $depense = $depensesRepository->recuperer($idDepense);
         if(!$depense) {
             MessageFlash::ajouter("danger", "Dépense inexistante");
-            self::redirection("base", "accueil");
+            self::redirection("");
         }
 
         $evenement = $depense->getEvenement();
         if(!$evenement->estMembre(ConnexionUtilisateur::getLoginUtilisateurConnecte())) {
             MessageFlash::ajouter("danger", "Vous n'avez pas de droits d'éditions sur cet événement");
-            self::redirection("evenement", "afficherEvenement", ["codeEvenement" => $evenement->getCodeSecret()]);
+            $codeSecret = $evenement->getCodeSecret();
+            self::redirection("evenements/$codeSecret");
         }
 
         if($depensesRepository->compterNombreDepensesEvenement($evenement->getId()) == 1) {
             MessageFlash::ajouter("danger", "Vous ne pouvez pas supprimer cette dépense car cela entrainera la supression de l'événement");
-            self::redirection("evenement", "afficherEvenement", ["codeEvenement" => $evenement->getCodeSecret()]);
+            $codeSecret = $evenement->getCodeSecret();
+            self::redirection("evenements/$codeSecret");
         }
         $depensesRepository->supprimer($idDepense);
-        self::redirection("evenement", "afficherEvenement", ["codeEvenement" => $evenement->getCodeSecret()]);
+        $codeSecret = $evenement->getCodeSecret();
+            self::redirection("evenements/$codeSecret");
     }
 }
