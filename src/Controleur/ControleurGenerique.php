@@ -2,6 +2,7 @@
 
 namespace App\VeryBadSplit\Controleur;
 
+use App\VeryBadSplit\Lib\Helper;
 use App\VeryBadSplit\Lib\MessageFlash;
 use JetBrains\PhpStorm\NoReturn;
 
@@ -15,22 +16,9 @@ abstract class ControleurGenerique {
     }
     
     #[NoReturn]
-    protected static function redirection(string $controleur = "", string $action = "", array $query = []) : void
+    protected static function redirection(string $url) : void
     {
-        $queryString = [];
-        if ($action != "") {
-            $queryString[] = "action=$action";
-        }
-        if ($controleur != "") {
-            $queryString[] = "controleur=$controleur";
-        }
-        foreach ($query as $name => $value) {
-            $name = rawurlencode($name);
-            $value = rawurlencode($value);
-            $queryString[] = "$name=$value";
-        }
-        $url = "Location: ./controleurFrontal.php?" . join("&", $queryString);
-        header($url);
+        header("Location: " . Helper::url($url));
         exit();
     }
 
