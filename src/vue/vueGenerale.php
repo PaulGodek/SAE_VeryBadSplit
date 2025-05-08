@@ -18,7 +18,7 @@ $generateurUrl = Conteneur::recupererService("generateurUrl");
     <title><?= htmlspecialchars($pagetitle) ?></title>
     <link rel="stylesheet" href="<?= Helper::url("../ressources/css/bulma.min.css") ?>">
     <link rel="stylesheet" href="<?= Helper::url("../ressources/css/styles.css") ?>">
-    <script type="text/javascript" src="<?= Helper::url("../ressources/js/bulma.jsZz") ?>" defer></script>
+    <script type="text/javascript" src="<?= Helper::url("../ressources/js/bulma.js") ?>" defer></script>
 </head>
 <body>
     <section class="hero is-fullheight">
@@ -35,7 +35,7 @@ $generateurUrl = Conteneur::recupererService("generateurUrl");
                     </div>
                     <div id="navSite" class="navbar-menu">
                         <div class="navbar-start">
-                            <a href="./" class="navbar-item">Accueil</a>
+                            <a href="<?= Helper::url("./"); ?>" class="navbar-item">Accueil</a>
                             <?php
                             if (ConnexionUtilisateur::estConnecte()) {?>
                                 <a href="<?= Helper::url('evenements'); ?>" class="navbar-item">

@@ -51,7 +51,7 @@ use App\VeryBadSplit\Modele\DataObject\Evenement;
                                         </a>
                                         <a class="delete" href="<?= Helper::url('evenements/supprimer/' . rawurlencode($evenement->getId())) ?>"></a>
                                     <?php } else { ?>
-                                        <a class="icon-container" href="<?= Helper::url('evenements/quitter' . rawurlencode($evenement->getId())) ?>">
+                                        <a class="icon-container" href="<?= Helper::url('evenements/quitter/' . rawurlencode($evenement->getId())) ?>">
                                             <span class="icon"><ion-icon name="person-remove"></ion-icon></span>
                                         </a>
                                     <?php } ?>
