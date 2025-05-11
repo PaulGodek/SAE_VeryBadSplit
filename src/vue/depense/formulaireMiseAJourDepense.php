@@ -9,7 +9,7 @@ $evenement = $depense->getEvenement();
         <div class="columns is-centered">
             <div class="column is-8 box has-background-black-ter">
                 <p class="is-size-2 has-text-centered has-text-white">Edition d'une dépense</p>
-                <form action="controleurFrontal.php" method="post">
+                <form action="<?= \App\VeryBadSplit\Lib\Helper::url("depense/modifier/" . htmlspecialchars($depense->getId())) ?>" method="post">
                     <div class="field is-horizontal">
                         <div class="field-body">
                             <div class="field">
@@ -53,9 +53,6 @@ $evenement = $depense->getEvenement();
                             </div>
                         </div>
                     </div>
-                    <input type='hidden' name='idDepense' value='<?= htmlspecialchars($depense->getId()) ?>'>
-                    <input type='hidden' name='action' value='mettreAJourDepense'>
-                    <input type='hidden' name='controleur' value='depense'>
                     <div class="buttons is-centered mt-6">
                         <button class="button has-background-black is-size-4">
                             <span class="icon is-left"><ion-icon name="add-circle"></ion-icon></span>
