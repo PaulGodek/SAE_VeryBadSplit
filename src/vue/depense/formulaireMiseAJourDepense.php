@@ -45,6 +45,7 @@ $evenement = $depense->getEvenement();
                                 <label class="label is-size-4" for="participants">Participants</label>
                                 <div class="select is-multiple is-size-4 is-fullwidth">
                                     <select required id="participants" name="participants[]" multiple size="<?= min(count($evenement->getMembres()), 4) ?>">
+                                        <option value="" disabled selected hidden></option>
                                         <?php foreach ($evenement->getMembres() as $membre) {?>
                                             <option <?= $depense->estParticipant($membre->getLogin()) ? "selected" : ""?> value="<?=htmlspecialchars($membre->getLogin())?>"><?=htmlspecialchars($membre->getPrenom()." ".$membre->getNom()." (".$membre->getLogin().")")?></option>
                                         <?php }?>
