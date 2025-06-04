@@ -5,12 +5,6 @@ namespace App\VeryBadSplit\Controleur;
 use App\VeryBadSplit\Lib\ConnexionUtilisateur;
 use App\VeryBadSplit\Lib\Conteneur;
 use App\VeryBadSplit\Lib\MessageFlash;
-use App\VeryBadSplit\Lib\MotDePasse;
-use App\VeryBadSplit\Modele\DataObject\Utilisateur;
-use App\VeryBadSplit\Modele\HTTP\Cookie;
-use App\VeryBadSplit\Modele\Repository\DepenseRepository;
-use App\VeryBadSplit\Modele\Repository\EvenementRepository;
-use App\VeryBadSplit\Modele\Repository\UtilisateurRepository;
 use App\VeryBadSplit\Service\Exception\ServiceException;
 use App\VeryBadSplit\Service\UtilisateurService;
 use Symfony\Component\Routing\Attribute\Route;
@@ -64,8 +58,6 @@ class ControleurUtilisateur extends ControleurGenerique
 
         try {
             self::getUtilisateurService()->creerUtilisateur($login, $prenom, $nom, $email, $mdp, $mdp2);
-//            Cookie::enregistrer("login", $utilisateur->getLogin());
-//            Cookie::enregistrer("mdp", $mdp);
             MessageFlash::ajouter("success", "L'utilisateur a bien été créé !");
             self::redirection("connexion");
         } catch (ServiceException $e) {
