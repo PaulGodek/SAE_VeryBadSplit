@@ -2,8 +2,8 @@
 
 namespace App\VeryBadSplit\Service;
 
-use App\VeryBadSplit\Controleur\ControleurGenerique;
 use App\VeryBadSplit\Lib\ConnexionUtilisateur;
+use App\VeryBadSplit\Lib\Validator;
 use App\VeryBadSplit\Modele\DataObject\Depense;
 use App\VeryBadSplit\Modele\Repository\DepenseRepository;
 use App\VeryBadSplit\Modele\Repository\UtilisateurRepository;
@@ -14,13 +14,16 @@ class DepenseService extends GeneriqueService
 {
     private DepenseRepository $depenseRepository;
     private UtilisateurRepository $utilisateurRepository;
+    private EvenementService $evenementService;
 
     public function __construct(
         DepenseRepository $depenseRepository,
-        UtilisateurRepository $utilisateurRepository
+        UtilisateurRepository $utilisateurRepository,
+        EvenementService $evenementService
     ) {
         $this->depenseRepository = $depenseRepository;
         $this->utilisateurRepository = $utilisateurRepository;
+        $this->evenementService = $evenementService;
     }
 
     /**
@@ -61,9 +64,9 @@ class DepenseService extends GeneriqueService
      */
     public function creerDepense(int $idEvenement, string $titre, float $montant, string $payeur, array $loginsParticipants): string
     {
-        $evenement = (new EvenementService)->verifierAccesEvenement($idEvenement);
+        $evenement = $this->evenementService->verifierAccesEvenement($idEvenement);
 
-        if (!ControleurGenerique::isNotNull([$titre, $montant, $payeur, $loginsParticipants])) {
+        if (!Validator::allNotEmpty([$titre, $montant, $payeur, $loginsParticipants])) {
             throw new ServiceException("Attributs manquants.", 
                 "evenements/nouvelleDepense/$idEvenement");
         }
@@ -129,9 +132,9 @@ class DepenseService extends GeneriqueService
         }
 
         $evenement = $depense->getEvenement();
-        (new EvenementService)->verifierDroitsEvenement($evenement);
+        $this->evenementService->verifierDroitsEvenement($evenement);
 
-        if (!ControleurGenerique::isNotNull([$titre, $montant, $payeurLogin, $loginsParticipants])) {
+        if (!Validator::allNotEmpty([$titre, $montant, $payeurLogin, $loginsParticipants])) {
             throw new ServiceException("Attributs manquants.",
                 "depense/modifier/$idDepense");
         }
@@ -188,7 +191,7 @@ class DepenseService extends GeneriqueService
         }
 
         $evenement = $depense->getEvenement();
-        (new EvenementService())->verifierDroitsEvenement($evenement);
+        $this->evenementService->verifierDroitsEvenement($evenement);
 
         if ($depenseRepository->compterNombreDepensesEvenement($evenement->getId()) == 1) {
             throw new ServiceException("Vous ne pouvez pas supprimer cette dépense car cela entraînera la suppression de l'événement.",

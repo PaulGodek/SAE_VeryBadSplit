@@ -79,7 +79,8 @@ class RouteurURL
         
         $depenseService = new DepenseService(
             $depenseRepository,
-            $utilisateurRepository
+            $utilisateurRepository,
+            $evenementService
         );
         
         // Ajout des services au conteneur

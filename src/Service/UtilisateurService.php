@@ -2,9 +2,9 @@
 
 namespace App\VeryBadSplit\Service;
 
-use App\VeryBadSplit\Controleur\ControleurGenerique;
 use App\VeryBadSplit\Lib\ConnexionUtilisateur;
 use App\VeryBadSplit\Lib\MotDePasse;
+use App\VeryBadSplit\Lib\Validator;
 use App\VeryBadSplit\Modele\DataObject\Depense;
 use App\VeryBadSplit\Modele\DataObject\Evenement;
 use App\VeryBadSplit\Modele\DataObject\Utilisateur;
@@ -73,7 +73,7 @@ class UtilisateurService extends GeneriqueService
                 "inscription");
         }
 
-        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        if (!Validator::isValidEmail($email)) {
             throw new ServiceException("Email non valide.",
                 "inscription");
         }
@@ -141,7 +141,7 @@ class UtilisateurService extends GeneriqueService
             throw new ServiceException("Login, nom, prénom, email ou mot de passe actuel manquant.", "compte/modifier");
         }
 
-        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        if (!Validator::isValidEmail($email)) {
             throw new ServiceException("Email non valide.", "compte/modifier", "warning");
         }
 
@@ -214,8 +214,6 @@ class UtilisateurService extends GeneriqueService
         $this->utilisateurRepository->supprimer($login);
         
         ConnexionUtilisateur::deconnecter();
-//        Cookie::supprimer("login");
-//        Cookie::supprimer("mdp");
     }
 
     /**
@@ -245,8 +243,6 @@ class UtilisateurService extends GeneriqueService
         }
 
         ConnexionUtilisateur::connecter($utilisateur->getLogin());
-//        Cookie::enregistrer("login", $login);
-//        Cookie::enregistrer("mdp", $mdp);
     }
 
 
