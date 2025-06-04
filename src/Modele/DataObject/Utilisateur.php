@@ -6,11 +6,11 @@ class Utilisateur
 {
     public function __construct(
         private string  $login,
-        private ?string $nom ,
-        private ?string $prenom ,
-        private ?string $email ,
-        private ?string $mdpHache ,
-        private ?string $mdp
+        private ?string $nom = null,
+        private ?string $prenom = null,
+        private ?string $email = null,
+        private ?string $mdpHache = null,
+        private ?string $mdp = null
     )
     {
     }
