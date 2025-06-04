@@ -136,7 +136,7 @@ class EvenementRepository
         return $obj[0] === null ? 0 : $obj[0] + 1;
     }
 
-    public function compterNombreEvenementProprietaire($loginProprietaire): int
+    public function compterNombreEvenelengmentProprietaire($loginProprietaire): int
     {
         $sql = "SELECT COUNT(DISTINCT idEvenement) FROM app_db WHERE loginProprietaire=:loginProprietaire";
         $pdoStatement = ConnexionBaseDeDonnees::getPDO()->prepare($sql);
@@ -145,10 +145,5 @@ class EvenementRepository
         return $obj[0] === null ? 0 : $obj[0];
     }
 
-    public function unlog()
-    {
-        if(ConnexionUtilisateur::estConnecte()) {
-            echo "To-DO unlog";
-        }
-    }
+
 }

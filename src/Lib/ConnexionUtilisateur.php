@@ -44,9 +44,5 @@ class ConnexionUtilisateur
         );
     }
 
-    public static function tel() : int
-    {
-        //TO-DO
-        return 5;
-    }
+
 }
