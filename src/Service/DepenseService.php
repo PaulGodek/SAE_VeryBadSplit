@@ -76,6 +76,11 @@ class DepenseService extends GeneriqueService
                 "evenements/nouvelleDepense/$idEvenement");
         }
 
+        if (!Validator::hasMaxLength($titre,50)|| !Validator::hasMinLength($titre,1)) {
+            throw new ServiceException("La longueur du titre n'est pas valide.",
+                "evenements/nouvelleDepense/$idEvenement");
+        }
+
         $utilisateurRepository = $this->utilisateurRepository;
         $payeur = $utilisateurRepository->recuperer($payeur);
         if (!$payeur || !$evenement->estMembre($payeur->getLogin())) {

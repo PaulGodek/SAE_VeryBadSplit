@@ -4,6 +4,7 @@ namespace App\VeryBadSplit\Service;
 
 use App\VeryBadSplit\Lib\ConnexionUtilisateur;
 use App\VeryBadSplit\Lib\MessageFlash;
+use App\VeryBadSplit\Lib\Validator;
 use App\VeryBadSplit\Modele\DataObject\Depense;
 use App\VeryBadSplit\Modele\DataObject\Evenement;
 use App\VeryBadSplit\Modele\Repository\DepenseRepository;
@@ -168,6 +169,10 @@ class EvenementService extends GeneriqueService
             throw new ServiceException("Le nom de l'événement est manquant.", 
                 "evenements/creation", "danger");
         }
+        if (!Validator::hasMaxLength($nomEvenement,50)|| !Validator::hasMinLength($nomEvenement,3)) {
+            throw new ServiceException("La longueur du nom de l'événement n'est pas valide.",
+                "evenements/creation", "danger");
+        }
 
         $evenementRepository = $this->evenementRepository;
         $idEvenement = $evenementRepository->getNextId();
@@ -218,6 +223,10 @@ class EvenementService extends GeneriqueService
 
         if (empty($nomEvenement)) {
             throw new ServiceException("Le nom de l'événement est manquant.", 
+                "evenements/modifier/$idEvenement");
+        }
+        if (!Validator::hasMaxLength($nomEvenement,50)|| !Validator::hasMinLength($nomEvenement,3)) {
+            throw new ServiceException("La longueur du nom de l'événement n'est pas valide.",
                 "evenements/modifier/$idEvenement");
         }
 

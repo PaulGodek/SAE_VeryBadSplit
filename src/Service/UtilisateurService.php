@@ -2,6 +2,7 @@
 
 namespace App\VeryBadSplit\Service;
 
+use App\VeryBadSplit\Controleur\ControleurGenerique;
 use App\VeryBadSplit\Lib\ConnexionUtilisateur;
 use App\VeryBadSplit\Lib\MotDePasse;
 use App\VeryBadSplit\Lib\Validator;
@@ -78,6 +79,28 @@ class UtilisateurService extends GeneriqueService
                 "inscription");
         }
 
+        if (!Validator::hasMaxLength($login,30)|| !Validator::hasMinLength($login,3)) {
+            throw new ServiceException("La longueur du nom d'utilisateur n'est pas valide.",
+                "inscrpition");
+        }
+
+        if (!Validator::hasMaxLength($nom,30)|| !Validator::hasMinLength($nom,1)) {
+            throw new ServiceException("La longueur du nom n'est pas valide.",
+                "inscrpition");
+        }
+
+        if (!Validator::hasMaxLength($prenom,30)|| !Validator::hasMinLength($prenom,1)) {
+            throw new ServiceException("La longueur du prenom n'est pas valide.",
+                "inscrpition");
+        }
+
+        if (!Validator::hasMaxLength($mdp,50)|| !Validator::hasMinLength($mdp,6)) {
+            throw new ServiceException("La longueur du mot de passe n'est pas valide.",
+                "inscrpition");
+        }
+
+
+
         if ($this->utilisateurRepository->recuperer($login)) {
             throw new ServiceException("Le login est déjà pris.",
                 "inscription");
@@ -143,6 +166,26 @@ class UtilisateurService extends GeneriqueService
 
         if (!Validator::isValidEmail($email)) {
             throw new ServiceException("Email non valide.", "compte/modifier", "warning");
+        }
+
+        if (!Validator::hasMaxLength($login,30)|| !Validator::hasMinLength($login,3)) {
+            throw new ServiceException("La longueur du nom d'utilisateur n'est pas valide.",
+                "compte/modifier", "danger");
+        }
+
+        if (!Validator::hasMaxLength($nom,30)|| !Validator::hasMinLength($nom,1)) {
+            throw new ServiceException("La longueur du nom n'est pas valide.",
+                "compte/modifier", "danger");
+        }
+
+        if (!Validator::hasMaxLength($prenom,30)|| !Validator::hasMinLength($prenom,1)) {
+            throw new ServiceException("La longueur du prenom n'est pas valide.",
+                "compte/modifier", "danger");
+        }
+
+        if (!Validator::hasMaxLength($mdp,50)|| !Validator::hasMinLength($mdp,6)) {
+            throw new ServiceException("La longueur du mot de passe n'est pas valide.",
+                "compte/modifier", "danger");
         }
 
         $utilisateurRepository = $this->utilisateurRepository;
@@ -268,5 +311,5 @@ class UtilisateurService extends GeneriqueService
 
         return $utilisateurs;
     }
-    
+
 }
