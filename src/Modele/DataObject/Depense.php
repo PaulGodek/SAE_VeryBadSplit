@@ -8,11 +8,11 @@ class Depense
 {
     public function __construct(
         private int          $id,
-        private ?string      $titre = null,
-        private ?DateTime    $date = null,
-        private ?float      $montant = null,
-        private ?Utilisateur $payeur = null,
-        private ?Evenement   $evenement = null,
+        private ?string      $titre ,
+        private ?DateTime    $date,
+        private ?float      $montant ,
+        private ?Utilisateur $payeur ,
+        private ?Evenement   $evenement ,
         private ?array       $participants = [],
     )
     {

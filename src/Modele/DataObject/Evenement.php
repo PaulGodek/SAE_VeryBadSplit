@@ -9,10 +9,10 @@ class Evenement
 {
     public function __construct(
         private int $id,
-        private ?string $codeSecret = null,
-        private ?string $titre = null,
-        private ?DateTime $date = null,
-        private ?Utilisateur $proprietaire = null,
+        private ?string $codeSecret ,
+        private ?string $titre ,
+        private ?DateTime $date,
+        private ?Utilisateur $proprietaire,
         private ?array $membres = [],
         private ?array $depenses = [],
     ){}
