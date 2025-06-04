@@ -14,6 +14,12 @@ use Symfony\Component\HttpKernel\Controller\ArgumentResolver;
 use Symfony\Component\HttpKernel\Controller\ControllerResolver;
 use App\VeryBadSplit\Lib\AttributeRouteControllerLoader;
 use App\VeryBadSplit\Lib\Conteneur;
+use App\VeryBadSplit\Modele\Repository\UtilisateurRepository;
+use App\VeryBadSplit\Modele\Repository\EvenementRepository;
+use App\VeryBadSplit\Modele\Repository\DepenseRepository;
+use App\VeryBadSplit\Service\UtilisateurService;
+use App\VeryBadSplit\Service\EvenementService;
+use App\VeryBadSplit\Service\DepenseService;
 
 class RouteurURL
 {
@@ -47,6 +53,39 @@ class RouteurURL
 
         Conteneur::ajouterService("generateurUrl", $generateurUrl);
         Conteneur::ajouterService("assistantUrl", $assistantUrl);
+        
+        // Initialisation des repositories
+        $utilisateurRepository = new UtilisateurRepository();
+        $evenementRepository = new EvenementRepository();
+        $depenseRepository = new DepenseRepository();
+        
+        // Ajout des repositories au conteneur
+        Conteneur::ajouterService("utilisateurRepository", $utilisateurRepository);
+        Conteneur::ajouterService("evenementRepository", $evenementRepository);
+        Conteneur::ajouterService("depenseRepository", $depenseRepository);
+        
+        // Initialisation des services avec injection de dépendances
+        $utilisateurService = new UtilisateurService(
+            $utilisateurRepository,
+            $evenementRepository,
+            $depenseRepository
+        );
+        
+        $evenementService = new EvenementService(
+            $evenementRepository,
+            $utilisateurRepository,
+            $depenseRepository
+        );
+        
+        $depenseService = new DepenseService(
+            $depenseRepository,
+            $utilisateurRepository
+        );
+        
+        // Ajout des services au conteneur
+        Conteneur::ajouterService("utilisateurService", $utilisateurService);
+        Conteneur::ajouterService("evenementService", $evenementService);
+        Conteneur::ajouterService("depenseService", $depenseService);
 
         // Exécution du contrôleur
         call_user_func_array($controleur, $arguments);
