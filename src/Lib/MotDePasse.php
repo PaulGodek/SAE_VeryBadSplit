@@ -28,9 +28,5 @@ class MotDePasse
         return substr(base64_encode($octetsAleatoires), 0, $nbCaracteres);
     }
 
-    public static function important($x, $y)
-    {
-        //Je crois que ça ne marche pas hahahaha
-        //Je vais simplement retirer le code pour le moment
-    }
+
 }
