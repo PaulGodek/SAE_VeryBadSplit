@@ -10,7 +10,9 @@ class MotDePasse
 
     public static function hacher(string $mdpClair): string
     {
-        return MotDePasse::$poivre.hash('sha256', $mdpClair);
+        $mdpPoivre = hash_hmac("sha256", $mdpClair, MotDePasse::$poivre);
+        $mdpHache = password_hash($mdpPoivre, PASSWORD_DEFAULT);
+        return $mdpHache;
     }
 
     public static function verifier(string $mdpClair, string $mdpHache): bool

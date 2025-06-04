@@ -2,6 +2,7 @@
 
 namespace App\VeryBadSplit\Lib;
 
+
 /**
  * Classe utilitaire pour la validation des données
  */
@@ -87,7 +88,14 @@ class Validator
         return $number >= $min && $number <= $max;
     }
 
-    public static function validateUserInfo(){
-
+    /**
+     * Vérifie qu'une chaîne respecte le modèle de mot de passe
+     *
+     * @param string $string La chaîne à vérifier
+     * @return bool true si la chaîne respecte le modèle des mots de passes
+     */
+    public static function isValideMdp(string $string):bool {
+        $pattern = '/^(?=.*\d)(?=.*[a-zA-Z])(?=.*[!@#$%^&*_=+\-]).{6,50}$/';
+        return preg_match($pattern,$string);
     }
 }

@@ -94,8 +94,8 @@ class UtilisateurService extends GeneriqueService
                 "inscrpition");
         }
 
-        if (!Validator::hasMaxLength($mdp,50)|| !Validator::hasMinLength($mdp,6)) {
-            throw new ServiceException("La longueur du mot de passe n'est pas valide.",
+        if (!Validator::isValideMdp($mdp)) {
+            throw new ServiceException("Le mot de passe ne respecte pas le modèle donné.",
                 "inscrpition");
         }
 
@@ -183,8 +183,8 @@ class UtilisateurService extends GeneriqueService
                 "compte/modifier", "danger");
         }
 
-        if (!Validator::hasMaxLength($mdp,50)|| !Validator::hasMinLength($mdp,6)) {
-            throw new ServiceException("La longueur du mot de passe n'est pas valide.",
+        if (!Validator::isValideMdp($mdp)) {
+            throw new ServiceException("Le mot de passe ne respecte pas le modèle donné.",
                 "compte/modifier", "danger");
         }
 
