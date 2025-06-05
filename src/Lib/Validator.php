@@ -2,6 +2,7 @@
 
 namespace App\VeryBadSplit\Lib;
 
+
 /**
  * Classe utilitaire pour la validation des données
  */
@@ -61,6 +62,18 @@ class Validator
     {
         return strlen($string) >= $minLength;
     }
+
+    /**
+     * Vérifie qu'une chaîne a une longueur maximale
+     *
+     * @param string $string La chaîne à vérifier
+     * @param int $maxLength La longueur maximale
+     * @return bool true si la chaîne respecte la longueur maximale
+     */
+    public static function hasMaxLength(string $string, int $maxLength): bool
+    {
+        return strlen($string) <= $maxLength;
+    }
     
     /**
      * Vérifie qu'un nombre est dans un intervalle
@@ -73,5 +86,16 @@ class Validator
     public static function isInRange(float $number, float $min, float $max): bool
     {
         return $number >= $min && $number <= $max;
+    }
+
+    /**
+     * Vérifie qu'une chaîne respecte le modèle de mot de passe
+     *
+     * @param string $string La chaîne à vérifier
+     * @return bool true si la chaîne respecte le modèle des mots de passes
+     */
+    public static function isValideMdp(string $string):bool {
+        $pattern = '/^(?=.*\d)(?=.*[a-zA-Z])(?=.*[!@#$%^&*_=+\-]).{6,50}$/';
+        return preg_match($pattern,$string);
     }
 }

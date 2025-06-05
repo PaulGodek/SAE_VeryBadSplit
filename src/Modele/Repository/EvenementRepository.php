@@ -15,9 +15,9 @@ class EvenementRepository implements EvenementRepositoryInterface
     private function recupererPar($critere, $valeur) : ?Evenement
     {
         $pdoStatement = ConnexionBaseDeDonnees::getPdo()->prepare(
-            "SELECT * FROM app_db WHERE $critere = '$valeur'"
+            "SELECT * FROM app_db WHERE :critere = :valeur"
         );
-        $pdoStatement->execute();
+        $pdoStatement->execute(["critere"=>$critere, "valeur"=>$valeur]);
 
         $data = $pdoStatement->fetchAll(PDO::FETCH_ASSOC);
         if(!$data) {
@@ -137,7 +137,7 @@ class EvenementRepository implements EvenementRepositoryInterface
         return $obj[0] === null ? 0 : $obj[0] + 1;
     }
 
-    public function compterNombreEvenementProprietaire($loginProprietaire): int
+    public function compterNombreEvenelengmentProprietaire($loginProprietaire): int
     {
         $sql = "SELECT COUNT(DISTINCT idEvenement) FROM app_db WHERE loginProprietaire=:loginProprietaire";
         $pdoStatement = ConnexionBaseDeDonnees::getPDO()->prepare($sql);
@@ -146,10 +146,5 @@ class EvenementRepository implements EvenementRepositoryInterface
         return $obj[0] === null ? 0 : $obj[0];
     }
 
-    public function unlog()
-    {
-        if(ConnexionUtilisateur::estConnecte()) {
-            echo "To-DO unlog";
-        }
-    }
+
 }

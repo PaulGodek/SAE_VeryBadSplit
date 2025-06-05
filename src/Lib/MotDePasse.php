@@ -10,12 +10,14 @@ class MotDePasse
 
     public static function hacher(string $mdpClair): string
     {
-        return MotDePasse::$poivre.hash('sha256', $mdpClair);
+        $mdpPoivre = hash_hmac("sha256", $mdpClair, MotDePasse::$poivre);
+        $mdpHache = password_hash($mdpPoivre, PASSWORD_DEFAULT);
+        return $mdpHache;
     }
 
     public static function verifier(string $mdpClair, string $mdpHache): bool
     {
-        return MotDePasse::hacher($mdpClair) === $mdpHache;
+        return password_verify($mdpClair, $mdpHache);
     }
 
     /**
@@ -28,9 +30,5 @@ class MotDePasse
         return substr(base64_encode($octetsAleatoires), 0, $nbCaracteres);
     }
 
-    public static function important($x, $y)
-    {
-        //Je crois que ça ne marche pas hahahaha
-        //Je vais simplement retirer le code pour le moment
-    }
+    //Here was important, the unusefull method doing nothing
 }

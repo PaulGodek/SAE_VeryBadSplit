@@ -22,7 +22,7 @@ use App\VeryBadSplit\Modele\DataObject\Evenement;
                             <div class="field">
                                 <label class="label is-size-4" for="montant">Montant (minimum 1€)</label>
                                 <div class="control has-icons-left">
-                                    <input id="montant" name="montant" class="input is-large" type="number" step="0.1" min="1" max="10000" value="1,0" required>
+                                    <input id="montant" name="montant" class="input is-large" type="number" step="0.1" min="1" max="10000" value="1.0" required>
                                     <span class="icon is-small is-left"><ion-icon name="card"></ion-icon></span>
                                 </div>
                             </div>
@@ -34,9 +34,11 @@ use App\VeryBadSplit\Modele\DataObject\Evenement;
                                 <label class="label is-size-4" for="payeur">Payé par</label>
                                 <div class="select is-size-4 is-fullwidth">
                                     <select required id="payeur" name="payeur">
+                                        <option value="" disabled selected hidden></option>
                                         <?php foreach ($evenement->getMembres() as $membre) {?>
                                             <option value="<?=htmlspecialchars($membre->getLogin())?>"><?=htmlspecialchars($membre->getPrenom()." ".$membre->getNom()." (".$membre->getLogin().")")?></option>
                                         <?php }?>
+
                                     </select>
                                 </div>
                             </div>
