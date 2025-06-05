@@ -79,17 +79,17 @@ class UtilisateurService extends GeneriqueService
                 "inscription");
         }
 
-        if (!Validator::hasMaxLength($login,30)|| !Validator::hasMinLength($login,3)) {
+        if (!Validator::hasValideLength($login,3,30)) {
             throw new ServiceException("La longueur du nom d'utilisateur n'est pas valide.",
                 "inscrpition");
         }
 
-        if (!Validator::hasMaxLength($nom,30)|| !Validator::hasMinLength($nom,1)) {
+        if (!Validator::hasValideLength($nom,1,30)) {
             throw new ServiceException("La longueur du nom n'est pas valide.",
                 "inscrpition");
         }
 
-        if (!Validator::hasMaxLength($prenom,30)|| !Validator::hasMinLength($prenom,1)) {
+        if (!Validator::hasValideLength($prenom,1,30)) {
             throw new ServiceException("La longueur du prenom n'est pas valide.",
                 "inscrpition");
         }
@@ -168,17 +168,17 @@ class UtilisateurService extends GeneriqueService
             throw new ServiceException("Email non valide.", "compte/modifier", "warning");
         }
 
-        if (!Validator::hasMaxLength($login,30)|| !Validator::hasMinLength($login,3)) {
+        if (!Validator::hasValideLength($login,3,30)) {
             throw new ServiceException("La longueur du nom d'utilisateur n'est pas valide.",
                 "compte/modifier", "danger");
         }
 
-        if (!Validator::hasMaxLength($nom,30)|| !Validator::hasMinLength($nom,1)) {
+        if (!Validator::hasValideLength($nom,1,30)) {
             throw new ServiceException("La longueur du nom n'est pas valide.",
                 "compte/modifier", "danger");
         }
 
-        if (!Validator::hasMaxLength($prenom,30)|| !Validator::hasMinLength($prenom,1)) {
+        if (!Validator::hasValideLength($prenom,1,30)) {
             throw new ServiceException("La longueur du prenom n'est pas valide.",
                 "compte/modifier", "danger");
         }

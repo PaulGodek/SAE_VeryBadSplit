@@ -74,6 +74,21 @@ class Validator
     {
         return strlen($string) <= $maxLength;
     }
+
+    /**
+     * Vérifie qu'une chaîne a une longueur maximale
+     *
+     * @param string $string La chaîne à vérifier
+     * @param int $minLength La longueur minimale
+    * @param int $maxLength La longueur maximale
+     * @return bool true si la chaîne respecte la longueur maximale
+     */
+    public static function hasValideLength(string $string,int $minLength ,int $maxLength): bool
+    {
+        return strlen($string) <= $maxLength&& strlen($string) >= $minLength;
+    }
+
+
     
     /**
      * Vérifie qu'un nombre est dans un intervalle

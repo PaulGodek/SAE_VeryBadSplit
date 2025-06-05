@@ -169,7 +169,7 @@ class EvenementService extends GeneriqueService
             throw new ServiceException("Le nom de l'événement est manquant.", 
                 "evenements/creation", "danger");
         }
-        if (!Validator::hasMaxLength($nomEvenement,50)|| !Validator::hasMinLength($nomEvenement,3)) {
+        if (!Validator::hasValideLength($nomEvenement,3,30)) {
             throw new ServiceException("La longueur du nom de l'événement n'est pas valide.",
                 "evenements/creation", "danger");
         }
@@ -225,7 +225,7 @@ class EvenementService extends GeneriqueService
             throw new ServiceException("Le nom de l'événement est manquant.", 
                 "evenements/modifier/$idEvenement");
         }
-        if (!Validator::hasMaxLength($nomEvenement,50)|| !Validator::hasMinLength($nomEvenement,3)) {
+        if (!Validator::hasValideLength($nomEvenement,3,30)) {
             throw new ServiceException("La longueur du nom de l'événement n'est pas valide.",
                 "evenements/modifier/$idEvenement");
         }
