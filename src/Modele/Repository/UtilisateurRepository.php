@@ -3,9 +3,10 @@
 namespace App\VeryBadSplit\Modele\Repository;
 
 use App\VeryBadSplit\Modele\DataObject\Utilisateur;
+use App\VeryBadSplit\Modele\Repository\Interface\UtilisateurRepositoryInterface;
 use PDO;
 
-class UtilisateurRepository
+class UtilisateurRepository implements UtilisateurRepositoryInterface
 {
 
     public function recuperer($login) : ?Utilisateur {

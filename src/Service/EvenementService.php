@@ -6,22 +6,23 @@ use App\VeryBadSplit\Lib\ConnexionUtilisateur;
 use App\VeryBadSplit\Lib\MessageFlash;
 use App\VeryBadSplit\Modele\DataObject\Depense;
 use App\VeryBadSplit\Modele\DataObject\Evenement;
-use App\VeryBadSplit\Modele\Repository\DepenseRepository;
-use App\VeryBadSplit\Modele\Repository\EvenementRepository;
-use App\VeryBadSplit\Modele\Repository\UtilisateurRepository;
+use App\VeryBadSplit\Modele\Repository\Interface\DepenseRepositoryInterface;
+use App\VeryBadSplit\Modele\Repository\Interface\EvenementRepositoryInterface;
+use App\VeryBadSplit\Modele\Repository\Interface\UtilisateurRepositoryInterface;
 use App\VeryBadSplit\Service\Exception\ServiceException;
+use App\VeryBadSplit\Service\Interface\EvenementServiceInterface;
 use DateTime;
 
-class EvenementService extends GeneriqueService
+class EvenementService extends GeneriqueService implements EvenementServiceInterface
 {
-    private EvenementRepository $evenementRepository;
-    private UtilisateurRepository $utilisateurRepository;
-    private DepenseRepository $depenseRepository;
+    private EvenementRepositoryInterface $evenementRepository;
+    private UtilisateurRepositoryInterface $utilisateurRepository;
+    private DepenseRepositoryInterface $depenseRepository;
 
     public function __construct(
-        EvenementRepository $evenementRepository,
-        UtilisateurRepository $utilisateurRepository,
-        DepenseRepository $depenseRepository
+        EvenementRepositoryInterface $evenementRepository,
+        UtilisateurRepositoryInterface $utilisateurRepository,
+        DepenseRepositoryInterface $depenseRepository
     ) {
         $this->evenementRepository = $evenementRepository;
         $this->utilisateurRepository = $utilisateurRepository;

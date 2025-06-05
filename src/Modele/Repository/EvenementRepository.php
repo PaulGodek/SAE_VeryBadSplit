@@ -6,10 +6,11 @@ use App\VeryBadSplit\Lib\ConnexionUtilisateur;
 use App\VeryBadSplit\Modele\DataObject\Depense;
 use App\VeryBadSplit\Modele\DataObject\Evenement;
 use App\VeryBadSplit\Modele\DataObject\Utilisateur;
+use App\VeryBadSplit\Modele\Repository\Interface\EvenementRepositoryInterface;
 use DateTime;
 use PDO;
 
-class EvenementRepository
+class EvenementRepository implements EvenementRepositoryInterface
 {
     private function recupererPar($critere, $valeur) : ?Evenement
     {

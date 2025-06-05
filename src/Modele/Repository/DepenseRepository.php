@@ -5,11 +5,12 @@ namespace App\VeryBadSplit\Modele\Repository;
 use App\VeryBadSplit\Modele\DataObject\Depense;
 use App\VeryBadSplit\Modele\DataObject\Evenement;
 use App\VeryBadSplit\Modele\DataObject\Utilisateur;
+use App\VeryBadSplit\Modele\Repository\Interface\DepenseRepositoryInterface;
 use DateTime;
 use PDO;
 use PDOException;
 
-class DepenseRepository
+class DepenseRepository implements DepenseRepositoryInterface
 {
     public function ajouter(Depense $depense): bool
     {
@@ -128,6 +129,7 @@ class DepenseRepository
         }
         return $depenses;
     }
+    
     public function mettreAJour(Depense $depense): void
     {
         $map = [
