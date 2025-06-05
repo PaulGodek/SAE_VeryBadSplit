@@ -78,7 +78,7 @@ class DepenseService extends GeneriqueService implements DepenseServiceInterface
                 "evenements/nouvelleDepense/$idEvenement");
         }
 
-        if (!Validator::hasMaxLength($titre,50)|| !Validator::hasMinLength($titre,1)) {
+        if (!Validator::hasValideLength($titre,1,50)) {
             throw new ServiceException("La longueur du titre n'est pas valide.",
                 "evenements/nouvelleDepense/$idEvenement");
         }
@@ -148,6 +148,11 @@ class DepenseService extends GeneriqueService implements DepenseServiceInterface
 
         if (empty($loginsParticipants)) {
             throw new ServiceException("Il faut au moins un participant.",
+                "depense/modifier/$idDepense");
+        }
+
+        if (!Validator::hasValideLength($titre,1,50)) {
+            throw new ServiceException("La longueur du titre n'est pas valide.",
                 "depense/modifier/$idDepense");
         }
 
