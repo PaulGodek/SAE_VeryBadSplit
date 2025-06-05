@@ -37,7 +37,7 @@ class UtilisateurRepository
             "SELECT DISTINCT 
                         loginProprietaire, nomProprietaire, prenomProprietaire, mdpProprietaire
                         FROM app_db
-                        WHERE emailProprietaire = email");
+                        WHERE emailProprietaire = :email");
         $pdoStatement->execute(["email"=>$email]);
         $data = $pdoStatement->fetchAll(PDO::FETCH_ASSOC);
         if(!$data) {

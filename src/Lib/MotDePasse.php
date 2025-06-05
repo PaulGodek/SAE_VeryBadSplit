@@ -17,7 +17,7 @@ class MotDePasse
 
     public static function verifier(string $mdpClair, string $mdpHache): bool
     {
-        return MotDePasse::hacher($mdpClair) === $mdpHache;
+        return password_verify($mdpClair, $mdpHache);
     }
 
     /**
