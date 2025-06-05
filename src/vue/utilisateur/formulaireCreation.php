@@ -3,7 +3,7 @@
         <div class="columns is-centered">
             <div class="column is-8 box has-background-black-ter">
                 <p class="is-size-2 has-text-centered has-text-white">Inscription</p>
-                <form action="controleurFrontal.php" method="post">
+                <form action="<?= \App\VeryBadSplit\Lib\Helper::url("./inscription") ?>" method="post">
                     <div class="field is-horizontal">
                         <div class="field-body">
                             <div class="field">
@@ -52,7 +52,7 @@
                                     <input id="mdp" name="mdp" class="input is-large" type="password" placeholder="********"
                                            minlength="6" maxlength="50"
                                            pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*_=+\-]).{6,50}"
-                                           title="6 à 50 caractères, au moins une minuscule, une majuscule et un caractère spécial"
+                                           title="6 à 50 caractères, au moins une minuscule, une majuscule, un chiffre et un caractère spécial parmi ( !@#$%k^&_=+- )"
                                            required>
                                     <span class="icon is-small is-left"><ion-icon name="key"></ion-icon></span>
                                 </div>
@@ -68,8 +68,6 @@
                             </div>
                         </div>
                     </div>
-                    <input type='hidden' name='action' value='creerDepuisFormulaire'>
-                    <input type='hidden' name='controleur' value='utilisateur'>
                     <div class="buttons is-centered">
                         <button class="button has-background-black is-size-4">
                             <span class="icon is-left"><ion-icon name="person-add"></ion-icon></span>

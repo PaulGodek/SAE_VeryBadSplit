@@ -33,11 +33,12 @@ class UtilisateurRepository
      * @return Utilisateur[]
      */
     public function recupererParEmail($email) : array {
-        $pdoStatement = ConnexionBaseDeDonnees::getPdo()->query(
+        $pdoStatement = ConnexionBaseDeDonnees::getPdo()->prepare(
             "SELECT DISTINCT 
                         loginProprietaire, nomProprietaire, prenomProprietaire, mdpProprietaire
                         FROM app_db
-                        WHERE emailProprietaire = '$email'");
+                        WHERE emailProprietaire = :email");
+        $pdoStatement->execute(["email"=>$email]);
         $data = $pdoStatement->fetchAll(PDO::FETCH_ASSOC);
         if(!$data) {
             return [];

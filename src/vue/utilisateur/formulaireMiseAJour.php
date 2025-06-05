@@ -2,6 +2,7 @@
 
 /** @var Utilisateur $utilisateur */
 
+use App\VeryBadSplit\Lib\Helper;
 use App\VeryBadSplit\Modele\DataObject\Utilisateur;
 
 $loginHTML = htmlspecialchars($utilisateur->getLogin());
@@ -16,7 +17,7 @@ $passwordHTML = htmlspecialchars($utilisateur->getMdp());
         <div class="columns is-centered">
             <div class="column is-8 box has-background-black-ter">
                 <p class="is-size-2 has-text-centered has-text-white">Mise à jour du profil</p>
-                <form action="controleurFrontal.php" method="post">
+                <form action="<?= Helper::url("compte/modifier") ?>" method="post">
                     <div class="field">
                         <label class="label is-size-4" for="mdpActuel">Afin de confirmer votre identité, saissisez votre mot de passe actuel</label>
                         <div class="control has-icons-left">
@@ -88,8 +89,6 @@ $passwordHTML = htmlspecialchars($utilisateur->getMdp());
                             </div>
                         </div>
                     </div>
-                    <input type='hidden' name='action' value='mettreAJour'>
-                    <input type='hidden' name='controleur' value='utilisateur'>
                     <div class="buttons is-centered">
                         <button class="button has-background-black is-size-4">
                             <span class="icon is-left"><ion-icon name="pencil"></ion-icon></span>

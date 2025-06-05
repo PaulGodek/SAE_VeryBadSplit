@@ -1,0 +1,13 @@
+{
+    "autoload": {
+        "psr-4": {
+            "App\\VeryBadSplit\\": "src"
+        }
+    },
+    "require": {
+        "symfony/config": "^7.2",
+        "symfony/http-foundation": "^7.2",
+        "symfony/routing": "^7.2",
+        "symfony/http-kernel": "^7.2"
+    }
+}

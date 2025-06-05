@@ -2,7 +2,9 @@
 
 namespace App\VeryBadSplit\Controleur;
 
+use App\VeryBadSplit\Lib\Helper;
 use App\VeryBadSplit\Lib\MessageFlash;
+use App\VeryBadSplit\Service\Exception\ServiceException;
 use JetBrains\PhpStorm\NoReturn;
 
 abstract class ControleurGenerique {
@@ -15,22 +17,9 @@ abstract class ControleurGenerique {
     }
     
     #[NoReturn]
-    protected static function redirection(string $controleur = "", string $action = "", array $query = []) : void
+    protected static function redirection(string $url) : void
     {
-        $queryString = [];
-        if ($action != "") {
-            $queryString[] = "action=$action";
-        }
-        if ($controleur != "") {
-            $queryString[] = "controleur=$controleur";
-        }
-        foreach ($query as $name => $value) {
-            $name = rawurlencode($name);
-            $value = rawurlencode($value);
-            $queryString[] = "$name=$value";
-        }
-        $url = "Location: ./controleurFrontal.php?" . join("&", $queryString);
-        header($url);
+        header("Location: " . Helper::url($url));
         exit();
     }
 
@@ -50,5 +39,30 @@ abstract class ControleurGenerique {
             }
         }
         return true;
+    }
+
+    public static function isNotNull(array $array) : bool {
+        foreach ($array as $value) {
+            if(!(isset($value) && $value != null)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Gère une exception de type ServiceException en ajoutant un message flash
+     * et en redirigeant vers une URL spécifiée.
+     *
+     * @param ServiceException $e L'exception à gérer. Contient le message et l'URL de redirection.
+     * @param string|null $type Le type de message flash (optionnel). Si null, utilise le type de l'exception.
+     *
+     * @return void
+     */
+    #[NoReturn]
+    protected static function gererException(ServiceException $e, string $type = null): void
+    {
+        MessageFlash::ajouter($type ?? $e->getTypeMessageFlash(), $e->getMessage());
+        self::redirection($e->getRedirectionUrl());
     }
 }
