@@ -5,21 +5,23 @@ namespace App\VeryBadSplit\Service;
 use App\VeryBadSplit\Lib\ConnexionUtilisateur;
 use App\VeryBadSplit\Lib\Validator;
 use App\VeryBadSplit\Modele\DataObject\Depense;
-use App\VeryBadSplit\Modele\Repository\DepenseRepository;
-use App\VeryBadSplit\Modele\Repository\UtilisateurRepository;
+use App\VeryBadSplit\Modele\Repository\Interface\DepenseRepositoryInterface;
+use App\VeryBadSplit\Modele\Repository\Interface\UtilisateurRepositoryInterface;
+use App\VeryBadSplit\Service\Interface\EvenementServiceInterface;
 use App\VeryBadSplit\Service\Exception\ServiceException;
+use App\VeryBadSplit\Service\Interface\DepenseServiceInterface;
 use DateTime;
 
-class DepenseService extends GeneriqueService
+class DepenseService extends GeneriqueService implements DepenseServiceInterface
 {
-    private DepenseRepository $depenseRepository;
-    private UtilisateurRepository $utilisateurRepository;
-    private EvenementService $evenementService;
+    private DepenseRepositoryInterface $depenseRepository;
+    private UtilisateurRepositoryInterface $utilisateurRepository;
+    private EvenementServiceInterface $evenementService;
 
     public function __construct(
-        DepenseRepository $depenseRepository,
-        UtilisateurRepository $utilisateurRepository,
-        EvenementService $evenementService
+        DepenseRepositoryInterface $depenseRepository,
+        UtilisateurRepositoryInterface $utilisateurRepository,
+        EvenementServiceInterface $evenementService
     ) {
         $this->depenseRepository = $depenseRepository;
         $this->utilisateurRepository = $utilisateurRepository;

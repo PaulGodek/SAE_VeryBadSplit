@@ -2,27 +2,29 @@
 
 namespace App\VeryBadSplit\Service;
 
+use App\VeryBadSplit\Controleur\ControleurGenerique;
 use App\VeryBadSplit\Lib\ConnexionUtilisateur;
 use App\VeryBadSplit\Lib\MotDePasse;
 use App\VeryBadSplit\Lib\Validator;
 use App\VeryBadSplit\Modele\DataObject\Depense;
 use App\VeryBadSplit\Modele\DataObject\Evenement;
 use App\VeryBadSplit\Modele\DataObject\Utilisateur;
-use App\VeryBadSplit\Modele\Repository\DepenseRepository;
-use App\VeryBadSplit\Modele\Repository\EvenementRepository;
-use App\VeryBadSplit\Modele\Repository\UtilisateurRepository;
+use App\VeryBadSplit\Modele\Repository\Interface\DepenseRepositoryInterface;
+use App\VeryBadSplit\Modele\Repository\Interface\EvenementRepositoryInterface;
+use App\VeryBadSplit\Modele\Repository\Interface\UtilisateurRepositoryInterface;
 use App\VeryBadSplit\Service\Exception\ServiceException;
+use App\VeryBadSplit\Service\Interface\UtilisateurServiceInterface;
 
-class UtilisateurService extends GeneriqueService
+class UtilisateurService extends GeneriqueService implements UtilisateurServiceInterface
 {
-    private UtilisateurRepository $utilisateurRepository;
-    private EvenementRepository $evenementRepository;
-    private DepenseRepository $depenseRepository;
+    private UtilisateurRepositoryInterface $utilisateurRepository;
+    private EvenementRepositoryInterface $evenementRepository;
+    private DepenseRepositoryInterface $depenseRepository;
 
     public function __construct(
-        UtilisateurRepository $utilisateurRepository,
-        EvenementRepository $evenementRepository,
-        DepenseRepository $depenseRepository
+        UtilisateurRepositoryInterface $utilisateurRepository,
+        EvenementRepositoryInterface $evenementRepository,
+        DepenseRepositoryInterface $depenseRepository
     ) {
         $this->utilisateurRepository = $utilisateurRepository;
         $this->evenementRepository = $evenementRepository;
