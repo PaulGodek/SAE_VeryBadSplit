@@ -2,8 +2,10 @@
 
 use App\VeryBadSplit\Lib\ConnexionUtilisateur;
 use App\VeryBadSplit\Lib\Helper;
+use App\VeryBadSplit\Modele\DataObject\Depense;
 use App\VeryBadSplit\Modele\DataObject\Evenement;
 /** @var Evenement $evenement */
+/** @var Depense $depenses */
 /** @var int $coutTotal */
 /** @var array $dettes */
 
@@ -59,7 +61,7 @@ $coutTotalEvenementHTML = htmlspecialchars(number_format($coutTotal,2));
                                 <?php }?>
                             </div>
                             <div class="mt-5 is-overflow-y-auto scrollable-list pr-3">
-                                <?php foreach ($evenement->getDepenses() as $depense) { ?>
+                                <?php foreach ($depenses as $depense) { ?>
                                     <div class="box media">
                                         <div class="media-content">
                                             <div class="is-size-4">

@@ -61,6 +61,8 @@ class ControleurDepense extends ControleurGenerique
     public static function afficherFormulaireMiseAJourDepense(int $idDepense): void {
         try {
             $depense = self::getDepenseService()->verifierAccesDepense($idDepense);
+            $evenement = self::getEvenementService()->verifierAccesEvenement($depense->getEvenement()->getId());
+
         } catch (ServiceException $e) {
             self::gererException($e, "danger");
         }
@@ -68,6 +70,7 @@ class ControleurDepense extends ControleurGenerique
         self::afficherVue('vueGenerale.php', [
             "pagetitle" => "Edition d'une dépense",
             "cheminVueBody" => "depense/formulaireMiseAJourDepense.php",
+            "evenement" => $evenement,
             "depense" => $depense
         ]);
     }

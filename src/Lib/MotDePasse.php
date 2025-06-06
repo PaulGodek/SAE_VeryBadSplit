@@ -17,7 +17,8 @@ class MotDePasse
 
     public static function verifier(string $mdpClair, string $mdpHache): bool
     {
-        return password_verify($mdpClair, $mdpHache);
+        $mdpPoivre =hash_hmac("sha256", $mdpClair, MotDePasse::$poivre);
+        return password_verify($mdpPoivre, $mdpHache);
     }
 
     /**

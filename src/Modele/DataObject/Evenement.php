@@ -5,17 +5,17 @@ namespace App\VeryBadSplit\Modele\DataObject;
 use App\VeryBadSplit\Modele\Repository\DepenseRepository;
 use DateTime;
 
-class Evenement
+class Evenement extends AbstractDataObject
 {
     public function __construct(
         private int $id,
-        private ?string $codeSecret = null,
-        private ?string $titre = null,
-        private ?DateTime $date = null,
-        private ?Utilisateur $proprietaire = null,
+        private string $codeSecret ,
+        private string $titre ,
+        private DateTime $date ,
+        private Utilisateur $proprietaire,
         private ?array $membres = [],
-        private ?array $depenses = [],
-    ){}
+    ){
+    }
 
     public function getId(): int
     {
@@ -47,17 +47,18 @@ class Evenement
         return $this->date;
     }
 
+
     public function setDate(?DateTime $date): void
     {
         $this->date = $date;
     }
 
-    public function getProprietaire(): ?Utilisateur
+    public function getproprietaire(): ?Utilisateur
     {
         return $this->proprietaire;
     }
 
-    public function setProprietaire(?Utilisateur $proprietaire): void
+    public function setproprietaire(Utilisateur $proprietaire): void
     {
         $this->proprietaire = $proprietaire;
     }
@@ -78,13 +79,7 @@ class Evenement
         $this->membres = $membres;
     }
 
-    /**
-     * @return Depense[]|null
-     */
-    public function getDepenses(): ?array
-    {
-        return $this->depenses;
-    }
+
 
     public function estProprietaire($login): bool {
         return $this->proprietaire->getLogin() === $login;

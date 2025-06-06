@@ -1,7 +1,9 @@
 <?php
 use App\VeryBadSplit\Modele\DataObject\Depense;
-/** @var Depense $depense */
-$evenement = $depense->getEvenement();
+use App\VeryBadSplit\Modele\DataObject\Evenement;
+
+/** @var Depense $depense
+ * @var Evenement $evenement*/
 ?>
 
 <div class="hero-body pt-0 mt-0">

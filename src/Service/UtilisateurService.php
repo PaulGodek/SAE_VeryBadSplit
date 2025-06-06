@@ -6,8 +6,6 @@ use App\VeryBadSplit\Controleur\ControleurGenerique;
 use App\VeryBadSplit\Lib\ConnexionUtilisateur;
 use App\VeryBadSplit\Lib\MotDePasse;
 use App\VeryBadSplit\Lib\Validator;
-use App\VeryBadSplit\Modele\DataObject\Depense;
-use App\VeryBadSplit\Modele\DataObject\Evenement;
 use App\VeryBadSplit\Modele\DataObject\Utilisateur;
 use App\VeryBadSplit\Modele\Repository\Interface\DepenseRepositoryInterface;
 use App\VeryBadSplit\Modele\Repository\Interface\EvenementRepositoryInterface;
@@ -42,7 +40,7 @@ class UtilisateurService extends GeneriqueService implements UtilisateurServiceI
         $this->verifierConnexion();
 
         $login = ConnexionUtilisateur::getLoginUtilisateurConnecte();
-        $utilisateur = $this->utilisateurRepository->recuperer($login);
+        $utilisateur = $this->utilisateurRepository->recupererParClePrimaire($login);
 
         if (!$utilisateur) {
             throw new ServiceException("Utilisateur introuvable.", "connexion");
@@ -102,7 +100,7 @@ class UtilisateurService extends GeneriqueService implements UtilisateurServiceI
 
 
 
-        if ($this->utilisateurRepository->recuperer($login)) {
+        if ($this->utilisateurRepository->recupererParClePrimaire($login)) {
             throw new ServiceException("Le login est déjà pris.",
                 "inscription");
         }
@@ -112,37 +110,11 @@ class UtilisateurService extends GeneriqueService implements UtilisateurServiceI
             nom: $nom,
             prenom: $prenom,
             email: $email,
-            mdpHache: MotDePasse::hacher($mdp),
-            mdp: $mdp
+            mdpHache: MotDePasse::hacher($mdp)
+
         );
+        $this->utilisateurRepository->ajouter($utilisateur);
 
-        $idEvenement = $this->evenementRepository->getNextId();
-
-        $depenseRepository = $this->depenseRepository;
-        $idDepense = $depenseRepository->getNextId();
-
-        $evenement = new Evenement(
-            id: $idEvenement,
-            codeSecret: hash("sha256", $login . $idEvenement),
-            titre: "Evenement d'exemple",
-            date: new \DateTime(),
-            proprietaire: $utilisateur,
-            membres: [$utilisateur]
-        );
-
-        $depense = new Depense(
-            id: $idDepense,
-            titre: "Exemple de dépense",
-            date: new \DateTime(),
-            montant: 50,
-            payeur: $utilisateur,
-            evenement: $evenement,
-            participants: [$utilisateur]
-        );
-
-        if(!$depenseRepository->ajouter($depense))
-            throw new ServiceException("Une erreur est survenue lors de la création de l'utilisateur.",
-                "inscription");
     }
 
     /**
@@ -190,7 +162,7 @@ class UtilisateurService extends GeneriqueService implements UtilisateurServiceI
         }
 
         $utilisateurRepository = $this->utilisateurRepository;
-        $utilisateur = $utilisateurRepository->recuperer($login);
+        $utilisateur = $utilisateurRepository->recupererParClePrimaire($login);
 
         if (!$utilisateur) {
             throw new ServiceException("L'utilisateur n'existe pas.", "compte/modifier");
@@ -214,13 +186,6 @@ class UtilisateurService extends GeneriqueService implements UtilisateurServiceI
 
         $utilisateurRepository->mettreAJour($utilisateur);
 
-        $evenementRepository = $this->evenementRepository;
-        foreach ($evenementRepository->recupererEvenementsUtilisateur($login) as $evenement) {
-            $membres = array_filter($evenement->getMembres(), fn($u) => $u->getLogin() !== $login);
-            $membres[] = $utilisateur;
-            $evenement->setMembres($membres);
-            $evenementRepository->mettreAJour($evenement);
-        }
     }
 
     /**
@@ -244,14 +209,6 @@ class UtilisateurService extends GeneriqueService implements UtilisateurServiceI
         foreach ($depenseRepository->recupererDepensesPayeesOuParticipeUtilisateur($login) as $depense) {
             if ($depense->estPayeur($login)) {
                 $depenseRepository->supprimer($depense->getId());
-            } elseif ($depense->estParticipant($login)) {
-                $participants = array_filter($depense->getParticipants(), fn($u) => $u->getLogin() !== $login);
-                if (empty($participants)) {
-                    $depenseRepository->supprimer($depense->getId());
-                } else {
-                    $depense->setParticipants($participants);
-                    $depenseRepository->mettreAJour($depense);
-                }
             }
         }
         
@@ -276,7 +233,7 @@ class UtilisateurService extends GeneriqueService implements UtilisateurServiceI
             throw new ServiceException("Login ou mot de passe manquant.", "connexion");
         }
         
-        $utilisateur = $this->utilisateurRepository->recuperer($login);
+        $utilisateur = $this->utilisateurRepository->recupererParClePrimaire($login);
 
         if (!$utilisateur) {
             throw new ServiceException("Login inconnu.", "connexion");
@@ -310,6 +267,12 @@ class UtilisateurService extends GeneriqueService implements UtilisateurServiceI
             throw new ServiceException("Aucun compte associé à cette adresse email.", "recuperation");
         }
 
+        return $utilisateurs;
+    }
+
+    public function recupererUtilisateurParClePrimaire(string $login) {
+        $this->verifierConnexion();
+        $utilisateurs = $this->utilisateurRepository->recupererParClePrimaire($login);
         return $utilisateurs;
     }
 

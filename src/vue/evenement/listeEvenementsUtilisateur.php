@@ -3,8 +3,10 @@
 use App\VeryBadSplit\Lib\ConnexionUtilisateur;
 use App\VeryBadSplit\Lib\Helper;
 use App\VeryBadSplit\Modele\DataObject\Evenement;
+use App\VeryBadSplit\Modele\DataObject\Utilisateur;
 
-/** @var Evenement[] $evenements */
+/** @var Evenement[] $evenements
+ * @var Utilisateur[] $membres*/
 ?>
 
 <div class="hero-body pt-0 mt-5 is-align-items-stretch">
@@ -32,7 +34,7 @@ use App\VeryBadSplit\Modele\DataObject\Evenement;
                                     </div>
                                     <div class="has-text-left is-size-5 mt-2">
                                         <span class="icon"><ion-icon name="person"></ion-icon></span>
-                                        <?php foreach ($evenement->getMembres() as $membre) { ?>
+                                        <?php foreach ($membres as $membre) { ?>
                                             <span class="liste-membre-item"><?=htmlspecialchars($membre->getPrenom()[0].$membre->getNom()[0])?></span>
                                         <?php }?>
                                     </div>
