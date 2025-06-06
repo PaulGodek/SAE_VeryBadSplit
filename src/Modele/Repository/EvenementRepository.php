@@ -137,7 +137,7 @@ class EvenementRepository implements EvenementRepositoryInterface
         return $obj[0] === null ? 0 : $obj[0] + 1;
     }
 
-    public function compterNombreEvenelengmentProprietaire($loginProprietaire): int
+    public function compterNombreEvenementProprietaire($loginProprietaire): int
     {
         $sql = "SELECT COUNT(DISTINCT idEvenement) FROM app_db WHERE loginProprietaire=:loginProprietaire";
         $pdoStatement = ConnexionBaseDeDonnees::getPDO()->prepare($sql);
@@ -145,6 +145,4 @@ class EvenementRepository implements EvenementRepositoryInterface
         $obj = $pdoStatement->fetch();
         return $obj[0] === null ? 0 : $obj[0];
     }
-
-
 }
