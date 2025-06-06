@@ -2,6 +2,7 @@
 
 namespace App\VeryBadSplit\Controleur;
 
+use App\VeryBadSplit\Lib\ConnexionUtilisateur;
 use App\VeryBadSplit\Lib\MessageFlash;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\HttpFoundation\Request;
@@ -106,8 +107,9 @@ class RouteurURL
 
         // Ajout des variables globales et des méthodes Twig
         $twig->addGlobal('messagesFlash', new MessageFlash());
-        $twig->addFunction(new TwigFunction('route', [$generateurUrl, 'generate']));
-        $twig->addFunction(new TwigFunction('asset', [$assistantUrl, 'getAbsoluteUrl']));
+        $twig->addGlobal("estConnecte", ConnexionUtilisateur::estConnecte() ? ConnexionUtilisateur::getLoginUtilisateurConnecte() : null);
+        $twig->addFunction(new TwigFunction('route', $generateurUrl->generate(...)));
+        $twig->addFunction(new TwigFunction('asset', $assistantUrl->getAbsoluteUrl(...)));
 
         // Exécution du contrôleur
         call_user_func_array($controleur, $arguments);

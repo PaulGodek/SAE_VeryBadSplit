@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block page_title %}Very Bad Split{% endblock %}</title>
+    <link rel="stylesheet" href="{{ asset("../ressources/css/bulma.min.css") }}">
+    <link rel="stylesheet" href="{{ asset("../ressources/css/styles.css") }}">
+    <script type="text/javascript" src="{{ asset("../ressources/js/bulma.js") }}" defer></script>
+</head>
+<body>
+    <section class="hero is-fullheight">
+        <div class="hero-head pb-0 mb-0">
+            <nav class="navbar is-black has-background-black is-size-4" role="navigation" aria-label="main navigation">
+                <div class="container">
+                    <div class="navbar-brand is-active">
+                        <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false" data-target="navSite">
+                            <span aria-hidden="true"></span>
+                            <span aria-hidden="true"></span>
+                            <span aria-hidden="true"></span>
+                            <span aria-hidden="true"></span>
+                        </a>
+                    </div>
+                    <div id="navSite" class="navbar-menu">
+                        <div class="navbar-start">
+                            <a href="{{ route("accueil") }}" class="navbar-item">Accueil</a>
+                            {% if estConnecte %}
+                                <a href="{{ route('MesEvenements') }}" class="navbar-item">
+                                    Mes évenements
+                                </a>
+                                <a href="{{ route('afficherDetail') }}" class="navbar-item">
+                                    Mon compte
+                                </a>
+                                <a href="{{ route('deconnecter') }}" class="navbar-item">
+                                    Se déconnecter
+                                </a>
+                            {% else %}
+                                <a href="{{ route('afficherFormulaireConnexion') }}" class="navbar-item">
+                                    Se connecter
+                                </a>
+                                <a href="{{ route('afficherFormulaireCreation') }}" class="navbar-item">
+                                    S'inscrire
+                                </a>
+                            {% endif %}
+                        </div>
+                        <div class="navbar-end"></div>
+                    </div>
+                </div>
+            </nav>
+            <div id="flashes-container" class="container">
+                {% for type in ["success", "info", "warning", "danger"] %}
+                    {% for messageFlashUnType in messagesFlash.lireMessages(type) %}
+                        <div class="flash notification mt-5 is-{{ type }}">
+                            <button class="delete"></button>
+                            <p class="is-size-4">{{ messageFlashUnType }}</p>
+                        </div>
+                    {% endfor %}
+                {% endfor %} %}
+            </div>
+        </div>
+        {% block page_content %}{% endblock %}
+        <div class="hero-foot has-background-black">
+            <div class="content has-text-centered">
+                <p><strong>Copyright Very Bad Split</strong></p>
+            </div>
+        </div>
+    </section>
+	<script type="module" src="https://cdn.jsdelivr.net/npm/ionicons@latest/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://cdn.jsdelivr.net/npm/ionicons@latest/dist/ionicons/ionicons.js"></script>
+</body>
+</html>
