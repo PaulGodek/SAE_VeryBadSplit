@@ -1,4 +1,5 @@
 .idea/
 *.Identifier
 /vendor/
+/src/Configuration/ConfigurationBaseDeDonnees.php
 CLAUDE.md
