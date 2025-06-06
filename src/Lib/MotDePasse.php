@@ -31,5 +31,5 @@ class MotDePasse
         return substr(base64_encode($octetsAleatoires), 0, $nbCaracteres);
     }
 
-    //Here was important, the unusefull method doing nothing
+    // Here was important, the unusefull method doing nothing
 }

@@ -5,11 +5,11 @@ namespace App\VeryBadSplit\Configuration;
 class ConfigurationBaseDeDonnees {
 
     static private array $configurationBaseDeDonnees = array(
-        'nomHote' => 'https://webinfo.iutmontp.univ-montp2.fr',
-        'nomBaseDeDonnees' => '',
+        'nomHote' => 'webinfo.iutmontp.univ-montp2.fr',
+        'nomBaseDeDonnees' => 'godekp',
         'port' => '3316',
-        'login' => '',
-        'motDePasse' => ''
+        'login' => 'godekp',
+        'motDePasse' => '100793528EF'
     );
 
     static public function getLogin() : string {
