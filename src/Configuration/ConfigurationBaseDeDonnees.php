@@ -6,10 +6,10 @@ class ConfigurationBaseDeDonnees {
 
     static private array $configurationBaseDeDonnees = array(
         'nomHote' => 'https://webinfo.iutmontp.univ-montp2.fr',
-        'nomBaseDeDonnees' => 'godek',
+        'nomBaseDeDonnees' => '',
         'port' => '3316',
-        'login' => 'godekp',
-        'motDePasse' => '100793528EF'
+        'login' => '',
+        'motDePasse' => ''
     );
 
     static public function getLogin() : string {
