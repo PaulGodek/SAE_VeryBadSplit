@@ -123,8 +123,9 @@ class EvenementService extends GeneriqueService implements EvenementServiceInter
             }
         }
 
-        if(!is_null($this->depenseRepository->recupererParEvenement($evenement->getId()))){
-            foreach ($this->depenseRepository->recupererParEvenement($evenement->getId()) as $depense) {
+        $depenses = $this->depenseRepository->recupererParEvenement($evenement->getId());
+        if(!is_null($depenses)){
+            foreach ($depenses as $depense) {
             $coutTotal += $depense->getMontant();
             $payeur = $depense->getPayeur();
             $participants = $depense->getParticipants();
@@ -185,19 +186,24 @@ class EvenementService extends GeneriqueService implements EvenementServiceInter
 
 
 
+        $utilisateur = $this->utilisateurRepository->recupererParClePrimaire($loginUtilisateur);
+
         $evenement = new Evenement(
             id: $idEvenement,
             codeSecret: hash("sha256", $loginUtilisateur . $idEvenement),
             titre: $nomEvenement,
             date: new DateTime(),
-            proprietaire: $this->utilisateurRepository->recupererParClePrimaire( $loginUtilisateur),
-            membres: [$loginUtilisateur]
+            proprietaire: $utilisateur,
+            membres: [$utilisateur]
         );
 
-        $this->evenementRepository->ajouter($evenement);
-        $this->evenementRepository->ajouterJointure($evenement,$evenement->getProprietaire()->getLogin());
+
+        $evenementRepository->ajouter($evenement);
+        $this->evenementRepository->ajouterJointure($evenement,$loginUtilisateur);
+
 
         return $evenement->getCodeSecret();
+
     }
 
     /**
@@ -220,6 +226,9 @@ class EvenementService extends GeneriqueService implements EvenementServiceInter
             throw new ServiceException("La longueur du nom de l'événement n'est pas valide.",
                 "evenements/modifier/$idEvenement");
         }
+
+
+
 
         $evenement->setTitre($nomEvenement);
         $this->evenementRepository->mettreAJour($evenement);
@@ -304,6 +313,11 @@ class EvenementService extends GeneriqueService implements EvenementServiceInter
             throw new ServiceException("Cet utilisateur est déjà membre de l'événement",
                 "evenements/$codeSecret", "warning");
         }
+
+
+
+
+
 
         $membres = $evenement->getMembres();
         $membres[] = $utilisateur->getLogin();

@@ -2,21 +2,19 @@
 
 namespace App\VeryBadSplit\Modele\Repository;
 
-use App\VeryBadSplit\Lib\ConnexionUtilisateur;
-use App\VeryBadSplit\Lib\MessageFlash;
+
 use App\VeryBadSplit\Modele\DataObject\AbstractDataObject;
-use App\VeryBadSplit\Modele\DataObject\Depense;
 use App\VeryBadSplit\Modele\DataObject\Evenement;
 use App\VeryBadSplit\Modele\DataObject\Utilisateur;
 use App\VeryBadSplit\Modele\Repository\Interface\EvenementRepositoryInterface;
 use DateTime;
-use http\Message;
+
 use InvalidArgumentException;
 use PDO;
 
 class EvenementRepository extends AbstractRepository implements EvenementRepositoryInterface
 {
-    private function recupererPar($critere, $valeur) : ?Evenement
+    private function recupererPar($critere, $valeur) : ?array
     {
 
         if (!in_array($critere, $this->getNomsColonnes())) {
@@ -24,7 +22,9 @@ class EvenementRepository extends AbstractRepository implements EvenementReposit
         }
 
         $pdoStatement = ConnexionBaseDeDonnees::getPdo()->prepare(
-            $sql="SELECT * FROM ".$this->getNomTable()." e Join EtreMembre em on e.idEvenement=em.idEvenement join Utilisateurs u on u.login=em.loginMembre WHERE e.$critere = :valeur"
+            $sql="SELECT * FROM ".$this->getNomTable()." e 
+            Join EtreMembre em on e.idEvenement=em.idEvenement 
+            join Utilisateurs u on u.login=em.loginMembre WHERE e.$critere = :valeur"
         );
         $pdoStatement->execute([ "valeur"=>$valeur]);
         $data = $pdoStatement->fetchAll(PDO::FETCH_ASSOC);
@@ -33,49 +33,47 @@ class EvenementRepository extends AbstractRepository implements EvenementReposit
             return null;
         }
 
-        $membres = [];
-        foreach ($data as $row) {
-            if (!is_null($row['loginMembre'])) {
-                $membres[] = new Utilisateur(
-                    $row['loginMembre'],
-                    $row['nom'],
-                    $row['prenom'],
-                    $row['email'],
-                    $row['mdpHache']);
+        $evenements = [];
+        foreach ($data as $evenement) {
+
+            $membres = [];
+            foreach ($data as $row) {
+                if (!is_null($row['loginMembre'])) {
+                    $membres[] = new Utilisateur(
+                        $row['loginMembre'],
+                        $row['nom'],
+                        $row['prenom'],
+                        $row['email'],
+                        $row['mdpHache']);
+                }
             }
 
+
+            $evenements[] = new Evenement(
+                id: $evenement['idEvenement'],
+                codeSecret: $evenement['codeSecretEvenement'],
+                titre: $evenement['titreEvenement'],
+                date: new DateTime($evenement['dateEvenement']),
+                proprietaire: new Utilisateur(
+                    $evenement['loginProprietaire'],
+                    $evenement['nom'],
+                    $evenement['prenom'],
+                    $evenement['email'],
+                    $evenement['mdpHache']),
+                membres: $membres);
         }
 
-        $premiereLigne=$data[0];
-        $evenement=new Evenement(
-            id: $premiereLigne['idEvenement'],
-            codeSecret: $premiereLigne['codeSecretEvenement'],
-            titre: $premiereLigne['titreEvenement'],
-            date: new DateTime($premiereLigne['dateEvenement']),
-            proprietaire: new Utilisateur(
-                $premiereLigne['loginProprietaire'],
-                $premiereLigne['nom'],
-                $premiereLigne['prenom'],
-                $premiereLigne['email'],
-                $premiereLigne['mdpHache']),
-            membres: $membres);
-
-
-
-
-
-
-        return $evenement;
+        return $evenements;
     }
 
     public function recupererParClePrimaire($id) : ?Evenement
     {
-       return $this->recupererPar("idEvenement", $id);
+       return ($this->recupererPar("idEvenement", $id))[0];
     }
 
     public function recupererParCodeSecret($code) : ?Evenement
     {
-        return $this->recupererPar("codeSecretEvenement", $code);
+        return $this->recupererPar("codeSecretEvenement", $code)[0];
     }
 
     /**
@@ -98,16 +96,21 @@ class EvenementRepository extends AbstractRepository implements EvenementReposit
 
 
 
-        $membres = [];
-        foreach ($data as $row) {
-            if (!is_null($row['loginMembre'])) {
-                $membres[] = $row['loginMembre'];
-            }
-        }
+
 
 
         $evenements=[] ;
         foreach ($data as $evenement){
+
+
+
+            $membres = [];
+            foreach ($data as $row) {
+                if (!is_null($row['loginMembre'])) {
+                    $membres[] = $row['loginMembre'];
+                }
+            }
+
             $evenements[]=new Evenement(
                 id: $evenement['idEvenement'],
                 codeSecret: $evenement['codeSecretEvenement'],

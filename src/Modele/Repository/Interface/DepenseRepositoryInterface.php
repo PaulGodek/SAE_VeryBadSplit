@@ -25,5 +25,5 @@ interface DepenseRepositoryInterface
     
     public function compterNombreDepensesEvenement($idEvenement): int;
 
-    public function recupererParEvenement($idEvenement): ?Depense;
+    public function recupererParEvenement($idEvenement): ?array;
 }

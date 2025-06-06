@@ -21,6 +21,7 @@ abstract class AbstractRepository
 
 
         $pdoStatement = ConnexionBaseDeDonnees::getPdo()->prepare($sql);
+
         $values = $this->formatTableauSQL($objet);
         $pdoStatement->execute($values);
     }

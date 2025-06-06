@@ -42,12 +42,12 @@ class DepenseService extends GeneriqueService implements DepenseServiceInterface
     public function verifierAccesDepense(int $idDepense): Depense
     {
         GeneriqueService::verifierConnexion();
-        $depense = $this->depenseRepository->recupererParClePrimare($idDepense);
+        $depense = $this->depenseRepository->recupererParClePrimaire($idDepense);
         if (!$depense) {
             throw new ServiceException("Dépense inexistante.", "");
         }
 
-        $evenement = $this->evenementRepository->recupererParClePrimaire($depense->getEvenement());
+        $evenement = $this->evenementRepository->recupererParClePrimaire($depense->getEvenement()->getId());
         if (!$evenement->estMembre(ConnexionUtilisateur::getLoginUtilisateurConnecte())) {
             $codeSecret = $evenement->getCodeSecret();
             throw new ServiceException("Vous n'avez pas de droits d'éditions sur cet événement.",
@@ -171,7 +171,7 @@ class DepenseService extends GeneriqueService implements DepenseServiceInterface
 
         $participants = [];
         foreach ($loginsParticipants as $loginParticipant) {
-            $utilisateur = $utilisateurRepository->recuperer($loginParticipant);
+            $utilisateur = $utilisateurRepository->recupererParClePrimaire($loginParticipant);
             if (!$utilisateur || !$evenement->estMembre($utilisateur->getLogin())) {
                 throw new ServiceException("Un des participants n'existe pas ou n'est pas membre de l'événement.",
                     "depense/modifier/$idDepense");
@@ -179,6 +179,12 @@ class DepenseService extends GeneriqueService implements DepenseServiceInterface
             $participants[] = $utilisateur;
         }
 
+        foreach ($participants as $participant) {
+            if(!$depense->estParticipant($participant->getLogin())) {
+                $depenseRepository->ajouterJointure($depense, $participant->getLogin());
+            }
+
+        }
         $depense->setTitre($titre);
         $depense->setMontant($montant);
         $depense->setpayeur($payeur);
@@ -192,8 +198,7 @@ class DepenseService extends GeneriqueService implements DepenseServiceInterface
     /**
      * Supprime une dépense existante.
      *
-     * @param int             $sql="SELECT * FROM ".$this->getNomTable()." e Join PArtitiper p on e.idDepense=p.idDepense join Utilisateurs u on u.login=p.loginParticipant
-$idDepense L'ID de la dépense à supprimer.
+     * @param int $idDepense L'ID de la dépense à supprimer.
      * @return string Le code secret de l'événement associé.
      * @throws ServiceException Si la dépense n'existe pas ou si sa suppression entraîne des problèmes.
      */
@@ -222,10 +227,10 @@ $idDepense L'ID de la dépense à supprimer.
         return $evenement->getCodeSecret();
     }
 
-    public function recupererDepenseParEvenement(int $idEvenement): ?Depense{
+    public function recupererDepensesParEvenement(int $idEvenement): ?array{
         $this->verifierConnexion();
         $depenseRepository = $this->depenseRepository;
-        $depense = $depenseRepository->recupererParEvenement($idEvenement);
-        return $depense;
+        $depenses = $depenseRepository->recupererParEvenement($idEvenement);
+        return $depenses;
     }
 }

@@ -22,7 +22,11 @@ class DepenseRepository extends AbstractRepository implements DepenseRepositoryI
     public function recupererDepensesPayeesOuParticipeUtilisateur(string $login): array
     {
         $pdoStatement = ConnexionBaseDeDonnees::getPdo()->prepare(
-            "SELECT * FROM ".$this->getNomTable()." d Join Participer p on p.idDepense = d.idDepense join Utilisateurs u on u.login=p.loginParticipant join Evenements e on e.idEvenement=d.idEvenement join EtreMembre em on em.idEvenement=e.idEvenement
+            "SELECT * FROM ".$this->getNomTable()." d 
+            Join Participer p on p.idDepense = d.idDepense 
+            join Utilisateurs u on u.login=p.loginParticipant 
+            join Evenements e on e.idEvenement=d.idEvenement join 
+            EtreMembre em on em.idEvenement=e.idEvenement
                         WHERE   loginPayeur = '$login' OR p.loginParticipant = '$login'");
         $pdoStatement->execute(['login' => $login]);
 
@@ -42,6 +46,7 @@ class DepenseRepository extends AbstractRepository implements DepenseRepositoryI
                     $row['mdpHache']);
             }
         }
+
         $membres = [];
         foreach ($data as $row) {
             if (!is_null($row['loginMembre'])) {
@@ -87,7 +92,7 @@ class DepenseRepository extends AbstractRepository implements DepenseRepositoryI
         return $depenses;
     }
 
-    private function recupererPar($critere, $valeur) : ?Depense
+    private function recupererDepensesPar($critere, $valeur) : ?array
     {
 
         if (!in_array($critere, $this->getNomsColonnes())) {
@@ -95,77 +100,88 @@ class DepenseRepository extends AbstractRepository implements DepenseRepositoryI
         }
 
         $pdoStatement = ConnexionBaseDeDonnees::getPdo()->prepare(
-            "SELECT * FROM ".$this->getNomTable()." d Join Participer p on p.idDepense = d.idDepense join Utilisateurs u on u.login=p.loginParticipant join Evenements e on e.idEvenement=d.idEvenement join EtreMembre em on em.idEvenement=e.idEvenement
-             WHERE d.$critere = :valeur"
+            "SELECT * 
+                    FROM ".$this->getNomTable()." d 
+                    Join Participer p on p.idDepense = d.idDepense 
+                    join Utilisateurs u on u.login=p.loginParticipant 
+                    join Evenements e on e.idEvenement=d.idEvenement 
+                    join EtreMembre em on em.idEvenement=e.idEvenement
+                    WHERE d.$critere = :valeur;
+                    GROUP  idDepense"
         );
-        $pdoStatement->execute([ "valeur"=>$valeur]);
+        $pdoStatement->execute(["valeur"=>$valeur]);
         $data = $pdoStatement->fetchAll(PDO::FETCH_ASSOC);
 
         if(!$data) {
             return null;
         }
 
-        $participants = [];
-        foreach ($data as $row) {
-            if (!is_null($row['loginParticipant'])) {
-                $participants[] = new Utilisateur(
-                    $row['loginParticipant'],
-                    $row['nom'],
-                    $row['prenom'],
-                    $row['email'],
-                    $row['mdpHache']);
+        $depenses=[];
+        foreach ($data as $depense) {
+
+            $participants = [];
+            foreach ($data as $row) {
+                if (!is_null($row['loginParticipant'])) {
+                    $participants[] = new Utilisateur(
+                        $row['loginParticipant'],
+                        $row['nom'],
+                        $row['prenom'],
+                        $row['email'],
+                        $row['mdpHache']);
+                }
             }
-        }
-        $premiereLigne=$data[0];
-        $membres = [];
-        foreach ($data as $row) {
-                $membres[] = new Utilisateur(
-                    $row['loginMembre'],
-                    $row['nom'],
-                    $row['prenom'],
-                    $row['email'],
-                    $row['mdpHache']);
 
+            $membres = [];
+            foreach ($data as $row) {
+                if (!is_null($row['loginMembre'])) {
+                    $membres[] = new Utilisateur(
+                        $row['loginMembre'],
+                        $row['nom'],
+                        $row['prenom'],
+                        $row['email'],
+                        $row['mdpHache']);
+                }
 
-        }
+            }
 
-
-        return new Depense(
-                id: $premiereLigne['idDepense'],
-                titre: $premiereLigne['titreDepense'],
-                date: new DateTime($premiereLigne['dateDepense']),
-                montant: $premiereLigne['montantDepense'],
+            $depenses[] = new Depense(
+                id: $depense['idDepense'],
+                titre: $depense['titreDepense'],
+                date: new DateTime($depense['dateDepense']),
+                montant: $depense['montantDepense'],
                 payeur: new Utilisateur(
-                    $premiereLigne['loginPayeur'],
-                    $premiereLigne['nom'],
-                    $premiereLigne['prenom'],
-                    $premiereLigne['email'],
-                    $premiereLigne['mdpHache']),
+                    $depense['loginPayeur'],
+                    $depense['nom'],
+                    $depense['prenom'],
+                    $depense['email'],
+                    $depense['mdpHache']),
                 evenement:  new Evenement(
-                    id: $premiereLigne['idEvenement'],
-                    codeSecret: $premiereLigne['codeSecretEvenement'],
-                    titre: $premiereLigne['titreEvenement'],
-                    date: new DateTime($premiereLigne['dateEvenement']),
+                    id: $depense['idEvenement'],
+                    codeSecret: $depense['codeSecretEvenement'],
+                    titre: $depense['titreEvenement'],
+                    date: new DateTime($depense['dateEvenement']),
                     proprietaire: new Utilisateur(
-                        $premiereLigne['loginProprietaire'],
-                        $premiereLigne['nom'],
-                        $premiereLigne['prenom'],
-                        $premiereLigne['email'],
-                        $premiereLigne['mdpHache']),
+                        $depense['loginProprietaire'],
+                        $depense['nom'],
+                        $depense['prenom'],
+                        $depense['email'],
+                        $depense['mdpHache']),
                     membres: $membres),
                 participants: $participants
             );
+        }
+        return $depenses;
     }
 
 
     public function recupererParClePrimaire($id) : ?Depense
     {
-        return $this->recupererPar("idDepense", $id);
+        return $this->recupererDepensesPar("idDepense", $id)[0];
     }
 
-    public function recupererParEvenement($idEvenement): ?Depense
+    public function recupererParEvenement($idEvenement): ?array
     {
-        return $this->recupererPar('idEvenement', $idEvenement);
+        return $this->recupererDepensesPar('idEvenement', $idEvenement);
     }
 
     public function getNextId() : int

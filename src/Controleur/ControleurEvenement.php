@@ -34,12 +34,12 @@ class ControleurEvenement extends ControleurGenerique
             $evenement = $resultat["evenement"];
             $dettes = $resultat["dettes"];
             $coutTotal = $resultat["coutTotal"];
-            $depenses = self::getDepenseService()->recupererDepenseParEvenement($evenement->getId());
+            $depenses = self::getDepenseService()->recupererDepensesParEvenement($evenement->getId());
         } catch (ServiceException $e) {
             self::gererException($e, "warning");
         }
 
-        if(!$depenses){
+        if(is_null($depenses)){
             $depenses=[];
 
         }
