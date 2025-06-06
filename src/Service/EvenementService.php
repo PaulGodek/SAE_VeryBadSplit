@@ -357,7 +357,7 @@ class EvenementService extends GeneriqueService implements EvenementServiceInter
         }
 
         $this->mettreAJourMembresEtDepenses($evenement, $loginUtilisateur);
-        $this->evenementRepository->supprimerJointure($evenement,$evenement->getProprietaire()->getLogin());
+        $this->evenementRepository->supprimerJointure($evenement,ConnexionUtilisateur::getLoginUtilisateurConnecte());
 
     }
 
@@ -393,7 +393,7 @@ class EvenementService extends GeneriqueService implements EvenementServiceInter
         }
 
         $this->mettreAJourMembresEtDepenses($evenement, $loginUtilisateur);
-        $this->evenementRepository->supprimerJointure($evenement,$evenement->getProprietaire()->getLogin());
+        $this->evenementRepository->supprimerJointure($evenement,$loginUtilisateur);
 
         return $codeSecret;
 

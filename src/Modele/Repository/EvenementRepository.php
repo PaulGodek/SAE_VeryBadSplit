@@ -14,56 +14,90 @@ use PDO;
 
 class EvenementRepository extends AbstractRepository implements EvenementRepositoryInterface
 {
-    private function recupererPar($critere, $valeur) : ?array
+    private function recupererPar($critere, $valeur): ?array
     {
-
         if (!in_array($critere, $this->getNomsColonnes())) {
             throw new InvalidArgumentException("Critère de recherche invalide.");
         }
 
-        $pdoStatement = ConnexionBaseDeDonnees::getPdo()->prepare(
-            $sql="SELECT * FROM ".$this->getNomTable()." e 
-            Join EtreMembre em on e.idEvenement=em.idEvenement 
-            join Utilisateurs u on u.login=em.loginMembre WHERE e.$critere = :valeur"
-        );
-        $pdoStatement->execute([ "valeur"=>$valeur]);
+        $sql = "
+        SELECT 
+            e.idEvenement, e.codeSecretEvenement, e.titreEvenement, e.dateEvenement, e.loginProprietaire,
+            
+            u.nom, u.prenom, u.email, u.mdpHache,
+
+            em.loginMembre,
+            um.nom, um.prenom, um.email, um.mdpHache
+
+        FROM " . $this->getNomTable() . " e
+        JOIN Utilisateurs u ON u.login = e.loginProprietaire
+        LEFT JOIN EtreMembre em ON em.idEvenement = e.idEvenement
+        LEFT JOIN Utilisateurs um ON um.login = em.loginMembre
+        WHERE e.$critere = :valeur
+    ";
+
+        $pdoStatement = ConnexionBaseDeDonnees::getPdo()->prepare($sql);
+        $pdoStatement->execute(["valeur" => $valeur]);
         $data = $pdoStatement->fetchAll(PDO::FETCH_ASSOC);
 
-        if(!$data) {
+        if (!$data) {
             return null;
         }
 
         $evenements = [];
-        foreach ($data as $evenement) {
 
-            $membres = [];
-            foreach ($data as $row) {
-                if (!is_null($row['loginMembre'])) {
-                    $membres[] = new Utilisateur(
-                        $row['loginMembre'],
-                        $row['nom'],
+        foreach ($data as $row) {
+            $idEvenement = $row['idEvenement'];
+
+            if (!isset($evenements[$idEvenement])) {
+                $evenements[$idEvenement] = [
+                    'evenement' => null,
+                    'membres' => []
+                ];
+
+                $evenements[$idEvenement]['evenement'] = new Evenement(
+                    id: $row['idEvenement'],
+                    codeSecret: $row['codeSecretEvenement'],
+                    titre: $row['titreEvenement'],
+                    date: new DateTime($row['dateEvenement']),
+                    proprietaire: new Utilisateur(
+                        $row['loginProprietaire'],
+                        $row['nom'],       // propriétaire
                         $row['prenom'],
                         $row['email'],
-                        $row['mdpHache']);
-                }
+                        $row['mdpHache']
+                    ),
+                    membres: []
+                );
             }
 
+            // Ajout du membre (si présent)
+            if (!empty($row['loginMembre'])) {
+                $loginMembre = $row['loginMembre'];
+                $membres = &$evenements[$idEvenement]['membres'];
 
-            $evenements[] = new Evenement(
-                id: $evenement['idEvenement'],
-                codeSecret: $evenement['codeSecretEvenement'],
-                titre: $evenement['titreEvenement'],
-                date: new DateTime($evenement['dateEvenement']),
-                proprietaire: new Utilisateur(
-                    $evenement['loginProprietaire'],
-                    $evenement['nom'],
-                    $evenement['prenom'],
-                    $evenement['email'],
-                    $evenement['mdpHache']),
-                membres: $membres);
+                if (!isset($membres[$loginMembre])) {
+                    $membres[$loginMembre] = new Utilisateur(
+                        $loginMembre,
+                        $row['nom'],     // membre (même nom de colonne)
+                        $row['prenom'],
+                        $row['email'],
+                        $row['mdpHache']
+                    );
+                }
+            }
         }
 
-        return $evenements;
+        // Finalisation : injecter les membres
+        $resultats = [];
+
+        foreach ($evenements as $info) {
+            $evenement = $info['evenement'];
+            $evenement->setMembres($info['membres']);
+            $resultats[] = $evenement;
+        }
+
+        return $resultats;
     }
 
     public function recupererParClePrimaire($id) : ?Evenement
@@ -79,53 +113,85 @@ class EvenementRepository extends AbstractRepository implements EvenementReposit
     /**
      * @return Evenement[]
      */
-    public function recupererEvenementsUtilisateur($login) : array
+    public function recupererEvenementsUtilisateur($login): array
     {
-        $pdoStatement = ConnexionBaseDeDonnees::getPdo()->prepare(
-            "SELECT *
-                        FROM ".$this->getNomTable()." e join EtreMembre em on e.idEvenement=em.idEvenement join Utilisateurs on Utilisateurs.login=em.loginMembre
-                        WHERE loginMembre= :login OR e.loginProprietaire= :login"
-        );
+        $sql = "
+        SELECT 
+            e.idEvenement, e.codeSecretEvenement, e.titreEvenement, e.dateEvenement, e.loginProprietaire,
+
+            u.nom, u.prenom, u.email, u.mdpHache,
+
+            em.loginMembre,
+            um.nom as nomM, um.prenom as prenomM, um.email as emailM, um.mdpHache as mdpHacheM
+
+        FROM " . $this->getNomTable() . " e
+        JOIN Utilisateurs u ON u.login = e.loginProprietaire
+        LEFT JOIN EtreMembre em ON em.idEvenement = e.idEvenement
+        LEFT JOIN Utilisateurs um ON um.login = em.loginMembre
+        WHERE em.loginMembre = :login OR e.loginProprietaire = :login
+    ";
+
+        $pdoStatement = ConnexionBaseDeDonnees::getPdo()->prepare($sql);
         $pdoStatement->execute(['login' => $login]);
         $data = $pdoStatement->fetchAll(PDO::FETCH_ASSOC);
-        if(!$data) {
+
+        if (!$data) {
             return [];
         }
 
+        $evenements = [];
 
+        foreach ($data as $row) {
+            $idEvenement = $row['idEvenement'];
 
+            if (!isset($evenements[$idEvenement])) {
+                $evenements[$idEvenement] = [
+                    'evenement' => null,
+                    'membres' => []
+                ];
 
+                $evenements[$idEvenement]['evenement'] = new Evenement(
+                    id: $row['idEvenement'],
+                    codeSecret: $row['codeSecretEvenement'],
+                    titre: $row['titreEvenement'],
+                    date: new DateTime($row['dateEvenement']),
+                    proprietaire: new Utilisateur(
+                        $row['loginProprietaire'],
+                        $row['nom'],      // nom du propriétaire
+                        $row['prenom'],
+                        $row['email'],
+                        $row['mdpHache']
+                    ),
+                    membres: [] // rempli après
+                );
+            }
 
+            // Ajouter un membre s'il est présent
+            if (!empty($row['loginMembre'])) {
+                $loginMembre = $row['loginMembre'];
+                $membres = &$evenements[$idEvenement]['membres'];
 
-
-
-        $evenements=[] ;
-        foreach ($data as $evenement){
-
-
-
-            $membres = [];
-            foreach ($data as $row) {
-                if (!is_null($row['loginMembre'])) {
-                    $membres[] = $row['loginMembre'];
+                if (!isset($membres[$loginMembre])) {
+                    $membres[$loginMembre] = new Utilisateur(
+                        $loginMembre,
+                        $row['nomM'],    // nom du membre (mêmes noms de colonnes que pour le propriétaire)
+                        $row['prenomM'],
+                        $row['emailM'],
+                        $row['mdpHacheM']
+                    );
                 }
             }
+        }
 
-            $evenements[]=new Evenement(
-                id: $evenement['idEvenement'],
-                codeSecret: $evenement['codeSecretEvenement'],
-                titre: $evenement['titreEvenement'],
-                date: new DateTime($evenement['dateEvenement']),
-                proprietaire: new Utilisateur(
-                    $evenement['loginProprietaire'],
-                    $evenement['nom'],
-                    $evenement['prenom'],
-                    $evenement['email'],
-                    $evenement['mdpHache']),
-                membres: $membres);
-            }
+        // Injection finale des membres dans les événements
+        $resultats = [];
+        foreach ($evenements as $info) {
+            $evenement = $info['evenement'];
+            $evenement->setMembres($info['membres']);
+            $resultats[] = $evenement;
+        }
 
-        return $evenements;
+        return $resultats;
     }
 
 

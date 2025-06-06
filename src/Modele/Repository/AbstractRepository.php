@@ -73,11 +73,11 @@ abstract class AbstractRepository
 
         $sql='';
 
-        if($this->getNomTable()=='Evenements'){
-            $sql = 'DELETE FROM EtreMembre(idEvenement,loginMembre) Where idEvenement=:id AND loginMembre=:login)';
+        if(strcmp($this->getNomTable(),'Evenements')==0){
+            $sql = 'DELETE FROM EtreMembre  Where idEvenement=:id AND loginMembre=:login';
 
-        }else if ($this->getNomTable()=='Depenses'){
-            $sql = 'DELETE FROM Participer(idDepense,loginMembre) Where idDepense=:id AND loginParticipant=:login)';
+        }else if (strcmp($this->getNomTable(),'Depenses')==0){
+            $sql = 'DELETE FROM Participer  Where idDepense=:id AND loginParticipant=:login';
         }else{
             return true;
         }

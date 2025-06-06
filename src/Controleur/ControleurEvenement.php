@@ -65,7 +65,7 @@ class ControleurEvenement extends ControleurGenerique
             $membres=[];
             foreach ($evenements as $evenement) {
                 foreach ($evenement->getMembres() as $membre) {
-                    $membres[]=self::getUtilisateurService()->recupererUtilisateurParClePrimaire($membre);
+                    $membres[]=self::getUtilisateurService()->recupererUtilisateurParClePrimaire($membre->getLogin());
                 }
             }
         } catch (ServiceException $e) {

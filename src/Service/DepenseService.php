@@ -115,7 +115,14 @@ class DepenseService extends GeneriqueService implements DepenseServiceInterface
             participants: $participants
         );
 
+
         $depenseRepository->ajouter($depense);
+        foreach ($participants as $participant) {
+            if(!$depense->estParticipant($participant->getLogin())) {
+                $depenseRepository->ajouterJointure($depense, $participant->getLogin());
+            }
+
+        }
         $this->depenseRepository->ajouterJointure($depense,$depense->getPayeur()->getLogin());
 
         return $evenement->getCodeSecret();
