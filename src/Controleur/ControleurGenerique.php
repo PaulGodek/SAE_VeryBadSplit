@@ -2,10 +2,13 @@
 
 namespace App\VeryBadSplit\Controleur;
 
+use App\VeryBadSplit\Lib\Conteneur;
 use App\VeryBadSplit\Lib\Helper;
 use App\VeryBadSplit\Lib\MessageFlash;
 use App\VeryBadSplit\Service\Exception\ServiceException;
 use JetBrains\PhpStorm\NoReturn;
+use Symfony\Component\HttpFoundation\Response;
+use Twig\Environment;
 
 abstract class ControleurGenerique {
 
@@ -15,7 +18,16 @@ abstract class ControleurGenerique {
         $messagesFlash = MessageFlash::lireTousMessages();
         require __DIR__ . "/../vue/$cheminVue";
     }
-    
+
+    protected static function afficherTwig(string $cheminVue, array $parametres = []): Response
+    {
+        /** @var Environment $twig */
+        $twig = Conteneur::recupererService("twig");
+        $corpsReponse = $twig->render($cheminVue, $parametres);
+        return new Response($corpsReponse);
+    }
+
+
     #[NoReturn]
     protected static function redirection(string $url) : void
     {

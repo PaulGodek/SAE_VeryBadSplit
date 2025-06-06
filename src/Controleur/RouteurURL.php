@@ -2,6 +2,7 @@
 
 namespace App\VeryBadSplit\Controleur;
 
+use App\VeryBadSplit\Lib\MessageFlash;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -20,6 +21,9 @@ use App\VeryBadSplit\Modele\Repository\DepenseRepository;
 use App\VeryBadSplit\Service\UtilisateurService;
 use App\VeryBadSplit\Service\EvenementService;
 use App\VeryBadSplit\Service\DepenseService;
+use Twig\Environment;
+use Twig\Loader\FilesystemLoader;
+use Twig\TwigFunction;
 
 class RouteurURL
 {
@@ -87,6 +91,23 @@ class RouteurURL
         Conteneur::ajouterService("utilisateurService", $utilisateurService);
         Conteneur::ajouterService("evenementService", $evenementService);
         Conteneur::ajouterService("depenseService", $depenseService);
+
+        // Ajout du moteur Twig
+        $twigLoader = new FilesystemLoader(__DIR__ . '/../vue/');
+        $twig = new Environment(
+            $twigLoader,
+            [
+                'autoescape' => 'html',
+                'strict_variables' => true,
+                'debug' => true
+            ]
+        );
+        Conteneur::ajouterService("twig", $twig);
+
+        // Ajout des variables globales et des méthodes Twig
+        $twig->addGlobal('messagesFlash', new MessageFlash());
+        $twig->addFunction(new TwigFunction('route', [$generateurUrl, 'generate']));
+        $twig->addFunction(new TwigFunction('asset', [$assistantUrl, 'getAbsoluteUrl']));
 
         // Exécution du contrôleur
         call_user_func_array($controleur, $arguments);
