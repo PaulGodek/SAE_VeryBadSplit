@@ -13,6 +13,7 @@ use App\VeryBadSplit\Service\Interface\EvenementServiceInterface;
 use App\VeryBadSplit\Service\Exception\ServiceException;
 use App\VeryBadSplit\Service\Interface\DepenseServiceInterface;
 use DateTime;
+use http\Message;
 
 class DepenseService extends GeneriqueService implements DepenseServiceInterface
 {
@@ -96,8 +97,10 @@ class DepenseService extends GeneriqueService implements DepenseServiceInterface
                 "evenements/nouvelleDepense/$idEvenement");
         }
 
+
         $participants = [];
         foreach ($loginsParticipants as $loginParticipant) {
+
             $utilisateur = $utilisateurRepository->recupererParClePrimaire($loginParticipant);
             if (!$utilisateur || !$evenement->estMembre($utilisateur->getLogin())) {
                 throw new ServiceException("Un des participants n'existe pas ou n'est pas membre de l'événement.", 
@@ -120,9 +123,8 @@ class DepenseService extends GeneriqueService implements DepenseServiceInterface
 
         $depenseRepository->ajouter($depense);
         foreach ($participants as $participant) {
-            if(!$depense->estParticipant($participant->getLogin())) {
                 $depenseRepository->ajouterJointure($depense, $participant->getLogin());
-            }
+
 
         }
 
