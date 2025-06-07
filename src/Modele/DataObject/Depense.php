@@ -96,7 +96,7 @@ class Depense extends AbstractDataObject
 
     public function estParticipant($login): bool {
         foreach ($this->participants as $participant) {
-            if ($participant === $login) {
+            if ($participant->getLogin() === $login) {
                 return true;
             }
         }

@@ -3,6 +3,7 @@
 namespace App\VeryBadSplit\Service;
 
 use App\VeryBadSplit\Lib\ConnexionUtilisateur;
+use App\VeryBadSplit\Lib\MessageFlash;
 use App\VeryBadSplit\Lib\Validator;
 use App\VeryBadSplit\Modele\DataObject\Depense;
 use App\VeryBadSplit\Modele\Repository\Interface\DepenseRepositoryInterface;
@@ -71,6 +72,7 @@ class DepenseService extends GeneriqueService implements DepenseServiceInterface
     public function creerDepense(int $idEvenement, string $titre, float $montant, string $payeur, array $loginsParticipants): string
     {
         $evenement = $this->evenementService->verifierAccesEvenement($idEvenement);
+
 
         if (!Validator::allNotEmpty([$titre, $montant, $payeur, $loginsParticipants])) {
             throw new ServiceException("Attributs manquants.", 
@@ -153,15 +155,12 @@ class DepenseService extends GeneriqueService implements DepenseServiceInterface
         $evenement = $depense->getEvenement();
         $this->evenementService->verifierDroitsEvenement($evenement);
 
-        if (!Validator::allNotEmpty([$titre, $montant, $payeurLogin, $loginsParticipants])) {
+        if (!Validator::allNotEmpty([$titre, $montant, $payeurLogin])) {
             throw new ServiceException("Attributs manquants.",
                 "depense/modifier/$idDepense");
         }
 
-        if (empty($loginsParticipants)) {
-            throw new ServiceException("Il faut au moins un participant.",
-                "depense/modifier/$idDepense");
-        }
+
 
         if (!Validator::hasValideLength($titre,1,50)) {
             throw new ServiceException("La longueur du titre n'est pas valide.",
@@ -176,13 +175,20 @@ class DepenseService extends GeneriqueService implements DepenseServiceInterface
         }
 
         $participants = [];
-        foreach ($loginsParticipants as $loginParticipant) {
-            $utilisateur = $utilisateurRepository->recupererParClePrimaire($loginParticipant);
-            if (!$utilisateur || !$evenement->estMembre($utilisateur->getLogin())) {
-                throw new ServiceException("Un des participants n'existe pas ou n'est pas membre de l'événement.",
-                    "depense/modifier/$idDepense");
+        if (empty($loginsParticipants)) {
+            foreach ($depense->getParticipants() as $participant) {
+                $participants[]=$utilisateurRepository->recupererParClePrimaire($participant->getLogin());
             }
-            $participants[] = $utilisateur;
+        }else{
+
+            foreach ($loginsParticipants as $loginParticipant) {
+                $utilisateur = $utilisateurRepository->recupererParClePrimaire($loginParticipant);
+                if (!$utilisateur || !$evenement->estMembre($utilisateur->getLogin())) {
+                    throw new ServiceException("Un des participants n'existe pas ou n'est pas membre de l'événement.",
+                        "depense/modifier/$idDepense");
+                }
+                $participants[] = $utilisateur;
+            }
         }
 
 

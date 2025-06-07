@@ -62,7 +62,7 @@ class ControleurDepense extends ControleurGenerique
         try {
             $depense = self::getDepenseService()->verifierAccesDepense($idDepense);
             $evenement = self::getEvenementService()->verifierAccesEvenement($depense->getEvenement()->getId());
-
+            $participants=$depense->getParticipants();
         } catch (ServiceException $e) {
             self::gererException($e, "danger");
         }
@@ -71,6 +71,7 @@ class ControleurDepense extends ControleurGenerique
             "pagetitle" => "Edition d'une dépense",
             "cheminVueBody" => "depense/formulaireMiseAJourDepense.php",
             "evenement" => $evenement,
+            "participants" => $participants,
             "depense" => $depense
         ]);
     }
@@ -82,6 +83,10 @@ class ControleurDepense extends ControleurGenerique
         $montant = $_REQUEST["montant"] ?? null;
         $payeur = $_REQUEST["payeur"] ?? null;
         $participants = $_REQUEST["participants"] ?? null;
+
+        if(is_null($participants)){
+            $participants=[];
+        }
 
         try {
             $codeSecret = self::getDepenseService()->mettreAJourDepense($idDepense, $titre, $montant, $payeur, $participants);
