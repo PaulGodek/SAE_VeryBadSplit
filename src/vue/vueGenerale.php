@@ -92,7 +92,7 @@ $generateurUrl = Conteneur::recupererService("generateurUrl");
             </div>
         </div>
     </section>
-	<script type="module" src="https://cdn.jsdelivr.net/npm/ionicons@latest/dist/ionicons/ionicons.esm.js"></script>
-    <script nomodule src="https://cdn.jsdelivr.net/npm/ionicons@latest/dist/ionicons/ionicons.js"></script>
+	<script type="module" src="<?= Conteneur::recupererService("assistantUrl")->getAbsoluteUrl("../ressources/js/ionicons/ionicons.esm.js") ?>"></script>
+    <script nomodule src="<?= Conteneur::recupererService("assistantUrl")->getAbsoluteUrl("../ressources/js/ionicons/http_cdn.jsdelivr.net_npm_ionicons@latest_dist_ionicons_ionicons.js") ?></script>
 </body>
 </html>
