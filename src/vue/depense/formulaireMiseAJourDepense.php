@@ -1,4 +1,6 @@
 <?php
+
+use App\VeryBadSplit\Lib\Helper;
 use App\VeryBadSplit\Modele\DataObject\Depense;
 use App\VeryBadSplit\Modele\DataObject\Evenement;
 
@@ -45,14 +47,34 @@ use App\VeryBadSplit\Modele\DataObject\Evenement;
                             </div>
                             <div class="field">
                                 <label class="label is-size-4" for="participants">Participants</label>
-                                <div class="select is-multiple is-size-4 is-fullwidth">
-                                    <select  id="participants" name="participants[]" multiple size="<?= min(count($evenement->getMembres()), 4) ?>">
-                                        <?php foreach ($evenement->getMembres() as $membre) {?>
+                                <div class="box" style="max-height: 200px; overflow-y: auto;">
+                                    <?php foreach ($evenement->getMembres() as $membre):
+                                        $login = htmlspecialchars($membre->getLogin());
+                                        $nomComplet = htmlspecialchars($membre->getPrenom() . " " . $membre->getNom() . " ($login)");
+                                        $isParticipant = $depense->estParticipant($membre->getLogin());
+                                        $isPayeur = $depense->estPayeur($membre);
+                                        ?>
+                                        <div class="level mb-2">
+                                            <div class="level-left">
+                                                <?php if (!$isParticipant): ?>
+                                                    <label>
+                                                        <input class="mr-2" type="checkbox" name="participants[]" value="<?= $login ?>">
+                                                        <span class="is-size-5"><?= $nomComplet ?></span>
+                                                    </label>
+                                                <?php else: ?>
+                                                    <span class="is-size-5"><?= $nomComplet ?></span>
+                                                <?php endif; ?>
+                                            </div>
 
-                                            <option <?= $depense->estParticipant($membre->getLogin()) ? "selected" : ""?> value="<?=htmlspecialchars($membre->getLogin())?>"><?=htmlspecialchars($membre->getPrenom()." ".$membre->getNom()." (".$membre->getLogin().")")?></option>
-
-                                        <?php }?>
-                                    </select>
+                                            <?php if ($isParticipant): ?>
+                                                <div class="level-right">
+                                                    <a class="delete is-medium" title="Supprimer"
+                                                       href="<?= Helper::url("depense/supprimerParticipant/" . rawurlencode($depense->getId()) . "/" . rawurlencode($login)) ?>">
+                                                    </a>
+                                                </div>
+                                            <?php endif; ?>
+                                        </div>
+                                    <?php endforeach; ?>
                                 </div>
                             </div>
                         </div>

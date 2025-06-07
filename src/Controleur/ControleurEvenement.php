@@ -4,7 +4,6 @@ namespace App\VeryBadSplit\Controleur;
 
 use App\VeryBadSplit\Lib\ConnexionUtilisateur;
 use App\VeryBadSplit\Lib\Conteneur;
-use App\VeryBadSplit\Lib\Helper;
 use App\VeryBadSplit\Lib\MessageFlash;
 use App\VeryBadSplit\Service\DepenseService;
 use App\VeryBadSplit\Service\EvenementService;

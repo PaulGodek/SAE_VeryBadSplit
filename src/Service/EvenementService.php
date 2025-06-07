@@ -412,12 +412,14 @@ class EvenementService extends GeneriqueService implements EvenementServiceInter
         $evenement->setMembres($membres);
         $this->evenementRepository->mettreAJour($evenement);
 
+
         // Gestion des dépenses
         $depenseRepository = $this->depenseRepository;
         foreach ($this->depenseRepository->recupererParEvenement($evenement->getId()) as $depense) {
             if ($depense->estPayeur($loginUtilisateur)) {
                 $depenseRepository->supprimer($depense->getId());
             } elseif ($depense->estParticipant($loginUtilisateur)) {
+                $depenseRepository->supprimerJointure($depense,$loginUtilisateur);
                 $participants = array_filter($depense->getParticipants(), fn($participant) => $participant->getLogin() !== $loginUtilisateur);
                 if (empty($participants)) {
                     $depenseRepository->supprimer($depense->getId());

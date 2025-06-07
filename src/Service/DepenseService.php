@@ -3,7 +3,6 @@
 namespace App\VeryBadSplit\Service;
 
 use App\VeryBadSplit\Lib\ConnexionUtilisateur;
-use App\VeryBadSplit\Lib\MessageFlash;
 use App\VeryBadSplit\Lib\Validator;
 use App\VeryBadSplit\Modele\DataObject\Depense;
 use App\VeryBadSplit\Modele\Repository\Interface\DepenseRepositoryInterface;
@@ -13,7 +12,6 @@ use App\VeryBadSplit\Service\Interface\EvenementServiceInterface;
 use App\VeryBadSplit\Service\Exception\ServiceException;
 use App\VeryBadSplit\Service\Interface\DepenseServiceInterface;
 use DateTime;
-use http\Message;
 
 class DepenseService extends GeneriqueService implements DepenseServiceInterface
 {
@@ -194,12 +192,13 @@ class DepenseService extends GeneriqueService implements DepenseServiceInterface
         }
 
 
-        foreach ($participants as $participant) {
-            if(!$depense->estParticipant($participant->getLogin())) {
-                $depenseRepository->ajouterJointure($depense, $participant->getLogin());
+            foreach ($participants as $participant) {
+                if(!$depense->estParticipant($participant->getLogin())) {
+                    $depenseRepository->ajouterJointure($depense, $participant->getLogin());
+                }
+
             }
 
-        }
 
         $depense->setTitre($titre);
         $depense->setMontant($montant);
@@ -250,5 +249,42 @@ class DepenseService extends GeneriqueService implements DepenseServiceInterface
         $depenseRepository = $this->depenseRepository;
         $depenses = $depenseRepository->recupererParEvenement($idEvenement);
         return $depenses;
+    }
+
+
+
+    /**
+     * Supprime un membre d'un événement.
+     *
+     * @param int $idDepense L'identifiant de la dépense.
+     * @param string $loginUtilisateur Le login de l'utilisateur à supprimer.
+     * @return string Le code secret de l'événement.
+     * @throws ServiceException Si la dépense ou l'utilisateur n'existe pas, ou si l'utilisateur n'est pas membre.
+     */
+    public function supprimerParticipant(int $idDepense, string $loginUtilisateur): string
+    {
+        $depense = $this->verifierAccesDepense($idDepense);
+
+        $utilisateurRepository = $this->utilisateurRepository;
+        $utilisateur = $utilisateurRepository->recupererParClePrimaire($loginUtilisateur);
+
+        $codeSecret = $depense->getEvenement()->getCodeSecret();
+        if (!$utilisateur) {
+            throw new ServiceException("Utilisateur inexistant.",
+                "depense/modifier/$idDepense");
+        }
+
+        if (!$depense->estParticipant($loginUtilisateur)) {
+            throw new ServiceException("Cet utilisateur ne participe pas à la dépense.",
+                "depense/modifier/$idDepense");
+        }
+
+
+
+        $this->depenseRepository->supprimerJointure($depense,$loginUtilisateur);
+        $this->depenseRepository->mettreAJour($depense);
+
+        return $codeSecret;
+
     }
 }

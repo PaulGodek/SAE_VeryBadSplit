@@ -2,7 +2,6 @@
 
 namespace App\VeryBadSplit\Modele\Repository;
 
-use App\VeryBadSplit\Lib\MessageFlash;
 use App\VeryBadSplit\Modele\DataObject\AbstractDataObject;
 use App\VeryBadSplit\Modele\DataObject\Depense;
 use App\VeryBadSplit\Modele\DataObject\Evenement;
@@ -11,7 +10,6 @@ use App\VeryBadSplit\Modele\Repository\Interface\DepenseRepositoryInterface;
 use DateTime;
 use InvalidArgumentException;
 use PDO;
-use PDOException;
 
 class DepenseRepository extends AbstractRepository implements DepenseRepositoryInterface
 {
@@ -22,14 +20,27 @@ class DepenseRepository extends AbstractRepository implements DepenseRepositoryI
     public function recupererDepensesPayeesOuParticipeUtilisateur(string $login): array
     {
         $pdoStatement = ConnexionBaseDeDonnees::getPdo()->prepare(
-            "SELECT *from ".$this->getNomTable()."
-                    WHERE ".$this->getNomClePrimaire()." IN(
-                        SELECT * FROM ".$this->getNomTable()." d 
-                        Join Participer p on p.idDepense = d.idDepense 
-                        join Utilisateurs u on u.login=p.loginParticipant 
-                        join Evenements e on e.idEvenement=d.idEvenement join 
-                        EtreMembre em on em.idEvenement=e.idEvenement
-                        WHERE   loginPayeur = '$login' OR p.loginParticipant = '$login');");
+            "SELECT d.*, 
+                    upay.nom , upay.prenom, upay.email , upay.mdpHache,
+        
+                    p.loginParticipant,
+                    up.nom as nomPA, up.prenom as prenomPA, up.email as emailPA, up.mdpHache as mdpHachePA,
+        
+                    e.idEvenement, e.codeSecretEvenement, e.titreEvenement, e.dateEvenement, e.loginProprietaire,
+                    
+                    em.loginMembre,
+                    um.nom as nomM, um.prenom as prenomM, um.email as emailM, um.mdpHache as mdpHacheM,
+        
+                    uprop.nom as nomP, uprop.prenom as prenomP, uprop.email as emailP, uprop.mdpHache as mdpHacheP
+                    from ".$this->getNomTable()." d
+                    JOIN Utilisateurs upay ON d.loginPayeur = upay.login
+                    JOIN Evenements e ON e.idEvenement = d.idEvenement
+                    JOIN Utilisateurs uprop ON uprop.login = e.loginProprietaire
+                    LEFT JOIN Participer p ON p.idDepense = d.idDepense
+                    LEFT JOIN Utilisateurs up ON up.login = p.loginParticipant
+                    LEFT JOIN EtreMembre em ON em.idEvenement = e.idEvenement
+                    LEFT JOIN Utilisateurs um ON um.login = em.loginMembre
+                    WHERE   loginPayeur =:login OR p.loginParticipant =:login ");
         $pdoStatement->execute(['login' => $login]);
 
         $data = $pdoStatement->fetchAll(PDO::FETCH_ASSOC);
@@ -42,10 +53,10 @@ class DepenseRepository extends AbstractRepository implements DepenseRepositoryI
             if (!is_null($row['loginParticipant'])) {
                 $participants[] = new Utilisateur(
                     $row['loginParticipant'],
-                    $row['nom'],
-                    $row['prenom'],
-                    $row['email'],
-                    $row['mdpHache']);
+                    $row['nomPA'],
+                    $row['prenomPA'],
+                    $row['emailPA'],
+                    $row['mdpHachePA']);
             }
         }
 
@@ -54,10 +65,10 @@ class DepenseRepository extends AbstractRepository implements DepenseRepositoryI
             if (!is_null($row['loginMembre'])) {
                 $membres[] = new Utilisateur(
                     $row['loginMembre'],
-                    $row['nom'],
-                    $row['prenom'],
-                    $row['email'],
-                    $row['mdpHache']);
+                    $row['nomM'],
+                    $row['prenomM'],
+                    $row['emailM'],
+                    $row['mdpHacheM']);
             }
 
         }
@@ -83,10 +94,10 @@ class DepenseRepository extends AbstractRepository implements DepenseRepositoryI
                     date: new DateTime($premiereLigne['dateEvenement']),
                     proprietaire: new Utilisateur(
                         $premiereLigne['loginProprietaire'],
-                        $premiereLigne['nom'],
-                        $premiereLigne['prenom'],
-                        $premiereLigne['email'],
-                        $premiereLigne['mdpHache']),
+                        $premiereLigne['nomP'],
+                        $premiereLigne['prenomP'],
+                        $premiereLigne['emailP'],
+                        $premiereLigne['mdpHacheP']),
                     membres: $membres),
                 participants: $participants
             );
