@@ -223,8 +223,8 @@ class EvenementService extends GeneriqueService implements EvenementServiceInter
         $evenement= $this->verifierAccesEvenement($idEvenement);
 
         if (empty($nomEvenement)) {
-            throw new ServiceException("Le nom de l'événement est manquant.", 
-                "evenements/modifier/$idEvenement");
+            throw new ServiceException("Le nom de l'événement est manquant.",
+                "FormulaireMiseAJourEvenement", ["idEvenement" => $idEvenement]);
         }
         if (!Validator::hasValideLength($nomEvenement,3,30)) {
             throw new ServiceException("La longueur du nom de l'événement n'est pas valide.",

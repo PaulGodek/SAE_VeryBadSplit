@@ -87,7 +87,7 @@ class UtilisateurService extends GeneriqueService implements UtilisateurServiceI
 
         if (!Validator::hasValideLength($nom,1,30)) {
             throw new ServiceException("La longueur du nom n'est pas valide.",
-                "inscrpition");
+                "afficherFormulaireCreation");
         }
 
         if (!Validator::hasValideLength($prenom,1,30)) {
@@ -162,7 +162,7 @@ class UtilisateurService extends GeneriqueService implements UtilisateurServiceI
         $this->verifierConnexion();
 
         if (!ControleurGenerique::isNotNull([$login, $prenom, $nom, $email, $mdpActuel])) {
-            throw new ServiceException("Login, nom, prénom, email ou mot de passe actuel manquant.", "compte/modifier");
+            throw new ServiceException("Login, nom, prénom, email ou mot de passe actuel manquant.", "afficherFormulaireMiseAJour");
         }
 
         if (!Validator::isValidEmail($email)) {
@@ -193,7 +193,7 @@ class UtilisateurService extends GeneriqueService implements UtilisateurServiceI
         $utilisateur = $utilisateurRepository->recuperer($login);
 
         if (!$utilisateur) {
-            throw new ServiceException("L'utilisateur n'existe pas.", "compte/modifier");
+            throw new ServiceException("L'utilisateur n'existe pas.", "afficherFormulaireMiseAJour");
         }
 
         if ($mdp || $mdp2) {

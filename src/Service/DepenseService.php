@@ -143,7 +143,7 @@ class DepenseService extends GeneriqueService implements DepenseServiceInterface
 
         if (!Validator::allNotEmpty([$titre, $montant, $payeurLogin, $loginsParticipants])) {
             throw new ServiceException("Attributs manquants.",
-                "depense/modifier/$idDepense");
+                "afficherFormulaireMiseAJourDepense", ["idDepense" => $idDepense]);
         }
 
         if (empty($loginsParticipants)) {
