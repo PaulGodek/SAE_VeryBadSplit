@@ -123,7 +123,6 @@ class DepenseService extends GeneriqueService implements DepenseServiceInterface
             }
 
         }
-        $this->depenseRepository->ajouterJointure($depense,$depense->getPayeur()->getLogin());
 
         return $evenement->getCodeSecret();
     }

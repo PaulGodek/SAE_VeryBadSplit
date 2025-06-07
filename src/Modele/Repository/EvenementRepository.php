@@ -27,7 +27,7 @@ class EvenementRepository extends AbstractRepository implements EvenementReposit
             u.nom, u.prenom, u.email, u.mdpHache,
 
             em.loginMembre,
-            um.nom, um.prenom, um.email, um.mdpHache
+            um.nom as nomM, um.prenom as prenomM, um.email as emailM, um.mdpHache as mdpHacheM
 
         FROM " . $this->getNomTable() . " e
         JOIN Utilisateurs u ON u.login = e.loginProprietaire
@@ -72,21 +72,21 @@ class EvenementRepository extends AbstractRepository implements EvenementReposit
             }
 
             // Ajout du membre (si présent)
-            if (!empty($row['loginMembre'])) {
+           // if (!empty($row['loginMembre'])) {
                 $loginMembre = $row['loginMembre'];
-                $membres = &$evenements[$idEvenement]['membres'];
+                //$membres = &$evenements[$idEvenement]['membres'];
 
                 if (!isset($membres[$loginMembre])) {
                     $membres[$loginMembre] = new Utilisateur(
                         $loginMembre,
-                        $row['nom'],     // membre (même nom de colonne)
-                        $row['prenom'],
-                        $row['email'],
-                        $row['mdpHache']
+                        $row['nomM'],     // membre (même nom de colonne)
+                        $row['prenomM'],
+                        $row['emailM'],
+                        $row['mdpHacheM']
                     );
                 }
             }
-        }
+        //}
 
         // Finalisation : injecter les membres
         $resultats = [];
@@ -118,9 +118,7 @@ class EvenementRepository extends AbstractRepository implements EvenementReposit
         $sql = "
         SELECT 
             e.idEvenement, e.codeSecretEvenement, e.titreEvenement, e.dateEvenement, e.loginProprietaire,
-
             u.nom, u.prenom, u.email, u.mdpHache,
-
             em.loginMembre,
             um.nom as nomM, um.prenom as prenomM, um.email as emailM, um.mdpHache as mdpHacheM
 
@@ -174,11 +172,12 @@ class EvenementRepository extends AbstractRepository implements EvenementReposit
                 if (!isset($membres[$loginMembre])) {
                     $membres[$loginMembre] = new Utilisateur(
                         $loginMembre,
-                        $row['nomM'],    // nom du membre (mêmes noms de colonnes que pour le propriétaire)
+                        $row['nomM'],
                         $row['prenomM'],
                         $row['emailM'],
                         $row['mdpHacheM']
                     );
+
                 }
             }
         }

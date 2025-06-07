@@ -103,17 +103,20 @@ class DepenseRepository extends AbstractRepository implements DepenseRepositoryI
         $sql = "
         SELECT 
             d.*, 
+            upay.nom , upay.prenom, upay.email , upay.mdpHache,
+
             p.loginParticipant,
-            up.nom, up.prenom, up.email, up.mdpHache,
+            up.nom as nomPA, up.prenom as prenomPA, up.email as emailPA, up.mdpHache as mdpHachePA,
 
             e.idEvenement, e.codeSecretEvenement, e.titreEvenement, e.dateEvenement, e.loginProprietaire,
             
             em.loginMembre,
-            um.nom, um.prenom, um.email, um.mdpHache,
+            um.nom as nomM, um.prenom as prenomM, um.email as emailM, um.mdpHache as mdpHacheM,
 
-            uprop.nom, uprop.prenom, uprop.email, uprop.mdpHache
+            uprop.nom as nomP, uprop.prenom as prenomP, uprop.email as emailP, uprop.mdpHache as mdpHacheP
 
         FROM " . $this->getNomTable() . " d
+        JOIN Utilisateurs upay ON d.loginPayeur = upay.login
         JOIN Evenements e ON e.idEvenement = d.idEvenement
         JOIN Utilisateurs uprop ON uprop.login = e.loginProprietaire
         LEFT JOIN Participer p ON p.idDepense = d.idDepense
@@ -163,10 +166,10 @@ class DepenseRepository extends AbstractRepository implements DepenseRepositoryI
                         date: new DateTime($row['dateEvenement']),
                         proprietaire: new Utilisateur(
                             $row['loginProprietaire'],
-                            $row['nom'], // Même nom de colonne que plus haut
-                            $row['prenom'],
-                            $row['email'],
-                            $row['mdpHache']
+                            $row['nomP'], // Même nom de colonne que plus haut
+                            $row['prenomP'],
+                            $row['emailP'],
+                            $row['mdpHacheP']
                         ),
                         membres: []
                     ),
@@ -182,10 +185,10 @@ class DepenseRepository extends AbstractRepository implements DepenseRepositoryI
                 if (!isset($participants[$login])) {
                     $participants[$login] = new Utilisateur(
                         $login,
-                        $row['nom'], // nom du participant
-                        $row['prenom'],
-                        $row['email'],
-                        $row['mdpHache']
+                        $row['nomPA'], // nom du participant
+                        $row['prenomPA'],
+                        $row['emailPA'],
+                        $row['mdpHachePA']
                     );
                 }
             }
@@ -198,10 +201,10 @@ class DepenseRepository extends AbstractRepository implements DepenseRepositoryI
                 if (!isset($membres[$login])) {
                     $membres[$login] = new Utilisateur(
                         $login,
-                        $row['nom'], // nom du membre
-                        $row['prenom'],
-                        $row['email'],
-                        $row['mdpHache']
+                        $row['nomM'], // nom du membre
+                        $row['prenomM'],
+                        $row['emailM'],
+                        $row['mdpHacheM']
                     );
                 }
             }

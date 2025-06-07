@@ -9,7 +9,6 @@ $loginHTML = htmlspecialchars($utilisateur->getLogin());
 $prenomHTML = htmlspecialchars($utilisateur->getPrenom());
 $nomHTML = htmlspecialchars($utilisateur->getNom());
 $emailHTML = htmlspecialchars($utilisateur->getEmail());
-$passwordHTML = htmlspecialchars($utilisateur->getMdp());
 ?>
 
 <div class="hero-body pt-0 mt-0">
@@ -22,7 +21,7 @@ $passwordHTML = htmlspecialchars($utilisateur->getMdp());
                         <label class="label is-size-4" for="mdpActuel">Afin de confirmer votre identité, saissisez votre mot de passe actuel</label>
                         <div class="control has-icons-left">
                             <input id="mdpActuel" name="mdpActuel" class="input is-large" type="password" placeholder="********"
-                                   value="<?=$passwordHTML?>" required>
+                                   value="" required>
                             <span class="icon is-small is-left"><ion-icon name="key"></ion-icon></span>
                         </div>
                     </div>

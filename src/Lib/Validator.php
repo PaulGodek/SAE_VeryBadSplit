@@ -111,6 +111,6 @@ class Validator
      */
     public static function isValideMdp(string $string):bool {
         $pattern = '/^(?=.*\d)(?=.*[a-zA-Z])(?=.*[!@#$%^&*_=+\-]).{6,50}$/';
-        return preg_match($pattern,$string);
+        return preg_match($pattern,$string)&& !empty($string);
     }
 }
