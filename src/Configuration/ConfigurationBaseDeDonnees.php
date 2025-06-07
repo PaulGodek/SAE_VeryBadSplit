@@ -5,7 +5,7 @@ namespace App\VeryBadSplit\Configuration;
 class ConfigurationBaseDeDonnees {
 
     static public function getLogin() : string {
-        return $_ENV['DB_USER'] ?? 'root';
+        return $_ENV['DB_USER'] ?? 'verybadsplit_user';
     }
 
     static public function getNomBaseDeDonnees() : string {
@@ -17,11 +17,11 @@ class ConfigurationBaseDeDonnees {
     }
 
     static public function getNomHote() : string {
-        return $_ENV['DB_HOST'] ?? 'localhost';
+        return $_ENV['DB_HOST'] ?? 'db';
     }
 
     static public function getMotDePasse() : string {
-        return $_ENV['DB_PASSWORD'] ?? '';
+        return $_ENV['DB_PASSWORD'] ?? 'verybadsplit_pass';
     }
 
 }
