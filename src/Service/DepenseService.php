@@ -185,16 +185,20 @@ class DepenseService extends GeneriqueService implements DepenseServiceInterface
             $participants[] = $utilisateur;
         }
 
+
         foreach ($participants as $participant) {
             if(!$depense->estParticipant($participant->getLogin())) {
                 $depenseRepository->ajouterJointure($depense, $participant->getLogin());
             }
 
         }
+
         $depense->setTitre($titre);
         $depense->setMontant($montant);
         $depense->setpayeur($payeur);
         $depense->setParticipants($participants);
+
+
 
         $depenseRepository->mettreAJour($depense);
 

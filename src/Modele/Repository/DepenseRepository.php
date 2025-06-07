@@ -154,7 +154,7 @@ class DepenseRepository extends AbstractRepository implements DepenseRepositoryI
                     montant: $row['montantDepense'],
                     payeur: new Utilisateur(
                         $row['loginPayeur'],
-                        $row['nom'], // Ambigu s’il y a plusieurs utilisateurs — OK ici car c’est le premier bloc
+                        $row['nom'],
                         $row['prenom'],
                         $row['email'],
                         $row['mdpHache']
@@ -166,7 +166,7 @@ class DepenseRepository extends AbstractRepository implements DepenseRepositoryI
                         date: new DateTime($row['dateEvenement']),
                         proprietaire: new Utilisateur(
                             $row['loginProprietaire'],
-                            $row['nomP'], // Même nom de colonne que plus haut
+                            $row['nomP'],
                             $row['prenomP'],
                             $row['emailP'],
                             $row['mdpHacheP']
@@ -185,7 +185,7 @@ class DepenseRepository extends AbstractRepository implements DepenseRepositoryI
                 if (!isset($participants[$login])) {
                     $participants[$login] = new Utilisateur(
                         $login,
-                        $row['nomPA'], // nom du participant
+                        $row['nomPA'],
                         $row['prenomPA'],
                         $row['emailPA'],
                         $row['mdpHachePA']
@@ -201,7 +201,7 @@ class DepenseRepository extends AbstractRepository implements DepenseRepositoryI
                 if (!isset($membres[$login])) {
                     $membres[$login] = new Utilisateur(
                         $login,
-                        $row['nomM'], // nom du membre
+                        $row['nomM'],
                         $row['prenomM'],
                         $row['emailM'],
                         $row['mdpHacheM']

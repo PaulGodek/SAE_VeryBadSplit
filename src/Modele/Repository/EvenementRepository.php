@@ -3,6 +3,7 @@
 namespace App\VeryBadSplit\Modele\Repository;
 
 
+use App\VeryBadSplit\Lib\MessageFlash;
 use App\VeryBadSplit\Modele\DataObject\AbstractDataObject;
 use App\VeryBadSplit\Modele\DataObject\Evenement;
 use App\VeryBadSplit\Modele\DataObject\Utilisateur;
@@ -23,9 +24,7 @@ class EvenementRepository extends AbstractRepository implements EvenementReposit
         $sql = "
         SELECT 
             e.idEvenement, e.codeSecretEvenement, e.titreEvenement, e.dateEvenement, e.loginProprietaire,
-            
             u.nom, u.prenom, u.email, u.mdpHache,
-
             em.loginMembre,
             um.nom as nomM, um.prenom as prenomM, um.email as emailM, um.mdpHache as mdpHacheM
 
@@ -72,9 +71,9 @@ class EvenementRepository extends AbstractRepository implements EvenementReposit
             }
 
             // Ajout du membre (si présent)
-           // if (!empty($row['loginMembre'])) {
+            if (!empty($row['loginMembre'])) {
                 $loginMembre = $row['loginMembre'];
-                //$membres = &$evenements[$idEvenement]['membres'];
+                $membres = &$evenements[$idEvenement]['membres'];
 
                 if (!isset($membres[$loginMembre])) {
                     $membres[$loginMembre] = new Utilisateur(
@@ -86,11 +85,10 @@ class EvenementRepository extends AbstractRepository implements EvenementReposit
                     );
                 }
             }
-        //}
+        }
 
         // Finalisation : injecter les membres
         $resultats = [];
-
         foreach ($evenements as $info) {
             $evenement = $info['evenement'];
             $evenement->setMembres($info['membres']);
@@ -168,7 +166,6 @@ class EvenementRepository extends AbstractRepository implements EvenementReposit
             if (!empty($row['loginMembre'])) {
                 $loginMembre = $row['loginMembre'];
                 $membres = &$evenements[$idEvenement]['membres'];
-
                 if (!isset($membres[$loginMembre])) {
                     $membres[$loginMembre] = new Utilisateur(
                         $loginMembre,

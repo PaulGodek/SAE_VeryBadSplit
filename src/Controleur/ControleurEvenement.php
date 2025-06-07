@@ -59,22 +59,15 @@ class ControleurEvenement extends ControleurGenerique
     {
         $login = ConnexionUtilisateur::getLoginUtilisateurConnecte() ?? null;
         try {
-
-
             $evenements = self::getEvenementService()->recupererEvenementsUtilisateur($login);
-            $membres=[];
-            foreach ($evenements as $evenement) {
-                foreach ($evenement->getMembres() as $membre) {
-                    $membres[]=self::getUtilisateurService()->recupererUtilisateurParClePrimaire($membre->getLogin());
-                }
-            }
+
         } catch (ServiceException $e) {
             self::gererException($e, "danger");
         }
         self::afficherVue('vueGenerale.php', [
             "pagetitle" => "Liste des événements de $login",
             "cheminVueBody" => "evenement/listeEvenementsUtilisateur.php",
-            "membres"=>$membres,
+
             "evenements" => $evenements
         ]);
     }
