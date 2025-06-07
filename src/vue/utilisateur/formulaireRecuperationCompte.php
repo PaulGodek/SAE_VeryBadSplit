@@ -1,9 +1,14 @@
+<?php
+
+use App\VeryBadSplit\Lib\Conteneur;
+
+?>
 <div class="hero-body pt-0 mt-0">
     <div class="container">
         <div class="columns is-centered">
             <div class="column is-6 box has-background-black-ter">
                 <p class="is-size-2 has-text-centered has-text-white">Récupéreration de compte</p>
-                <form action="<?= \App\VeryBadSplit\Lib\Helper::url("recuperation") ?>" method="post">
+                <form action="<?= Conteneur::recupererService("generateurUrl")->generate("recuperation") ?>" method="post">
                     <div class="field">
                         <label class="label is-size-4" for="email">Email du compte</label>
                         <div class="control has-icons-left">

@@ -4,7 +4,6 @@
 
 use App\VeryBadSplit\Lib\ConnexionUtilisateur;
 use App\VeryBadSplit\Lib\Conteneur;
-use App\VeryBadSplit\Lib\Helper;
 use Symfony\Component\Routing\Generator\UrlGenerator;
 
 /** @var UrlGenerator $generateurUrl */
@@ -16,9 +15,9 @@ $generateurUrl = Conteneur::recupererService("generateurUrl");
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title><?= htmlspecialchars($pagetitle) ?></title>
-    <link rel="stylesheet" href="<?= Helper::url("../ressources/css/bulma.min.css") ?>">
-    <link rel="stylesheet" href="<?= Helper::url("../ressources/css/styles.css") ?>">
-    <script type="text/javascript" src="<?= Helper::url("../ressources/js/bulma.js") ?>" defer></script>
+    <link rel="stylesheet" href="<?= Conteneur::recupererService("assistantUrl")->getAbsoluteUrl("../ressources/css/bulma.min.css") ?>">
+    <link rel="stylesheet" href="<?= Conteneur::recupererService("assistantUrl")->getAbsoluteUrl("../ressources/css/styles.css") ?>">
+    <script type="text/javascript" src="<?= Conteneur::recupererService("assistantUrl")->getAbsoluteUrl("../ressources/js/bulma.js") ?>" defer></script>
 </head>
 <body>
     <section class="hero is-fullheight">
@@ -35,23 +34,23 @@ $generateurUrl = Conteneur::recupererService("generateurUrl");
                     </div>
                     <div id="navSite" class="navbar-menu">
                         <div class="navbar-start">
-                            <a href="<?= Helper::url("./"); ?>" class="navbar-item">Accueil</a>
+                            <a href="<?= Conteneur::recupererService("generateurUrl")->generate("accueil"); ?>" class="navbar-item">Accueil</a>
                             <?php
                             if (ConnexionUtilisateur::estConnecte()) {?>
-                                <a href="<?= Helper::url('evenements'); ?>" class="navbar-item">
+                                <a href="<?= Conteneur::recupererService("generateurUrl")->generate('MesEvenements'); ?>" class="navbar-item">
                                     Mes évenements
                                 </a>
-                                <a href="<?= Helper::url('compte'); ?>" class="navbar-item">
+                                <a href="<?= Conteneur::recupererService("generateurUrl")->generate('afficherDetail'); ?>" class="navbar-item">
                                     Mon compte
                                 </a>
-                                <a href="<?= Helper::url('deconnexion'); ?>" class="navbar-item">
+                                <a href="<?= Conteneur::recupererService("generateurUrl")->generate('deconnecter'); ?>" class="navbar-item">
                                     Se déconnecter
                                 </a>
                             <?php } else { ?>
-                                <a href="<?= Helper::url('connexion'); ?>" class="navbar-item">
+                                <a href="<?= Conteneur::recupererService("generateurUrl")->generate('afficherFormulaireConnexion'); ?>" class="navbar-item">
                                     Se connecter
                                 </a>
-                                <a href="<?= Helper::url('inscription'); ?>" class="navbar-item">
+                                <a href="<?= Conteneur::recupererService("generateurUrl")->generate('afficherFormulaireCreation'); ?>" class="navbar-item">
                                     S'inscrire
                                 </a>
                                 <?php

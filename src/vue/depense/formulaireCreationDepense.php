@@ -1,4 +1,6 @@
 <?php
+
+use App\VeryBadSplit\Lib\Conteneur;
 use App\VeryBadSplit\Modele\DataObject\Evenement;
 /** @var Evenement $evenement */
 ?>
@@ -8,7 +10,7 @@ use App\VeryBadSplit\Modele\DataObject\Evenement;
         <div class="columns is-centered">
             <div class="column is-8 box has-background-black-ter">
                 <p class="is-size-2 has-text-centered has-text-white">Ajout d'une dépense</p>
-                <form action="<?= \App\VeryBadSplit\Lib\Helper::url("evenements/nouvelleDepense/" . htmlspecialchars($evenement->getId())) ?>" method="post">
+                <form action="<?= Conteneur::recupererService("generateurUrl")->generate("evenements/nouvelleDepense/" . htmlspecialchars($evenement->getId())) ?>" method="post">
                     <div class="field is-horizontal">
                         <div class="field-body">
                             <div class="field">

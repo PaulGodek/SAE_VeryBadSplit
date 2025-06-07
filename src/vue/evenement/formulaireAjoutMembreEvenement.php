@@ -1,6 +1,6 @@
 <?php
 
-use App\VeryBadSplit\Lib\Helper;
+use App\VeryBadSplit\Lib\Conteneur;
 use App\VeryBadSplit\Modele\DataObject\Evenement;
 /** @var Evenement $evenement */
 /** @var array $utilisateurs */
@@ -11,7 +11,7 @@ use App\VeryBadSplit\Modele\DataObject\Evenement;
         <div class="columns is-centered">
             <div class="column is-6 box has-background-black-ter">
                 <p class="is-size-2 has-text-centered has-text-white">Ajout d'un membre à l'événement</p>
-                <form action="<?= Helper::url("evenements/ajouterMembre/" . rawurlencode($evenement->getId())) ?>" method="post">
+                <form action="<?= Conteneur::recupererService("generateurUrl")->generate("evenements/ajouterMembre/" . rawurlencode($evenement->getId())) ?>" method="post">
                     <div class="field">
                         <label class="label is-size-4" for="login">Utilisateur à ajouter</label>
                         <div class="select is-size-4 is-fullwidth">

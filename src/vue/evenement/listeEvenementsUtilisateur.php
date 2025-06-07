@@ -1,7 +1,7 @@
 <?php
 
 use App\VeryBadSplit\Lib\ConnexionUtilisateur;
-use App\VeryBadSplit\Lib\Helper;
+use App\VeryBadSplit\Lib\Conteneur;
 use App\VeryBadSplit\Modele\DataObject\Evenement;
 
 /** @var Evenement[] $evenements */
@@ -15,7 +15,7 @@ use App\VeryBadSplit\Modele\DataObject\Evenement;
         <div class='columns is-centered mt-2'>
             <div class='column is-6'>
                 <div class="has-text-centered">
-                    <a class="button has-background-black has-text-white-ter is-size-4" href="<?= Helper::url('evenements/creation'); ?>">
+                    <a class="button has-background-black has-text-white-ter is-size-4" href="<?= Conteneur::recupererService("generateurUrl")->generate('FormulaireCreationEvenement'); ?>">
                         <span class="icon is-left"><ion-icon name="add-circle"></ion-icon></span>
                         <span>Créer un événement</span>
                     </a>
@@ -40,18 +40,18 @@ use App\VeryBadSplit\Modele\DataObject\Evenement;
                             </div>
                             <div class="media-right">
                                 <div class="buttons">
-                                    <a class="icon-container" href="<?= Helper::url('evenements/' . rawurlencode($evenement->getCodeSecret())) ?>">
+                                    <a class="icon-container" href="<?= Conteneur::recupererService("generateurUrl")->generate('Evenement', ["codeEvenement" => $evenement->getCodeSecret()]) ?>">
                                         <span class="icon"><ion-icon name="eye"></ion-icon></span>
                                     </a>
                                     <?php
                                     if ($evenement->estProprietaire(ConnexionUtilisateur::getLoginUtilisateurConnecte())) {
                                         ?>
-                                        <a class="icon-container" href="<?= Helper::url('evenements/modifier/' . rawurlencode($evenement->getId())) ?>">
+                                        <a class="icon-container" href="<?= Conteneur::recupererService("generateurUrl")->generate('FormulaireMiseAJourEvenement',  ["idEvenement" => $evenement->getId()]) ?>">
                                             <span class="icon"><ion-icon name="pencil"></ion-icon></span>
                                         </a>
-                                        <a class="delete" href="<?= Helper::url('evenements/supprimer/' . rawurlencode($evenement->getId())) ?>"></a>
+                                        <a class="delete" href="<?= Conteneur::recupererService("generateurUrl")->generate('SupprimerEvenement', ["idEvenement" => $evenement->getId()]) ?>"></a>
                                     <?php } else { ?>
-                                        <a class="icon-container" href="<?= Helper::url('evenements/quitter/' . rawurlencode($evenement->getId())) ?>">
+                                        <a class="icon-container" href="<?= Conteneur::recupererService("generateurUrl")->generate('QuitterEvenement', ["idEvenement" => $evenement->getId()]) ?>">
                                             <span class="icon"><ion-icon name="person-remove"></ion-icon></span>
                                         </a>
                                     <?php } ?>

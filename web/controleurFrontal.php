@@ -9,4 +9,6 @@ require_once __DIR__ . "/../vendor/autoload.php";
 // Routage //
 /////////////
 
-\App\VeryBadSplit\Controleur\RouteurURL::traiterRequete();
+$requete = \Symfony\Component\HttpFoundation\Request::createFromGlobals();
+$reponse = \App\VeryBadSplit\Controleur\RouteurURL::traiterRequete($requete);
+$reponse->send();

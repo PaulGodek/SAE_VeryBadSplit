@@ -1,5 +1,6 @@
 <?php
 
+use App\VeryBadSplit\Lib\Conteneur;
 use App\VeryBadSplit\Modele\HTTP\Cookie;
 
 ?>
@@ -8,7 +9,7 @@ use App\VeryBadSplit\Modele\HTTP\Cookie;
         <div class="columns is-centered">
             <div class="column is-6 box has-background-black-ter">
                 <p class="is-size-2 has-text-centered has-text-white-ter">Connexion</p>
-                <form action="<?= \App\VeryBadSplit\Lib\Helper::url("./connexion") ?>" method="post">
+                <form action="<?= Conteneur::recupererService("generateurUrl")->generate("connecter") ?>" method="post">
                     <div class="field">
                         <label class="label is-size-4" for="login">Nom d'utilisateur</label>
                         <div class="control has-icons-left">

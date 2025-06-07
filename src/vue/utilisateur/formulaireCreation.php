@@ -1,9 +1,14 @@
+<?php
+
+use App\VeryBadSplit\Lib\Conteneur;
+
+?>
 <div class="hero-body pt-0 mt-0">
     <div class="container">
         <div class="columns is-centered">
             <div class="column is-8 box has-background-black-ter">
                 <p class="is-size-2 has-text-centered has-text-white">Inscription</p>
-                <form action="<?= \App\VeryBadSplit\Lib\Helper::url("./inscription") ?>" method="post">
+                <form action="<?= Conteneur::recupererService("generateurUrl")->generate("./inscription") ?>" method="post">
                     <div class="field is-horizontal">
                         <div class="field-body">
                             <div class="field">

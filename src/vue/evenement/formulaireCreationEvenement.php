@@ -1,9 +1,14 @@
+<?php
+
+use App\VeryBadSplit\Lib\Conteneur;
+
+?>
 <div class="hero-body pt-0 mt-0">
     <div class="container">
         <div class="columns is-centered">
             <div class="column is-6 box has-background-black-ter">
                 <p class="is-size-2 has-text-centered has-text-white">Création d'un événement</p>
-                <form action="<?= \App\VeryBadSplit\Lib\Helper::url('evenements/creation'); ?>" method="post">
+                <form action="<?= Conteneur::recupererService("generateurUrl")->generate('evenements/creation'); ?>" method="post">
                     <div class="field">
                         <label class="label is-size-4" for="nomEvenement">Nom de l'événement</label>
                         <div class="control has-icons-left">
