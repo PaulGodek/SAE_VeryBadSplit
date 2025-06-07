@@ -6,21 +6,27 @@ use Exception;
 
 class ServiceException extends Exception{
     
-    private string $redirectionUrl;
+    private string $redirectionRoute;
     private string $typeMessageFlash;
+    private array $arguments;
     
-    public function __construct(string $message, string $redirectionUrl, string $typeMessageFlash = "danger") {
+    public function __construct(string $message, string $redirectionRoute, array $arguments = [], string $typeMessageFlash = "danger") {
         parent::__construct($message);
-        $this->redirectionUrl = $redirectionUrl;
+        $this->redirectionRoute = $redirectionRoute;
+        $this->arguments = $arguments;
         $this->typeMessageFlash = $typeMessageFlash;
     }
     
-    public function getRedirectionUrl(): string {
-        return $this->redirectionUrl;
+    public function getRedirectionRoute(): string {
+        return $this->redirectionRoute;
     }
     
     public function getTypeMessageFlash(): string {
         return $this->typeMessageFlash;
+    }
+
+    public function getArguments(): array {
+        return $this->arguments;
     }
     
 }

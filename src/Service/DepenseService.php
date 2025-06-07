@@ -40,14 +40,14 @@ class DepenseService extends GeneriqueService implements DepenseServiceInterface
         GeneriqueService::verifierConnexion();
         $depense = $this->depenseRepository->recuperer($idDepense);
         if (!$depense) {
-            throw new ServiceException("Dépense inexistante.", "");
+            throw new ServiceException("Dépense inexistante.", "accueil");
         }
 
         $evenement = $depense->getEvenement();
         if (!$evenement->estMembre(ConnexionUtilisateur::getLoginUtilisateurConnecte())) {
             $codeSecret = $evenement->getCodeSecret();
             throw new ServiceException("Vous n'avez pas de droits d'éditions sur cet événement.",
-                "evenements/$codeSecret");
+                "Evenement", ["codeEvenement" => $codeSecret]);
         }
 
         return $depense;
@@ -69,33 +69,33 @@ class DepenseService extends GeneriqueService implements DepenseServiceInterface
         $evenement = $this->evenementService->verifierAccesEvenement($idEvenement);
 
         if (!Validator::allNotEmpty([$titre, $montant, $payeur, $loginsParticipants])) {
-            throw new ServiceException("Attributs manquants.", 
-                "evenements/nouvelleDepense/$idEvenement");
+            throw new ServiceException("Attributs manquants.",
+                "afficherFormulaireCreationDepense", ["idEvenement" => $idEvenement]);
         }
 
         if (empty($loginsParticipants)) {
             throw new ServiceException("Il faut au moins un participant.",
-                "evenements/nouvelleDepense/$idEvenement");
+                "afficherFormulaireCreationDepense", ["idEvenement" => $idEvenement]);
         }
 
         if (!Validator::hasValideLength($titre,1,50)) {
             throw new ServiceException("La longueur du titre n'est pas valide.",
-                "evenements/nouvelleDepense/$idEvenement");
+                "afficherFormulaireCreationDepense", ["idEvenement" => $idEvenement]);
         }
 
         $utilisateurRepository = $this->utilisateurRepository;
         $payeur = $utilisateurRepository->recuperer($payeur);
         if (!$payeur || !$evenement->estMembre($payeur->getLogin())) {
-            throw new ServiceException("Le payeur n'existe pas ou n'est pas membre de l'événement.", 
-                "evenements/nouvelleDepense/$idEvenement");
+            throw new ServiceException("Le payeur n'existe pas ou n'est pas membre de l'événement.",
+                "afficherFormulaireCreationDepense", ["idEvenement" => $idEvenement]);
         }
 
         $participants = [];
         foreach ($loginsParticipants as $loginParticipant) {
             $utilisateur = $utilisateurRepository->recuperer($loginParticipant);
             if (!$utilisateur || !$evenement->estMembre($utilisateur->getLogin())) {
-                throw new ServiceException("Un des participants n'existe pas ou n'est pas membre de l'événement.", 
-                    "evenements/nouvelleDepense/$idEvenement");
+                throw new ServiceException("Un des participants n'existe pas ou n'est pas membre de l'événement.",
+                    "afficherFormulaireCreationDepense", ["idEvenement" => $idEvenement]);
             }
             $participants[] = $utilisateur;
         }
@@ -135,7 +135,7 @@ class DepenseService extends GeneriqueService implements DepenseServiceInterface
 
         if (!$depense) {
             throw new ServiceException("Dépense inexistante.",
-                "");
+                "accueil");
         }
 
         $evenement = $depense->getEvenement();
@@ -148,19 +148,19 @@ class DepenseService extends GeneriqueService implements DepenseServiceInterface
 
         if (empty($loginsParticipants)) {
             throw new ServiceException("Il faut au moins un participant.",
-                "depense/modifier/$idDepense");
+                "afficherFormulaireMiseAJourDepense", ["idDepense" => $idDepense]);
         }
 
         if (!Validator::hasValideLength($titre,1,50)) {
             throw new ServiceException("La longueur du titre n'est pas valide.",
-                "depense/modifier/$idDepense");
+                "afficherFormulaireMiseAJourDepense", ["idDepense" => $idDepense]);
         }
 
         $utilisateurRepository = $this->utilisateurRepository;
         $payeur = $utilisateurRepository->recuperer($payeurLogin);
         if (!$payeur || !$evenement->estMembre($payeur->getLogin())) {
             throw new ServiceException("Le payeur n'existe pas ou n'est pas membre de l'événement.",
-                "depense/modifier/$idDepense");
+                "afficherFormulaireMiseAJourDepense", ["idDepense" => $idDepense]);
         }
 
         $participants = [];
@@ -168,7 +168,7 @@ class DepenseService extends GeneriqueService implements DepenseServiceInterface
             $utilisateur = $utilisateurRepository->recuperer($loginParticipant);
             if (!$utilisateur || !$evenement->estMembre($utilisateur->getLogin())) {
                 throw new ServiceException("Un des participants n'existe pas ou n'est pas membre de l'événement.",
-                    "depense/modifier/$idDepense");
+                    "afficherFormulaireMiseAJourDepense", ["idDepense" => $idDepense]);
             }
             $participants[] = $utilisateur;
         }
@@ -199,7 +199,7 @@ class DepenseService extends GeneriqueService implements DepenseServiceInterface
 
         if (!$depense) {
             throw new ServiceException("Dépense inexistante.",
-                "");
+                "accueil");
         }
 
         $evenement = $depense->getEvenement();
@@ -207,7 +207,7 @@ class DepenseService extends GeneriqueService implements DepenseServiceInterface
 
         if ($depenseRepository->compterNombreDepensesEvenement($evenement->getId()) == 1) {
             throw new ServiceException("Vous ne pouvez pas supprimer cette dépense car cela entraînera la suppression de l'événement.",
-                "evenements/" . $evenement->getCodeSecret());
+                "Evenement", ["codeEvenement" => $evenement->getCodeSecret()]);
         }
 
         $depenseRepository->supprimer($idDepense);
