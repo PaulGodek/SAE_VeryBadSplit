@@ -8,7 +8,7 @@ use App\VeryBadSplit\Lib\Conteneur;
         <div class="columns is-centered">
             <div class="column is-8 box has-background-black-ter">
                 <p class="is-size-2 has-text-centered has-text-white">Inscription</p>
-                <form action="<?= Conteneur::recupererService("generateurUrl")->generate("./inscription") ?>" method="post">
+                <form action="<?= Conteneur::recupererService("generateurUrl")->generate("creerDepuisFormulaire") ?>" method="post">
                     <div class="field is-horizontal">
                         <div class="field-body">
                             <div class="field">
