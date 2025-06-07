@@ -15,9 +15,9 @@ class EvenementRepository implements EvenementRepositoryInterface
     private function recupererPar($critere, $valeur) : ?Evenement
     {
         $pdoStatement = ConnexionBaseDeDonnees::getPdo()->prepare(
-            "SELECT * FROM app_db WHERE :critere = :valeur"
+            "SELECT * FROM app_db WHERE $critere = :valeur"
         );
-        $pdoStatement->execute(["critere"=>$critere, "valeur"=>$valeur]);
+        $pdoStatement->execute(["valeur" => $valeur]);
 
         $data = $pdoStatement->fetchAll(PDO::FETCH_ASSOC);
         if(!$data) {
