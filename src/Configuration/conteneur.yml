@@ -1,6 +1,72 @@
 services:
 
   #ConnexionBaseDeDonnees TODO
+  App\VeryBadSplit\Configuration\ConfigurationBaseDeDonnees:
+    class: App\VeryBadSplit\Configuration\ConfigurationBaseDeDonnees
+
+  App\VeryBadSplit\Modele\Repository\ConnexionBaseDeDonnees:
+    class: App\VeryBadSplit\Modele\Repository\ConnexionBaseDeDonnees
+    arguments: ['@App\VeryBadSplit\Configuration\ConfigurationBaseDeDonnees']
 
   #Repositories
   App\VeryBadSplit\Modele\Repository\DepenseRepository:
+    class: App\VeryBadSplit\Modele\Repository\DepenseRepository
+    arguments: ['@App\VeryBadSplit\Modele\Repository\ConnexionBaseDeDonnees']
+
+  App\VeryBadSplit\Modele\Repository\EvenementRepository:
+    class: App\VeryBadSplit\Modele\Repository\EvenementRepository
+    arguments: ['@App\VeryBadSplit\Modele\Repository\ConnexionBaseDeDonnees']
+
+  App\VeryBadSplit\Modele\Repository\UtilisateurRepository:
+    class: App\VeryBadSplit\Modele\Repository\UtilisateurRepository
+    arguments: ['@App\VeryBadSplit\Modele\Repository\ConnexionBaseDeDonnees']
+
+  #Services
+  App\VeryBadSplit\Service\EvenementService:
+    class: App\VeryBadSplit\Service\EvenementService
+    arguments: [ '@App\VeryBadSplit\Modele\Repository\EvenementRepository',
+                 '@App\VeryBadSplit\Modele\Repository\UtilisateurRepository',
+                 '@App\VeryBadSplit\Modele\Repository\DepenseRepository']
+
+  App\VeryBadSplit\Service\UtilisateurService:
+    class: App\VeryBadSplit\Service\UtilisateurService
+    arguments: [ '@App\VeryBadSplit\Modele\Repository\UtilisateurRepository',
+                 '@App\VeryBadSplit\Modele\Repository\EvenementRepository',
+                 '@App\VeryBadSplit\Modele\Repository\DepenseRepository' ]
+
+  App\VeryBadSplit\Service\DepenseService:
+    class: App\VeryBadSplit\Service\DepenseService
+    arguments: ['@App\VeryBadSplit\Modele\Repository\DepenseRepository',
+                '@App\VeryBadSplit\Modele\Repository\UtilisateurRepository',
+                '@App\VeryBadSplit\Service\EvenementService']
+
+  #Controleurs
+  App\VeryBadSplit\Controleur\ControleurGenerique:
+    class: App\VeryBadSplit\Controleur\ControleurGenerique
+    arguments: ['@service_container']
+
+  App\VeryBadSplit\Controleur\ControleurBase:
+    class: App\VeryBadSplit\Controleur\ControleurBase
+    arguments: ['@service_container']
+
+  App\VeryBadSplit\Controleur\ControleurDepense:
+    class: App\VeryBadSplit\Controleur\ControleurDepense
+    arguments: ['@service_container',
+                '@App\VeryBadSplit\Service\DepenseService',
+                '@App\VeryBadSplit\Service\EvenementService']
+
+  App\VeryBadSplit\Controleur\ControleurEvenement:
+    class: App\VeryBadSplit\Controleur\ControleurEvenement
+    arguments: ['@service_container',
+                '@App\VeryBadSplit\Service\EvenementService',
+                '@App\VeryBadSplit\Lib\ConnexionUtilisateur']
+
+  App\VeryBadSplit\Controleur\ControleurUtilisateur:
+    class: App\VeryBadSplit\Controleur\ControleurUtilisateur
+    arguments: ['@service_container',
+                '@App\VeryBadSplit\Service\UtilisateurService',
+                '@App\VeryBadSplit\Lib\ConnexionUtilisateur',]
+
+  #Lib
+  App\VeryBadSplit\Lib\ConnexionUtilisateur:
+    class: App\VeryBadSplit\Lib\ConnexionUtilisateur

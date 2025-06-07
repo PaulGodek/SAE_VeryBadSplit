@@ -2,27 +2,25 @@
 
 namespace App\VeryBadSplit\Modele\Repository;
 
-use App\VeryBadSplit\Configuration\ConfigurationBaseDeDonnees;
+use App\VeryBadSplit\Configuration\ConfigurationBaseDeDonneesInterface;
 use PDO;
 
 class ConnexionBaseDeDonnees
 {
-    private static ?ConnexionBaseDeDonnees $instance = null;
-
     private PDO $pdo;
 
-    public static function getPdo(): PDO
+    public function getPdo(): PDO
     {
-        return ConnexionBaseDeDonnees::getInstance()->pdo;
+        return $this->pdo;
     }
 
-    private function __construct()
+    private function __construct(ConfigurationBaseDeDonneesInterface $configurationBaseDeDonnees)
     {
-        $nomHote = ConfigurationBaseDeDonnees::getNomHote();
-        $port = ConfigurationBaseDeDonnees::getPort();
-        $login = ConfigurationBaseDeDonnees::getLogin();
-        $motDePasse = ConfigurationBaseDeDonnees::getMotDePasse();
-        $nomBaseDeDonnees = ConfigurationBaseDeDonnees::getNomBaseDeDonnees();
+        $nomHote = $configurationBaseDeDonnees->getNomHote();
+        $port = $configurationBaseDeDonnees->getPort();
+        $login = $configurationBaseDeDonnees->getLogin();
+        $motDePasse = $configurationBaseDeDonnees->getMotDePasse();
+        $nomBaseDeDonnees = $configurationBaseDeDonnees->getNomBaseDeDonnees();
 
         // Connexion à la base de données
         // Le dernier argument sert à ce que toutes les chaines de caractères
@@ -36,12 +34,5 @@ class ConnexionBaseDeDonnees
 
         // On active le mode d'affichage des erreurs, et le lancement d'exception en cas d'erreur
         $this->pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    }
-
-    private static function getInstance(): ConnexionBaseDeDonnees
-    {
-        if (is_null(ConnexionBaseDeDonnees::$instance))
-            ConnexionBaseDeDonnees::$instance = new ConnexionBaseDeDonnees();
-        return ConnexionBaseDeDonnees::$instance;
     }
 }

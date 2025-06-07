@@ -2,16 +2,17 @@
 
 namespace App\VeryBadSplit\Controleur;
 
-use App\VeryBadSplit\Lib\Conteneur;
 use App\VeryBadSplit\Lib\Helper;
 use App\VeryBadSplit\Lib\MessageFlash;
 use App\VeryBadSplit\Service\Exception\ServiceException;
 use JetBrains\PhpStorm\NoReturn;
-use Symfony\Component\Routing\Generator\UrlGenerator;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 abstract class ControleurGenerique {
 
-    protected static function afficherVue(string $cheminVue, array $parametres = []): void
+    public function __construct(private ContainerInterface $container){}
+
+    protected function afficherVue(string $cheminVue, array $parametres = []): void
     {
         extract($parametres);
         $messagesFlash = MessageFlash::lireTousMessages();
@@ -19,32 +20,32 @@ abstract class ControleurGenerique {
     }
     
     #[NoReturn]
-    protected static function redirection(string $url) : void
+    protected function redirection(string $url) : void
     {
         header("Location: " . Helper::url($url));
         exit();
     }
     
     #[NoReturn]
-    protected static function redirectionVersRoute(string $nomRoute, array $parametres = []) : void
+    protected function redirectionVersRoute(string $nomRoute, array $parametres = []) : void
     {
-        /** @var UrlGenerator $generateurUrl */
-        $generateurUrl = Conteneur::recupererService("generateurUrl");
+        global $generateurUrl;
+        $generateurUrl = $this->container->get("Symfony\Component\Routing\Generator\UrlGenerator");
         $url = $generateurUrl->generate($nomRoute, $parametres);
         header("Location: " . $url);
         exit();
     }
 
-    public static function afficherErreur($messageErreur = ""): void
+    public function afficherErreur($messageErreur = ""): void
     {
-        self::afficherVue('vueGenerale.php', [
+        $this->afficherVue('vueGenerale.php', [
             "pagetitle" => "Problème",
             "cheminVueBody" => "erreur.php",
             "messageErreur" => $messageErreur
         ]);
     }
 
-    public static function issetAndNotNull(array $requestParams) : bool {
+    public function issetAndNotNull(array $requestParams) : bool {
         foreach ($requestParams as $param) {
             if(!(isset($_REQUEST[$param]) && $_REQUEST[$param] != null)) {
                 return false;
@@ -53,7 +54,7 @@ abstract class ControleurGenerique {
         return true;
     }
 
-    public static function isNotNull(array $array) : bool {
+    public function isNotNull(array $array) : bool {
         foreach ($array as $value) {
             if(!(isset($value) && $value != null)) {
                 return false;
@@ -72,9 +73,9 @@ abstract class ControleurGenerique {
      * @return void
      */
     #[NoReturn]
-    protected static function gererException(ServiceException $e, string $type = null): void
+    protected function gererException(ServiceException $e, string $type = null): void
     {
         MessageFlash::ajouter($type ?? $e->getTypeMessageFlash(), $e->getMessage());
-        self::redirection($e->getRedirectionUrl());
+        $this->redirection($e->getRedirectionUrl());
     }
 }

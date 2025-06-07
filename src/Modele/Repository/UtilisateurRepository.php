@@ -3,14 +3,17 @@
 namespace App\VeryBadSplit\Modele\Repository;
 
 use App\VeryBadSplit\Modele\DataObject\Utilisateur;
+use App\VeryBadSplit\Modele\Repository\Interface\ConnexionBaseDeDonneesInterface;
 use App\VeryBadSplit\Modele\Repository\Interface\UtilisateurRepositoryInterface;
 use PDO;
 
 class UtilisateurRepository implements UtilisateurRepositoryInterface
 {
 
+    public function __construct(private ConnexionBaseDeDonneesInterface $connexionBaseDeDonnees){}
+
     public function recuperer($login) : ?Utilisateur {
-        $pdoStatement = ConnexionBaseDeDonnees::getPdo()->prepare(
+        $pdoStatement = $this->connexionBaseDeDonnees->getPdo()->prepare(
             "SELECT DISTINCT 
                         loginProprietaire, nomProprietaire, prenomProprietaire, emailProprietaire, mdpHacheProprietaire, mdpProprietaire
                         FROM app_db
@@ -34,7 +37,7 @@ class UtilisateurRepository implements UtilisateurRepositoryInterface
      * @return Utilisateur[]
      */
     public function recupererParEmail($email) : array {
-        $pdoStatement = ConnexionBaseDeDonnees::getPdo()->prepare(
+        $pdoStatement = $this->connexionBaseDeDonnees->getPdo()->prepare(
             "SELECT DISTINCT 
                         loginProprietaire, nomProprietaire, prenomProprietaire, mdpProprietaire
                         FROM app_db
@@ -60,7 +63,7 @@ class UtilisateurRepository implements UtilisateurRepositoryInterface
      * @return Utilisateur[]
      */
     public function recupererUtilisateursOrdonnesPrenomNom() : array {
-        $pdoStatement = ConnexionBaseDeDonnees::getPdo()->prepare(
+        $pdoStatement = $this->connexionBaseDeDonnees->getPdo()->prepare(
             "SELECT DISTINCT 
                         loginProprietaire, nomProprietaire, prenomProprietaire
                         FROM app_db
@@ -98,14 +101,14 @@ class UtilisateurRepository implements UtilisateurRepositoryInterface
         }, $nomsColonnes);
         $setString = join(', ', $setArray);
         $sql = "UPDATE app_db SET $setString WHERE loginProprietaire=:loginProprietaire";
-        $pdoStatement = ConnexionBaseDeDonnees::getPdo()->prepare($sql);
+        $pdoStatement = $this->connexionBaseDeDonnees->getPdo()->prepare($sql);
         $pdoStatement->execute($map);
     }
 
     public function supprimer(string $login): bool
     {
         $sql = "DELETE FROM app_db WHERE loginProprietaire=:loginProprietaire";
-        $pdoStatement = ConnexionBaseDeDonnees::getPDO()->prepare($sql);
+        $pdoStatement = $this->connexionBaseDeDonnees->getPDO()->prepare($sql);
         $pdoStatement->execute(['loginProprietaire' => $login]);
         if (!($pdoStatement->rowCount() > 0)) {
             return false;

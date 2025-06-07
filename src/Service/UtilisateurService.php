@@ -17,19 +17,12 @@ use App\VeryBadSplit\Service\Interface\UtilisateurServiceInterface;
 
 class UtilisateurService extends GeneriqueService implements UtilisateurServiceInterface
 {
-    private UtilisateurRepositoryInterface $utilisateurRepository;
-    private EvenementRepositoryInterface $evenementRepository;
-    private DepenseRepositoryInterface $depenseRepository;
 
     public function __construct(
-        UtilisateurRepositoryInterface $utilisateurRepository,
-        EvenementRepositoryInterface $evenementRepository,
-        DepenseRepositoryInterface $depenseRepository
-    ) {
-        $this->utilisateurRepository = $utilisateurRepository;
-        $this->evenementRepository = $evenementRepository;
-        $this->depenseRepository = $depenseRepository;
-    }
+        private UtilisateurRepositoryInterface $utilisateurRepository,
+        private EvenementRepositoryInterface $evenementRepository,
+        private DepenseRepositoryInterface $depenseRepository
+    ) {}
 
     /**
      * Récupère les détails de l'utilisateur connecté.

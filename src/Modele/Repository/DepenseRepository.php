@@ -5,6 +5,7 @@ namespace App\VeryBadSplit\Modele\Repository;
 use App\VeryBadSplit\Modele\DataObject\Depense;
 use App\VeryBadSplit\Modele\DataObject\Evenement;
 use App\VeryBadSplit\Modele\DataObject\Utilisateur;
+use App\VeryBadSplit\Modele\Repository\Interface\ConnexionBaseDeDonneesInterface;
 use App\VeryBadSplit\Modele\Repository\Interface\DepenseRepositoryInterface;
 use DateTime;
 use PDO;
@@ -13,7 +14,7 @@ use PDOException;
 class DepenseRepository implements DepenseRepositoryInterface
 {
 
-    private ConnexionBaseDeDonneesInterface
+    public function __construct(private ConnexionBaseDeDonneesInterface $connexionBaseDeDonnees){}
 
     public function ajouter(Depense $depense): bool
     {
@@ -48,7 +49,7 @@ class DepenseRepository implements DepenseRepositoryInterface
         $valueString = '(' . join(', ', $partiesValues) . ')';
 
         $sql = "INSERT INTO app_db $insertString VALUES $valueString";
-        $pdoStatement = ConnexionBaseDeDonnees::getPdo()->prepare($sql);
+        $pdoStatement = $this->connexionBaseDeDonnees->getPdo()->prepare($sql);
 
         try {
             $pdoStatement->execute($map);
@@ -64,7 +65,7 @@ class DepenseRepository implements DepenseRepositoryInterface
 
     public function recuperer(int $id): ?Depense
     {
-        $pdoStatement = ConnexionBaseDeDonnees::getPdo()->prepare(
+        $pdoStatement = $this->connexionBaseDeDonnees->getPdo()->prepare(
             "SELECT idDepense, titreDepense, dateDepense, montantDepense, loginPayeur, nomPayeur, prenomPayeur, participantsDepense,
                            idEvenement, codeSecretEvenement, membresEvenement, loginProprietaire, nomProprietaire, prenomProprietaire,
                            loginProprietaire
@@ -104,7 +105,7 @@ class DepenseRepository implements DepenseRepositoryInterface
      */
     public function recupererDepensesPayeesOuParticipeUtilisateur(string $login): array
     {
-        $pdoStatement = ConnexionBaseDeDonnees::getPdo()->prepare(
+        $pdoStatement = $this->connexionBaseDeDonnees->getPdo()->prepare(
             "SELECT DISTINCT idDepense, titreDepense, dateDepense, montantDepense, 
                                    loginPayeur, nomPayeur, prenomPayeur, 
                                    participantsDepense
@@ -152,21 +153,21 @@ class DepenseRepository implements DepenseRepositoryInterface
         }, $nomsColonnes);
         $setString = join(', ', $setArray);
         $sql = "UPDATE app_db SET $setString WHERE idDepense=:idDepense";
-        $pdoStatement = ConnexionBaseDeDonnees::getPdo()->prepare($sql);
+        $pdoStatement = $this->connexionBaseDeDonnees->getPdo()->prepare($sql);
         $pdoStatement->execute($map);
     }
 
     public function supprimer(int $id): bool
     {
         $sql = "DELETE FROM app_db WHERE idDepense=:idDepense";
-        $pdoStatement = ConnexionBaseDeDonnees::getPDO()->prepare($sql);
+        $pdoStatement = $this->connexionBaseDeDonnees->getPDO()->prepare($sql);
         $pdoStatement->execute(["idDepense" => $id]);
         return ($pdoStatement->rowCount() > 0);
     }
 
     public function getNextId() : int
     {
-        $query = ConnexionBaseDeDonnees::getPdo()->query("SELECT MAX(idDepense) FROM app_db");
+        $query = $this->connexionBaseDeDonnees->getPdo()->query("SELECT MAX(idDepense) FROM app_db");
         $obj = $query->fetch();
         return $obj[0] === null ? 0 : $obj[0] + 1;
     }
@@ -174,7 +175,7 @@ class DepenseRepository implements DepenseRepositoryInterface
     public function compterNombreDepensesEvenement($idEvenement): int
     {
         $sql = "SELECT COUNT(DISTINCT idDepense) FROM app_db WHERE idEvenement=:idEvenement";
-        $pdoStatement = ConnexionBaseDeDonnees::getPDO()->prepare($sql);
+        $pdoStatement = $this->connexionBaseDeDonnees->getPDO()->prepare($sql);
         $pdoStatement->execute(['idEvenement' => $idEvenement]);
         $obj = $pdoStatement->fetch();
         return $obj[0] === null ? 0 : $obj[0];

@@ -16,19 +16,12 @@ use DateTime;
 
 class EvenementService extends GeneriqueService implements EvenementServiceInterface
 {
-    private EvenementRepositoryInterface $evenementRepository;
-    private UtilisateurRepositoryInterface $utilisateurRepository;
-    private DepenseRepositoryInterface $depenseRepository;
 
     public function __construct(
-        EvenementRepositoryInterface $evenementRepository,
-        UtilisateurRepositoryInterface $utilisateurRepository,
-        DepenseRepositoryInterface $depenseRepository
-    ) {
-        $this->evenementRepository = $evenementRepository;
-        $this->utilisateurRepository = $utilisateurRepository;
-        $this->depenseRepository = $depenseRepository;
-    }
+        private EvenementRepositoryInterface $evenementRepository,
+        private UtilisateurRepositoryInterface $utilisateurRepository,
+        private DepenseRepositoryInterface $depenseRepository
+    ) {}
 
     /**
      * Vérifie l'existence d'un événement.
