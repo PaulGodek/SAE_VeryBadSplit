@@ -14,12 +14,19 @@ use DateTime;
 
 class DepenseService extends GeneriqueService implements DepenseServiceInterface
 {
+    private DepenseRepositoryInterface $depenseRepository;
+    private UtilisateurRepositoryInterface $utilisateurRepository;
+    private EvenementServiceInterface $evenementService;
 
     public function __construct(
-        private DepenseRepositoryInterface $depenseRepository,
-        private UtilisateurRepositoryInterface $utilisateurRepository,
-        private EvenementServiceInterface $evenementService
-    ) {}
+        DepenseRepositoryInterface $depenseRepository,
+        UtilisateurRepositoryInterface $utilisateurRepository,
+        EvenementServiceInterface $evenementService
+    ) {
+        $this->depenseRepository = $depenseRepository;
+        $this->utilisateurRepository = $utilisateurRepository;
+        $this->evenementService = $evenementService;
+    }
 
     /**
      * Vérifie l'accès à une dépense en fonction de son ID.

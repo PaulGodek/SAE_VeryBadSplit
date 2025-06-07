@@ -3,33 +3,28 @@
 namespace App\VeryBadSplit\Controleur;
 
 use App\VeryBadSplit\Lib\ConnexionUtilisateur;
+use App\VeryBadSplit\Lib\Conteneur;
 use App\VeryBadSplit\Lib\MessageFlash;
 use App\VeryBadSplit\Service\Exception\ServiceException;
-use App\VeryBadSplit\Service\Interface\UtilisateurServiceInterface;
-use Symfony\Component\DependencyInjection\ContainerInterface;
+use App\VeryBadSplit\Service\UtilisateurService;
 use Symfony\Component\Routing\Attribute\Route;
 
 class ControleurUtilisateur extends ControleurGenerique
 {
-    
-    public function __construct(
-        ContainerInterface $container,
-        private UtilisateurServiceInterface $utilisateurService,
-        private ConnexionUtilisateur $connexionUtilisateur)
+    private static function getUtilisateurService(): UtilisateurService
     {
-        parent::__construct($container);
+        return Conteneur::recupererService("utilisateurService");
     }
-    
     #[Route(path: '/compte', name: 'afficherDetail', methods: ['GET'])]
-    public function afficherDetail(): void
+    public static function afficherDetail(): void
     {
         try {
-            $utilisateur = $this->utilisateurService->recupererUtilisateurConnecte();
+            $utilisateur = self::getUtilisateurService()->recupererUtilisateurConnecte();
         } catch (ServiceException $e) {
-            $this->gererException($e, 'danger');
+            self::gererException($e, 'danger');
         }
 
-        $this->afficherVue('vueGenerale.php', [
+        self::afficherVue('vueGenerale.php', [
             "utilisateur" => $utilisateur,
             "pagetitle" => "Détails du compte",
             "cheminVueBody" => "utilisateur/detail.php"
@@ -37,22 +32,22 @@ class ControleurUtilisateur extends ControleurGenerique
     }
 
     #[Route(path: '/inscription', name: 'afficherFormulaireCreation', methods: ['GET'])]
-    public function afficherFormulaireCreation(): void
+    public static function afficherFormulaireCreation(): void
     {
         try {
-            $this->utilisateurService->verifierNonConnecte();
+            self::getUtilisateurService()->verifierNonConnecte();
         } catch (ServiceException $e) {
-            $this->gererException($e);
+            self::gererException($e);
         }
 
-        $this->afficherVue('vueGenerale.php', [
+        self::afficherVue('vueGenerale.php', [
             "pagetitle" => "Création d'un utilisateur",
             "cheminVueBody" => "utilisateur/formulaireCreation.php"
         ]);
     }
 
     #[Route(path: '/inscription', name: 'creerDepuisFormulaire', methods: ['POST'])]
-    public function creerDepuisFormulaire(): void
+    public static function creerDepuisFormulaire(): void
     {
         $login = $_REQUEST["login"] ?? null;
         $prenom = $_REQUEST["prenom"] ?? null;
@@ -62,24 +57,24 @@ class ControleurUtilisateur extends ControleurGenerique
         $mdp2 = $_REQUEST["mdp2"] ?? null;
 
         try {
-            $this->utilisateurService->creerUtilisateur($login, $prenom, $nom, $email, $mdp, $mdp2);
+            self::getUtilisateurService()->creerUtilisateur($login, $prenom, $nom, $email, $mdp, $mdp2);
             MessageFlash::ajouter("success", "L'utilisateur a bien été créé !");
-            $this->redirection("connexion");
+            self::redirection("connexion");
         } catch (ServiceException $e) {
-            $this->gererException($e, "warning");
+            self::gererException($e, "warning");
         }
     }
 
     #[Route(path: '/compte/modifier', name: 'afficherFormulaireMiseAJour', methods: ['GET'])]
-    public function afficherFormulaireMiseAJour(): void
+    public static function afficherFormulaireMiseAJour(): void
     {
         try {
-            $utilisateur = $this->utilisateurService->recupererUtilisateurConnecte();
+            $utilisateur = self::getUtilisateurService()->recupererUtilisateurConnecte();
         } catch (ServiceException $e) {
-            $this->gererException($e);
+            self::gererException($e);
         }
 
-        $this->afficherVue('vueGenerale.php', [
+        self::afficherVue('vueGenerale.php', [
             "pagetitle" => "Mise à jour du profil",
             "cheminVueBody" => "utilisateur/formulaireMiseAJour.php",
             "utilisateur" => $utilisateur,
@@ -87,7 +82,7 @@ class ControleurUtilisateur extends ControleurGenerique
     }
 
     #[Route(path: '/compte/modifier', name: 'modifierDepuisFormulaire', methods: ['POST'])]
-    public function mettreAJour(): void
+    public static function mettreAJour(): void
     {
         $login = $_REQUEST['login'] ?? null;
         $prenom = $_REQUEST['prenom'] ?? null;
@@ -98,93 +93,93 @@ class ControleurUtilisateur extends ControleurGenerique
         $mdp2 = $_REQUEST['mdp2'] ?? null;
 
         try {
-            $this->utilisateurService->mettreAJourUtilisateur($login, $prenom, $nom, $email, $mdpActuel, $mdp, $mdp2);
+            self::getUtilisateurService()->mettreAJourUtilisateur($login, $prenom, $nom, $email, $mdpActuel, $mdp, $mdp2);
         } catch (ServiceException $e) {
-            $this->gererException($e);
+            self::gererException($e);
         }
 
         MessageFlash::ajouter("success", "L'utilisateur a bien été modifié !");
-        $this->redirection("compte");
+        self::redirection("compte");
     }
 
     #[Route(path: '/compte/supprimer/{login}', name: 'supprimerCompte', methods: ['GET'])]
-    public function supprimer(string $login): void
+    public static function supprimer(string $login): void
     {
         try {
-            $this->utilisateurService->supprimerUtilisateur($login);
+            self::getUtilisateurService()->supprimerUtilisateur($login);
         } catch (ServiceException $e) {
-            $this->gererException($e);
+            self::gererException($e);
         }
 
         MessageFlash::ajouter("success", "Votre compte a bien été supprimé !");
-        $this->redirection("connexion");
+        self::redirection("connexion");
     }
 
     #[Route(path: '/connexion', name: 'afficherFormulaireConnexion', methods: ['GET'])]
-    public function afficherFormulaireConnexion(): void
+    public static function afficherFormulaireConnexion(): void
     {
         try {
-            $this->utilisateurService->verifierNonConnecte();
+            self::getUtilisateurService()->verifierNonConnecte();
         } catch (ServiceException $e) {
-            $this->gererException($e);
+            self::gererException($e);
         }
         
-        $this->afficherVue('vueGenerale.php', [
+        self::afficherVue('vueGenerale.php', [
             "pagetitle" => "Formulaire de connexion",
             "cheminVueBody" => "utilisateur/formulaireConnexion.php"
         ]);
     }
 
     #[Route(path: '/connexion', name: 'connecter', methods: ['POST'])]
-    public function connecter(): void
+    public static function connecter(): void
     {
         $login = $_REQUEST["login"] ?? null;
         $mdp = $_REQUEST["mdp"] ?? null;
         
         try {
-            $this->utilisateurService->connecterUtilisateur($login, $mdp);
+            self::getUtilisateurService()->connecterUtilisateur($login, $mdp);
         } catch (ServiceException $e) {
-            $this->gererException($e, "danger");
+            self::gererException($e, "danger");
         }
 
         MessageFlash::ajouter("success", "Connexion réussie !");
-        $this->redirection("evenements");
+        self::redirection("evenements");
     }
 
     #[Route(path: '/deconnexion', name: 'deconnecter', methods: ['GET'])]
-    public function deconnecter(): void
+    public static function deconnecter(): void
     {
-        if ($this->connexionUtilisateur->estConnecte()) {
-            $this->connexionUtilisateur->deconnecter();
+        if (ConnexionUtilisateur::estConnecte()) {
+            ConnexionUtilisateur::deconnecter();
             MessageFlash::ajouter("success", "Déconnexion réussie.");
         } else {
             MessageFlash::ajouter("danger", "Utilisateur non connecté.");
         }
-        $this->redirectionVersRoute("accueil");
+        self::redirectionVersRoute("accueil");
     }
 
     #[Route(path: '/recuperation', name: 'afficherFormulaireRecuperationCompte', methods: ['GET'])]
-    public function afficherFormulaireRecuperationCompte(): void {
-        if($this->connexionUtilisateur->estConnecte()) {
-            $this->redirection("evenements");
+    public static function afficherFormulaireRecuperationCompte(): void {
+        if(ConnexionUtilisateur::estConnecte()) {
+            self::redirection("evenements");
         }
-        $this->afficherVue('vueGenerale.php', [
+        self::afficherVue('vueGenerale.php', [
             "pagetitle" => "Récupérer mon compte",
             "cheminVueBody" => "utilisateur/formulaireRecuperationCompte.php"
         ]);
     }
 
     #[Route(path: '/recuperation', name: 'recupererCompte', methods: ['POST'])]
-    public function recupererCompte(): void {
+    public static function recupererCompte(): void {
         $email = $_REQUEST["email"] ?? null;
         
         try {
-            $utilisateurs = $this->utilisateurService->recupererUtilisateursParEmail($email);
+            $utilisateurs = self::getUtilisateurService()->recupererUtilisateursParEmail($email);
         } catch (ServiceException $e) {
-            $this->gererException($e, "warning");
+            self::gererException($e, "warning");
         }
 
-        $this->afficherVue('vueGenerale.php', [
+        self::afficherVue('vueGenerale.php', [
             "pagetitle" => "Récupérer mon compte",
             "cheminVueBody" => "utilisateur/resultatRecuperationCompte.php",
             "utilisateurs" => $utilisateurs

@@ -2,22 +2,19 @@
 
 namespace App\VeryBadSplit\Modele\Repository;
 
+use App\VeryBadSplit\Lib\ConnexionUtilisateur;
 use App\VeryBadSplit\Modele\DataObject\Depense;
 use App\VeryBadSplit\Modele\DataObject\Evenement;
 use App\VeryBadSplit\Modele\DataObject\Utilisateur;
-use App\VeryBadSplit\Modele\Repository\Interface\ConnexionBaseDeDonneesInterface;
 use App\VeryBadSplit\Modele\Repository\Interface\EvenementRepositoryInterface;
 use DateTime;
 use PDO;
 
 class EvenementRepository implements EvenementRepositoryInterface
 {
-
-    public function __construct(private ConnexionBaseDeDonneesInterface $connexionBaseDeDonnees){}
-
     private function recupererPar($critere, $valeur) : ?Evenement
     {
-        $pdoStatement = $this->connexionBaseDeDonnees->getPdo()->prepare(
+        $pdoStatement = ConnexionBaseDeDonnees::getPdo()->prepare(
             "SELECT * FROM app_db WHERE $critere = :valeur"
         );
         $pdoStatement->execute(["valeur" => $valeur]);
@@ -77,7 +74,7 @@ class EvenementRepository implements EvenementRepositoryInterface
      */
     public function recupererEvenementsUtilisateur($login) : array
     {
-        $pdoStatement = $this->connexionBaseDeDonnees->getPdo()->prepare(
+        $pdoStatement = ConnexionBaseDeDonnees::getPdo()->prepare(
             "SELECT DISTINCT idEvenement, codeSecretEvenement, titreEvenement, dateEvenement,
                            loginProprietaire, nomProprietaire, prenomProprietaire, membresEvenement
                         FROM app_db
@@ -120,21 +117,21 @@ class EvenementRepository implements EvenementRepositoryInterface
         }, $nomsColonnes);
         $setString = join(', ', $setArray);
         $sql = "UPDATE app_db SET $setString WHERE idEvenement=:idEvenement";
-        $pdoStatement = $this->connexionBaseDeDonnees->getPdo()->prepare($sql);
+        $pdoStatement = ConnexionBaseDeDonnees::getPdo()->prepare($sql);
         $pdoStatement->execute($map);
     }
 
     public function supprimer(int $id): bool
     {
         $sql = "DELETE FROM app_db WHERE idEvenement=:idEvenement";
-        $pdoStatement = $this->connexionBaseDeDonnees->getPDO()->prepare($sql);
+        $pdoStatement = ConnexionBaseDeDonnees::getPDO()->prepare($sql);
         $pdoStatement->execute(['idEvenement' => $id]);
         return ($pdoStatement->rowCount() > 0);
     }
 
     public function getNextId() : int
     {
-        $query = $this->connexionBaseDeDonnees->getPdo()->query("SELECT MAX(idEvenement) FROM app_db");
+        $query = ConnexionBaseDeDonnees::getPdo()->query("SELECT MAX(idEvenement) FROM app_db");
         $query->execute();
         $obj = $query->fetch();
         return $obj[0] === null ? 0 : $obj[0] + 1;
@@ -143,7 +140,7 @@ class EvenementRepository implements EvenementRepositoryInterface
     public function compterNombreEvenementProprietaire($loginProprietaire): int
     {
         $sql = "SELECT COUNT(DISTINCT idEvenement) FROM app_db WHERE loginProprietaire=:loginProprietaire";
-        $pdoStatement = $this->connexionBaseDeDonnees->getPDO()->prepare($sql);
+        $pdoStatement = ConnexionBaseDeDonnees::getPDO()->prepare($sql);
         $pdoStatement->execute(["loginProprietaire" => $loginProprietaire]);
         $obj = $pdoStatement->fetch();
         return $obj[0] === null ? 0 : $obj[0];

@@ -3,35 +3,32 @@
 namespace App\VeryBadSplit\Controleur;
 
 use App\VeryBadSplit\Lib\ConnexionUtilisateur;
+use App\VeryBadSplit\Lib\Conteneur;
+use App\VeryBadSplit\Lib\Helper;
 use App\VeryBadSplit\Lib\MessageFlash;
+use App\VeryBadSplit\Service\EvenementService;
 use App\VeryBadSplit\Service\Exception\ServiceException;
-use App\VeryBadSplit\Service\Interface\EvenementServiceInterface;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\Routing\Attribute\Route;
 
 class ControleurEvenement extends ControleurGenerique
 {
-
-    public function __construct(
-        ContainerInterface $container,
-        private EvenementServiceInterface $evenementService,
-        private ConnexionUtilisateur $connexionUtilisateur)
+    private static function getEvenementService(): EvenementService
     {
-        parent::__construct($container);
+        return Conteneur::recupererService("evenementService");
     }
     #[Route(path: "/evenements/{codeEvenement}", name:"Evenement", requirements: ['codeEvenement' => '[a-zA-Z0-9]{64}'])]
-    public function afficherEvenement(string $codeEvenement): void
+    public static function afficherEvenement(string $codeEvenement): void
     {
         try {
-            $resultat = $this->evenementService->recupererEvenementAvecDettes($codeEvenement);
+            $resultat = self::getEvenementService()->recupererEvenementAvecDettes($codeEvenement);
             $evenement = $resultat["evenement"];
             $dettes = $resultat["dettes"];
             $coutTotal = $resultat["coutTotal"];
         } catch (ServiceException $e) {
-            $this->gererException($e, "warning");
+            self::gererException($e, "warning");
         }
 
-        $this->afficherVue('vueGenerale.php', [
+        self::afficherVue('vueGenerale.php', [
             "pagetitle" => $evenement->getTitre(),
             "cheminVueBody" => "evenement/evenement.php",
             "evenement" => $evenement,
@@ -41,15 +38,15 @@ class ControleurEvenement extends ControleurGenerique
     }
 
     #[Route(path: "/evenements", name: "MesEvenements")]
-    public function afficherListeMesEvenements(): void
+    public static function afficherListeMesEvenements(): void
     {
-        $login = $this->connexionUtilisateur->getLoginUtilisateurConnecte() ?? null;
+        $login = ConnexionUtilisateur::getLoginUtilisateurConnecte() ?? null;
         try {
-            $evenements = $this->evenementService->recupererEvenementsUtilisateur($login);
+            $evenements = self::getEvenementService()->recupererEvenementsUtilisateur($login);
         } catch (ServiceException $e) {
-            $this->gererException($e, "danger");
+            self::gererException($e, "danger");
         }
-        $this->afficherVue('vueGenerale.php', [
+        self::afficherVue('vueGenerale.php', [
             "pagetitle" => "Liste des événements de $login",
             "cheminVueBody" => "evenement/listeEvenementsUtilisateur.php",
             "evenements" => $evenements
@@ -57,45 +54,45 @@ class ControleurEvenement extends ControleurGenerique
     }
 
     #[Route(path: "/evenements/creation", name: "FormulaireCreationEvenement", methods: ['GET'])]
-    public function afficherFormulaireCreationEvenement(): void {
+    public static function afficherFormulaireCreationEvenement(): void {
         try {
-            $this->evenementService->verifierConnexion();
+            self::getEvenementService()->verifierConnexion();
         } catch (ServiceException $e) {
-            $this->gererException($e, "danger");
+            self::gererException($e, "danger");
         }
-        $this->afficherVue('vueGenerale.php', [
+        self::afficherVue('vueGenerale.php', [
             "pagetitle" => "Ajout d'un événement",
             "cheminVueBody" => "evenement/formulaireCreationEvenement.php",
         ]);
     }
 
     #[Route(path: "/evenements/creation", name: "CreationEvenement", methods: ['POST'])]
-    public function creerEvenement(): void
+    public static function creerEvenement(): void
     {
         $nomEvenement = $_REQUEST["nomEvenement"] ?? null;
-        $loginUtilisateur = $this->connexionUtilisateur->getLoginUtilisateurConnecte() ?? null;
+        $loginUtilisateur = ConnexionUtilisateur::getLoginUtilisateurConnecte() ?? null;
         
         try {
-            $codeSecret = $this->evenementService->creerEvenement($nomEvenement, $loginUtilisateur);
+            $codeSecret = self::getEvenementService()->creerEvenement($nomEvenement, $loginUtilisateur);
         } catch (ServiceException $e) {
-            $this->gererException($e);
+            self::gererException($e);
         }
         
         MessageFlash::ajouter("success", "Événement créé avec succès");
-        $this->redirection("evenements/$codeSecret");
+        self::redirection("evenements/$codeSecret");
     }
 
     #[Route(path: "/evenements/modifier/{idEvenement}", name: "FormulaireMiseAJourEvenement",
         requirements: ['idEvenement' => '\d+'], methods: ['GET'])]
-    public function afficherFormulaireMiseAJourEvenement(int $idEvenement): void
+    public static function afficherFormulaireMiseAJourEvenement(int $idEvenement): void
     {
         try {
-            $evenement = $this->evenementService->verifierAccesEvenement($idEvenement);
+            $evenement = self::getEvenementService()->verifierAccesEvenement($idEvenement);
         } catch (ServiceException $e) {
-            $this->gererException($e, "danger");
+            self::gererException($e, "danger");
         }
 
-        $this->afficherVue('vueGenerale.php', [
+        self::afficherVue('vueGenerale.php', [
             "pagetitle" => "Modification d'un événement",
             "cheminVueBody" => "evenement/formulaireMiseAJourEvenement.php",
             "evenement" => $evenement
@@ -104,46 +101,46 @@ class ControleurEvenement extends ControleurGenerique
 
     #[Route(path: "/evenements/modifier/{idEvenement}", name: "mettreAJourEvenement",
         requirements: ['idEvenement' => '\d+'], methods: ['POST'])]
-    public function mettreAJourEvenement(int $idEvenement): void
+    public static function mettreAJourEvenement(int $idEvenement): void
     {
         $nomEvenement = $_REQUEST["nomEvenement"] ?? null;
         try {
-            $codeSecret = $this->evenementService->mettreAJourEvenement($idEvenement, $nomEvenement);
+            $codeSecret = self::getEvenementService()->mettreAJourEvenement($idEvenement, $nomEvenement);
         } catch (ServiceException $e) {
-            $this->gererException($e, "danger");
+            self::gererException($e, "danger");
         }
         
         MessageFlash::ajouter("success", "Événement mis à jour avec succès.");
-        $this->redirection("evenements/$codeSecret");
+        self::redirection("evenements/$codeSecret");
     }
 
     #[Route(path: "/evenements/supprimer/{idEvenement}", name: "SupprimerEvenement",
         requirements: ['idEvenement' => '\d+'])]
-    public function supprimerEvenement(int $idEvenement): void
+    public static function supprimerEvenement(int $idEvenement): void
     {
         try {
-            $this->evenementService->supprimerEvenement($idEvenement);
+            self::getEvenementService()->supprimerEvenement($idEvenement);
         } catch (ServiceException $e) {
-            $this->gererException($e, "danger");
+            self::gererException($e, "danger");
         }
         MessageFlash::ajouter("success", "Événement supprimé avec succès");
-        $this->redirection("evenements");
+        self::redirection("evenements");
     }
 
     #[Route(path: "/evenements/ajouterMembre/{idEvenement}", name: "afficherFormulaireAjoutMembre",
         requirements: ['idEvenement' => '\d+'], methods: ['GET'])]
-    public function afficherFormulaireAjoutMembre(int $idEvenement): void
+    public static function afficherFormulaireAjoutMembre(int $idEvenement): void
     {
         try {
-            $resultat = $this->evenementService->recupererUtilisateursPourAjout($idEvenement);
+            $resultat = self::getEvenementService()->recupererUtilisateursPourAjout($idEvenement);
             $evenement = $resultat["evenement"];
             $utilisateurs = $resultat["utilisateurs"];
         } catch (ServiceException $e) {
             MessageFlash::ajouter($e->getTypeMessageFlash(), $e->getMessage());
-            $this->redirection($e->getRedirectionUrl());
+            self::redirection($e->getRedirectionUrl());
         }
 
-        $this->afficherVue('vueGenerale.php', [
+        self::afficherVue('vueGenerale.php', [
             "pagetitle" => "Ajout d'un membre",
             "cheminVueBody" => "evenement/formulaireAjoutMembreEvenement.php",
             "evenement" => $evenement,
@@ -153,44 +150,44 @@ class ControleurEvenement extends ControleurGenerique
 
     #[Route(path: "/evenements/ajouterMembre/{idEvenement}", name: "ajouterMembre",
         requirements: ['idEvenement' => '\d+'], methods: ['POST'])]
-    public function ajouterMembre(int $idEvenement): void
+    public static function ajouterMembre(int $idEvenement): void
     {
         $loginUtilisateur = $_REQUEST["login"] ?? null;
 
         try {
-            $codeSecret = $this->evenementService->ajouterMembre($idEvenement, $loginUtilisateur);
+            $codeSecret = self::getEvenementService()->ajouterMembre($idEvenement, $loginUtilisateur);
         } catch (ServiceException $e) {
-            $this->gererException($e);
+            self::gererException($e);
         }
         
         MessageFlash::ajouter("success", "Membre ajouté avec succès.");
-        $this->redirection("evenements/$codeSecret");
+        self::redirection("evenements/$codeSecret");
     }
 
     #[Route(path: "/evenements/quitter/{idEvenement}", name: "QuitterEvenement", requirements: ['idEvenement' => '\d+'])]
-    public function quitterEvenement(int $idEvenement): void
+    public static function quitterEvenement(int $idEvenement): void
     {
         try {
-            $this->evenementService->quitterEvenement($idEvenement);
+            self::getEvenementService()->quitterEvenement($idEvenement);
         } catch (ServiceException $e) {
-            $this->gererException($e, "danger");
+            self::gererException($e, "danger");
         }
 
         MessageFlash::ajouter("success", "Vous avez quitté l'événement avec succès.");
-        $this->redirection("evenements");
+        self::redirection("evenements");
     }
 
     #[Route(path: "/evenements/supprimerMembre/{idEvenement}/{login}", name: "SupprimerMembre")]
 
-    public function supprimerMembre(int $idEvenement, string $login): void
+    public static function supprimerMembre(int $idEvenement, string $login): void
     {
         try {
-            $codeSecret = $this->evenementService->supprimerMembre($idEvenement, $login);
+            $codeSecret = self::getEvenementService()->supprimerMembre($idEvenement, $login);
         } catch (ServiceException $e) {
-            $this->gererException($e, "danger");
+            self::gererException($e, "danger");
         }
 
         MessageFlash::ajouter("success", "Membre supprimé avec succès.");
-        $this->redirection("evenements/$codeSecret");
+        self::redirection("evenements/$codeSecret");
     }
 }

@@ -10,25 +10,25 @@ class ConnexionUtilisateur
 {
     private static string $cleConnexion = "_utilisateurConnecte";
 
-    public function connecter(string $loginUtilisateur): void
+    public static function connecter(string $loginUtilisateur): void
     {
         $session = Session::getInstance();
         $session->enregistrer(ConnexionUtilisateur::$cleConnexion, $loginUtilisateur);
     }
 
-    public function estConnecte(): bool
+    public static function estConnecte(): bool
     {
         $session = Session::getInstance();
         return $session->contient(ConnexionUtilisateur::$cleConnexion);
     }
 
-    public function deconnecter() : void
+    public static function deconnecter() : void
     {
         $session = Session::getInstance();
         $session->supprimer(ConnexionUtilisateur::$cleConnexion);
     }
 
-    public function getLoginUtilisateurConnecte(): ?string
+    public static function getLoginUtilisateurConnecte(): ?string
     {
         $session = Session::getInstance();
         if ($session->contient(ConnexionUtilisateur::$cleConnexion)) {
@@ -37,10 +37,10 @@ class ConnexionUtilisateur
             return null;
     }
 
-    public function estUtilisateur($login): bool
+    public static function estUtilisateur($login): bool
     {
-        return ($this->estConnecte() &&
-            $this->getLoginUtilisateurConnecte() == $login
+        return (ConnexionUtilisateur::estConnecte() &&
+            ConnexionUtilisateur::getLoginUtilisateurConnecte() == $login
         );
     }
 
