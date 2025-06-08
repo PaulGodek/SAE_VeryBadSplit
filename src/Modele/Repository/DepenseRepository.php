@@ -12,6 +12,9 @@ use PDOException;
 
 class DepenseRepository implements DepenseRepositoryInterface
 {
+
+    private ConnexionBaseDeDonneesInterface
+
     public function ajouter(Depense $depense): bool
     {
         $map = [
