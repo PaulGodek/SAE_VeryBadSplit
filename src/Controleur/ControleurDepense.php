@@ -62,11 +62,7 @@ class ControleurDepense extends ControleurGenerique
             return self::gererException($e, "danger");
         }
         
-        return self::afficherVue('vueGenerale.php', [
-            "pagetitle" => "Edition d'une dépense",
-            "cheminVueBody" => "depense/formulaireMiseAJourDepense.php",
-            "depense" => $depense
-        ]);
+        return self::afficherTwig("depense/formulaireMiseAJourDepense.html.twig", ["depense" => $depense]);
     }
 
     #[Route(path: "/depense/modifier/{idDepense}", name: "mettreAJourDepense", 

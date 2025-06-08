@@ -1,0 +1,64 @@
+{% extends "vueGenerale.html.twig" %}
+
+{% block page_title %}Mes événements | Very Bad Split{% endblock %}
+
+{% block page_content %}
+    <div class="hero-body pt-0 mt-5 is-align-items-stretch">
+        <div class="container">
+            <div class="has-text-centered is-size-2 has-text-white-ter">
+                <p>Mes événements ({{ evenements|length }})</p>
+            </div>
+            <div class="columns is-centered mt-2">
+                <div class="column is-6">
+                    <div class="has-text-centered">
+                        <a class="button has-background-black has-text-white-ter is-size-4"
+                           href="{{ route('FormulaireCreationEvenement') }}">
+                            <span class="icon is-left"><ion-icon name="add-circle"></ion-icon></span>
+                            <span>Créer un événement</span>
+                        </a>
+                    </div>
+                    <div class="mt-5">
+                        {% for evenement in evenements %}
+                            <div class="box media has-background-black has-text-white-ter">
+                                <div class="media-content">
+                                    <div class="is-size-3">{{ evenement.titre|e }}</div>
+                                    <div class="has-text-left is-size-5">
+                                        <span class="icon"><ion-icon name="time"></ion-icon></span>
+                                        <span>Créé le {{ evenement.date.format('d/m/Y') }}</span>
+                                    </div>
+                                    <div class="has-text-left is-size-5 mt-2">
+                                        <span class="icon"><ion-icon name="person"></ion-icon></span>
+                                        {% for membre in evenement.membres %}
+                                            <span class="liste-membre-item">{{ membre.prenom|slice(0,1)|e ~ membre.nom|slice(0,1)|e }}</span>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                <div class="media-right">
+                                    <div class="buttons">
+                                        <a class="icon-container"
+                                           href="{{ route('Evenement', { codeEvenement: evenement.codeSecret }) }}">
+                                            <span class="icon"><ion-icon name="eye"></ion-icon></span>
+                                        </a>
+                                        {% if evenement.estProprietaire(loginConnecte) %}
+                                            <a class="icon-container"
+                                               href="{{ route('FormulaireMiseAJourEvenement', { idEvenement: evenement.id }) }}">
+                                                <span class="icon"><ion-icon name="pencil"></ion-icon></span>
+                                            </a>
+                                            <a class="delete"
+                                               href="{{ route('SupprimerEvenement', { idEvenement: evenement.id }) }}"></a>
+                                        {% else %}
+                                            <a class="icon-container"
+                                               href="{{ route('QuitterEvenement', { idEvenement: evenement.id }) }}">
+                                                <span class="icon"><ion-icon name="person-remove"></ion-icon></span>
+                                            </a>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

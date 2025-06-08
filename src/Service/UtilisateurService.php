@@ -299,7 +299,7 @@ class UtilisateurService extends GeneriqueService implements UtilisateurServiceI
      * @throws ServiceException Si l'adresse email est manquante ou si aucun utilisateur n'est trouvé.
      */
     public function recupererUtilisateursParEmail(string $email): array {
-        $this->verifierConnexion();
+        //$this->verifierConnexion(); euuuh non en fait, on ne peut accéder à la récup que si on est pas connecté.
         
         if (empty($email)) {
             throw new ServiceException("Adresse email manquante.", "afficherFormulaireRecuperationCompte");

@@ -1,0 +1,134 @@
+{% extends "vueGenerale.html.twig" %}
+
+{% block page_title %}{{ evenement.titre }} | Very Bad Split{% endblock %}
+
+{% block page_content %}
+<div class="hero-body pt-0 mt-5 is-align-items-stretch">
+    <div class="container box has-background-black-ter">
+        <div class="columns is-centered">
+            <div class="column is-10">
+                <div class="container">
+                    <div class="has-text-white-ter has-text-centered ">
+                        <div class="is-size-2">
+                            <span>{{ evenement.titre|e }}</span>
+                        </div>
+                        <div>
+                            <span class="icon"><ion-icon name="time"></ion-icon></span>
+                            <span>Date : {{ evenement.date.format('d/m/Y') }}</span>
+                            <span class="icon"><ion-icon name="card"></ion-icon></span>
+                            <span>Coût total : {{ coupTotal|number_format(2) }}€</span>
+                        </div>
+                        <div class="buttons is-centered mt-2">
+                            {% if (evenement.estMembre(loginConnecte)) %}
+                                <a class="button is-link" href="{{ route('FormulaireMiseAJourEvenement', {idEvenement : evenement.id}) }}">
+                                    <span class="icon is-left"><ion-icon name="pencil"></ion-icon></span>
+                                    <span>Editer</span>
+                                </a>
+                                {% if (evenement.estProprietaire(loginConnecte)) %}
+                                    <a class="button is-danger" href="{{ route('SupprimerEvenement', {idEvenement : evenement.id}) }}">
+                                        <span class="icon is-left"><ion-icon name="trash"></ion-icon></span>
+                                        <span>Supprimer</span>
+                                    </a>
+                                {% else %}
+                                    <a class="button is-danger" href="{{ route('QuitterEvenement', {idEvenement : evenement.id}) }}">
+                                        <span class="icon is-left"><ion-icon name="person-remove"></ion-icon></span>
+                                        <span>Quitter</span>
+                                    </a>
+                                {% endif %}
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="columns">
+                        <div class="column is-half">
+                            <div class="has-text-centered">
+                                <p class="is-size-4"><strong>Dépenses</strong></p>
+                                {% if (evenement.estMembre(loginConnecte)) %}
+                                    <a class="button has-background-black has-text-white-ter is-size-4" href="{{ route("afficherFormulaireCreationDepense", {idEvenement : evenement.id}) }}">
+                                        <span class="icon is-left"><ion-icon name="add-circle"></ion-icon></span>
+                                        <span>Ajouter une dépense</span>
+                                    </a>
+                                {% endif %}
+                            </div>
+                            <div class="mt-5 is-overflow-y-auto scrollable-list pr-3">
+                                {% for depense in evenement.depenses %}
+                                    <div class="box media">
+                                        <div class="media-content">
+                                            <div class="is-size-4">
+                                                <span><strong>{{ depense.titre|e }}</strong></span>
+                                            </div>
+                                            <div class="has-text-left is-size-5">
+                                                <span class="icon is-left"><ion-icon name="time"></ion-icon></span>
+                                                <span>Le {{ depense.date.format('d/m/Y') }}</span>
+                                            </div>
+                                            <div class="has-text-left is-size-5">
+                                                <span class="icon is-left"><ion-icon name="card"></ion-icon></span>
+                                                <span>{{ depense.montant|number_format(2) }}€ payé par {{ depense.payeur.prenom|e~" "~depense.payeur.nom|e }}</span>
+                                            </div>
+                                            <div class="has-text-left is-size-5 mt-2">
+                                                <span class="icon is-left"><ion-icon name="person"></ion-icon></span>
+                                                {% for participant in depense.participants %}
+                                                    <span class="liste-membre-item">{{ participant.prenom|slice(0, 1)|e~participant.nom|slice(0, 1)|e }}</span>
+                                                {% endfor %}
+                                            </div>
+                                        </div>
+                                        <div class="media-right">
+                                            {% if evenement.estMembre(loginConnecte) %}
+                                                <a class="icon-container" href="{{ route("afficherFormulaireMiseAJourDepense", {idDepense : depense.id}) }}"><span class="icon pb-3"><ion-icon name="pencil"></ion-icon></span></a>
+                                                <a class="delete" href="{{ route("supprimerDepense", {idDepense : depense.id}) }}"></a>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        <div class="column is-half">
+                            <div>
+                                <div class="has-text-centered">
+                                    <p class="is-size-4"><strong>Membres</strong></p>
+                                    {% if evenement.estMembre(loginConnecte) %}
+                                        {% if evenement.estProprietaire(loginConnecte) %}
+                                            <a class="button has-background-black has-text-white-ter is-size-4" href="{{ route("afficherFormulaireAjoutMembre", {idEvenement : evenement.id}) }}">
+                                                <span class="icon is-left"><ion-icon name="person-add"></ion-icon></span>
+                                                <span>Ajouter un membre</span>
+                                            </a>
+                                        {% else %}
+                                            <button disabled class="button has-background-black has-text-white-ter is-size-4">
+                                                <span class="icon is-left"><ion-icon name="person-add"></ion-icon></span>
+                                                <span>Ajouter un membre</span>
+                                            </button>
+                                        {% endif %}
+                                    {% endif %}
+                                </div>
+                                <div class="mt-5 has-background-black-ter is-overflow-y-auto scrollable-list pr-3">
+                                    {% for membre in evenement.membres %}
+                                        <div class="box media">
+                                            <div class="media-content">
+                                                <div class="is-size-4 is-wrapped">
+                                                    <span><strong>{{ membre.prenom|e~" "~membre.nom|e }}</strong></span>
+                                                </div>
+                                                {% for dette in dettes[membre.login] %}
+                                                    {% if (dette["montant"] > 0) %}
+                                                        <div class="has-text-left is-size-5">
+                                                            <span class="icon is-left"><ion-icon name="card"></ion-icon></span>
+                                                            <span>Doit {{ dette["montant"]|number_format(2) }}€ à {{ dette["membre"].prenom|e~" "~dette["membre"].nom|e }}</span>
+                                                        </div>
+                                                    {% endif %}
+                                                {% endfor %}
+                                            </div>
+                                            <div class="media-right">
+                                                {% if evenement.estProprietaire(loginConnecte) %}
+                                                    <a class="delete" href="{{ route("SupprimerMembre", {idEvenement : evenement.id, login : membre.login}) }}"></a>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

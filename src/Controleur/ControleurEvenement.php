@@ -29,12 +29,11 @@ class ControleurEvenement extends ControleurGenerique
             return self::gererException($e, "warning");
         }
 
-        return self::afficherVue('vueGenerale.php', [
-            "pagetitle" => $evenement->getTitre(),
-            "cheminVueBody" => "evenement/evenement.php",
+        return self::afficherTwig("evenement/evenement.html.twig", [
             "evenement" => $evenement,
-            "coutTotal" => $coutTotal,
+            "coupTotal" => $coutTotal,
             "dettes" => $dettes,
+            "loginConnecte" => ConnexionUtilisateur::getLoginUtilisateurConnecte()
         ]);
     }
 
@@ -48,10 +47,9 @@ class ControleurEvenement extends ControleurGenerique
             return self::gererException($e, "danger");
         }
 
-        return self::afficherVue('vueGenerale.php', [
-            "pagetitle" => "Liste des événements de $login",
-            "cheminVueBody" => "evenement/listeEvenementsUtilisateur.php",
-            "evenements" => $evenements
+        return self::afficherTwig("evenement/listeEvenementsUtilisateur.html.twig", [
+            "evenements" => $evenements,
+            "loginConnecte" => ConnexionUtilisateur::getLoginUtilisateurConnecte()
         ]);
     }
 
@@ -62,10 +60,7 @@ class ControleurEvenement extends ControleurGenerique
         } catch (ServiceException $e) {
             return self::gererException($e, "danger");
         }
-        return self::afficherVue('vueGenerale.php', [
-            "pagetitle" => "Ajout d'un événement",
-            "cheminVueBody" => "evenement/formulaireCreationEvenement.php",
-        ]);
+        return self::afficherTwig("evenement/formulaireCreationEvenement.html.twig");
     }
 
     #[Route(path: "/evenements/creation", name: "CreationEvenement", methods: ['POST'])]
@@ -94,9 +89,7 @@ class ControleurEvenement extends ControleurGenerique
             return self::gererException($e, "danger");
         }
 
-        return self::afficherVue('vueGenerale.php', [
-            "pagetitle" => "Modification d'un événement",
-            "cheminVueBody" => "evenement/formulaireMiseAJourEvenement.php",
+        return self::afficherTwig("evenement/formulaireMiseAJourEvenement.html.twig", [
             "evenement" => $evenement
         ]);
     }
@@ -142,9 +135,7 @@ class ControleurEvenement extends ControleurGenerique
             return self::redirection($e->getRedirectionRoute(), $e->getArguments());
         }
 
-        return self::afficherVue('vueGenerale.php', [
-            "pagetitle" => "Ajout d'un membre",
-            "cheminVueBody" => "evenement/formulaireAjoutMembreEvenement.php",
+        return self::afficherTwig("evenement/formulaireAjoutMembreEvenement.html.twig", [
             "evenement" => $evenement,
             "utilisateurs" => $utilisateurs
         ]);
@@ -180,7 +171,6 @@ class ControleurEvenement extends ControleurGenerique
     }
 
     #[Route(path: "/evenements/supprimerMembre/{idEvenement}/{login}", name: "SupprimerMembre")]
-
     public static function supprimerMembre(int $idEvenement, string $login): Response
     {
         try {

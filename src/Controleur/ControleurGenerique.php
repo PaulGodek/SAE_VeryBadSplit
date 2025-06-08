@@ -42,9 +42,7 @@ abstract class ControleurGenerique {
 
     public static function afficherErreur($messageErreur = "",  $statusCode = 400): Response
     {
-        $reponse = self::afficherVue('vueGenerale.php', [
-            "pagetitle" => "Problème",
-            "cheminVueBody" => "erreur.php",
+        $reponse = self::afficherTwig("erreur.html.twig", [
             "statusCode" => $statusCode,
             "messageErreur" => $messageErreur
         ]);

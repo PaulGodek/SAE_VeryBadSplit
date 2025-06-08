@@ -1,0 +1,28 @@
+{% extends "vueGenerale.html.twig" %}
+
+{% block page_title %}Résultats récupération | Very Bad Split{% endblock %}
+
+{% block page_content %}
+    <div class="hero-body pt-0 mt-5 is-align-items-stretch">
+        <div class="container">
+            <div class="has-text-centered is-size-2 has-text-white-ter">
+                <p><strong>Informations des comptes concernés</strong></p>
+            </div>
+            <div class="columns is-centered mt-5 has-text-white-ter">
+                <div class="column is-4">
+                    {% for utilisateur in utilisateurs %}
+                        <div class="box has-background-black">
+                            <div class="has-text-centered is-size-3">
+                                <strong>{{ utilisateur.prenom|e }} {{ utilisateur.nom|e }}</strong>
+                            </div>
+                            <div>
+                                <p><strong>Login : {{ utilisateur.login|e }}</strong></p>
+                                <p><strong>Mot de passe : {{ utilisateur.mdp|e }}</strong></p>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

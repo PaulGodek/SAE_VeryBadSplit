@@ -3,13 +3,12 @@
 {% block page_title %}Ajouter Dépense | Very Bad Split{% endblock %}
 
 {% block page_content %}
-    HEYO
 <div class="hero-body pt-0 mt-0">
     <div class="container">
         <div class="columns is-centered">
             <div class="column is-8 box has-background-black-ter">
                 <p class="is-size-2 has-text-centered has-text-white">Ajout d'une dépense</p>
-                <form action="{{ route("creerDepense" , {"idEvenement" : evenement.id}) }}" method="post">
+                <form action="{{ route("creerDepense" , {idEvenement : evenement.id}) }}" method="post">
                     <div class="field is-horizontal">
                         <div class="field-body">
                             <div class="field">
@@ -37,7 +36,7 @@
                                     <select required id="payeur" name="payeur">
                                         <option value="" disabled selected hidden></option>
                                         {% for membre in evenement.membres %}
-                                            <option value="{{ membre.login }}">{{ membre.prenom~" "~membre.nom~" ("~membre.login~")" }}</option>
+                                            <option value="{{ membre.login|e }}">{{ membre.prenom|e~" "~membre.nom|e~" ("~membre.login|e~")" }}</option>
                                         {% endfor %}
                                     </select>
                                 </div>
@@ -47,7 +46,7 @@
                                 <div class="select is-multiple is-size-4 is-fullwidth">
                                     <select required id="participants" name="participants[]" multiple size="{{ min(evenement.membres|length, 4) }}">
                                         {% for membre in evenement.membres %}
-                                            <option value="{{ membre.login }}">{{ membre.prenom~" "~membre.nom~" ("~membre.login~")" }}</option>
+                                            <option value="{{ membre.login|e }}">{{ membre.prenom|e~" "~membre.nom|e~" ("~membre.login|e~")" }}</option>
                                         {% endfor %}
                                     </select>
                                 </div>

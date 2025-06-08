@@ -5,6 +5,7 @@ namespace App\VeryBadSplit\Controleur;
 use App\VeryBadSplit\Lib\ConnexionUtilisateur;
 use App\VeryBadSplit\Lib\Conteneur;
 use App\VeryBadSplit\Lib\MessageFlash;
+use App\VeryBadSplit\Modele\HTTP\Cookie;
 use App\VeryBadSplit\Service\Exception\ServiceException;
 use App\VeryBadSplit\Service\UtilisateurService;
 use Symfony\Component\HttpFoundation\Response;
@@ -25,10 +26,8 @@ class ControleurUtilisateur extends ControleurGenerique
             return self::gererException($e, 'danger');
         }
 
-        return self::afficherVue('vueGenerale.php', [
-            "utilisateur" => $utilisateur,
-            "pagetitle" => "Détails du compte",
-            "cheminVueBody" => "utilisateur/detail.php"
+        return self::afficherTwig("utilisateur/detail.html.twig", [
+            "utilisateur" => $utilisateur
         ]);
     }
 
@@ -41,10 +40,7 @@ class ControleurUtilisateur extends ControleurGenerique
             return self::gererException($e);
         }
 
-        return self::afficherVue('vueGenerale.php', [
-            "pagetitle" => "Création d'un utilisateur",
-            "cheminVueBody" => "utilisateur/formulaireCreation.php"
-        ]);
+        return self::afficherTwig("utilisateur/formulaireCreation.html.twig");
     }
 
     #[Route(path: '/inscription', name: 'creerDepuisFormulaire', methods: ['POST'])]
@@ -75,10 +71,8 @@ class ControleurUtilisateur extends ControleurGenerique
             return self::gererException($e);
         }
 
-        return self::afficherVue('vueGenerale.php', [
-            "pagetitle" => "Mise à jour du profil",
-            "cheminVueBody" => "utilisateur/formulaireMiseAJour.php",
-            "utilisateur" => $utilisateur,
+        return self::afficherTwig("utilisateur/formulaireMiseAJour.html.twig", [
+            "utilisateur" => $utilisateur
         ]);
     }
 
@@ -124,10 +118,10 @@ class ControleurUtilisateur extends ControleurGenerique
         } catch (ServiceException $e) {
             return self::gererException($e);
         }
-        
-        return self::afficherVue('vueGenerale.php', [
-            "pagetitle" => "Formulaire de connexion",
-            "cheminVueBody" => "utilisateur/formulaireConnexion.php"
+
+        return self::afficherTwig("utilisateur/formulaireConnexion.html.twig", [
+            "login" => Cookie::contient("login") ? Cookie::lire("login") : "",
+            "mdp" => Cookie::contient("mdp") ? Cookie::lire("mdp") : ""
         ]);
     }
 
@@ -164,10 +158,8 @@ class ControleurUtilisateur extends ControleurGenerique
         if(ConnexionUtilisateur::estConnecte()) {
             return self::redirection("MesEvenements");
         }
-        return self::afficherVue('vueGenerale.php', [
-            "pagetitle" => "Récupérer mon compte",
-            "cheminVueBody" => "utilisateur/formulaireRecuperationCompte.php"
-        ]);
+
+        return self::afficherTwig("utilisateur/formulaireRecuperationCompte.html.twig");
     }
 
     #[Route(path: '/recuperation', name: 'recupererCompte', methods: ['POST'])]
@@ -180,9 +172,7 @@ class ControleurUtilisateur extends ControleurGenerique
             return self::gererException($e, "warning");
         }
 
-        return self::afficherVue('vueGenerale.php', [
-            "pagetitle" => "Récupérer mon compte",
-            "cheminVueBody" => "utilisateur/resultatRecuperationCompte.php",
+        return self::afficherTwig("utilisateur/resultatRecuperationCompte.html.twig", [
             "utilisateurs" => $utilisateurs
         ]);
     }
