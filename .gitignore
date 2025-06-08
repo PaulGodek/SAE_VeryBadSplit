@@ -2,3 +2,5 @@
 *.Identifier
 /vendor/
 CLAUDE.md
+.env
+.env.*

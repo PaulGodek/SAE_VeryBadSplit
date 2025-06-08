@@ -2,10 +2,12 @@
 
 namespace App\VeryBadSplit\Controleur;
 
+use App\VeryBadSplit\Lib\Conteneur;
 use App\VeryBadSplit\Lib\Helper;
 use App\VeryBadSplit\Lib\MessageFlash;
 use App\VeryBadSplit\Service\Exception\ServiceException;
 use JetBrains\PhpStorm\NoReturn;
+use Symfony\Component\Routing\Generator\UrlGenerator;
 
 abstract class ControleurGenerique {
 
@@ -20,6 +22,16 @@ abstract class ControleurGenerique {
     protected static function redirection(string $url) : void
     {
         header("Location: " . Helper::url($url));
+        exit();
+    }
+    
+    #[NoReturn]
+    protected static function redirectionVersRoute(string $nomRoute, array $parametres = []) : void
+    {
+        /** @var UrlGenerator $generateurUrl */
+        $generateurUrl = Conteneur::recupererService("generateurUrl");
+        $url = $generateurUrl->generate($nomRoute, $parametres);
+        header("Location: " . $url);
         exit();
     }
 

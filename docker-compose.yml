@@ -1,0 +1,44 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    working_dir: /var/www/html
+    volumes:
+      - ./:/var/www/html
+    ports:
+      - "8080:80"
+    depends_on:
+      - db
+    environment:
+      # Utilisation de DATABASE_URL pour Symfony, plus propre
+      DATABASE_URL: mysql://${DB_USER:-verybadsplit_user}:${DB_PASSWORD:-verybadsplit_pass}@db:3306/${DB_NAME:-verybadsplit}?serverVersion=8.0.32&charset=utf8mb4
+
+  db:
+    image: mysql:8.0
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: ${DB_NAME:-verybadsplit}
+      MYSQL_USER: ${DB_USER:-verybadsplit_user}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-verybadsplit_pass}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-root_password}
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./docker/mysql-init:/docker-entrypoint-initdb.d
+
+  # Optionnel : Pour une utilisation de verybadsplit indépendante de l'IUT
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    restart: unless-stopped
+    environment:
+      PMA_HOST: db
+      PMA_PORT: 3306
+      UPLOAD_LIMIT: 100M
+    ports:
+      - "8081:80"
+    depends_on:
+      - db
+
+volumes:
+  db_data:

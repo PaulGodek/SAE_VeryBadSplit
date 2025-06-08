@@ -155,7 +155,7 @@ class ControleurUtilisateur extends ControleurGenerique
         } else {
             MessageFlash::ajouter("danger", "Utilisateur non connecté.");
         }
-        self::redirection("");
+        self::redirectionVersRoute("accueil");
     }
 
     #[Route(path: '/recuperation', name: 'afficherFormulaireRecuperationCompte', methods: ['GET'])]

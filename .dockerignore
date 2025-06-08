@@ -1,0 +1,38 @@
+# Git
+.git
+.gitignore
+
+# Env files
+.env
+.env.* # pour plusieurs environnements
+
+# Dépendances
+vendor/
+node_modules/
+
+# Logs et caches
+*.log
+*.cache
+*.tmp
+
+# Fichiers système
+.DS_Store
+Thumbs.db
+
+# IDEs et éditeurs
+.idea/
+.vscode/
+*.sublime-workspace
+*.sublime-project
+
+# Docker
+docker-compose.override.yml
+Dockerfile.*
+.dockerignore
+
+# Autres
+coverage/
+phpunit.xml
+phpunit.result.cache
+*.swp
+*.bak

@@ -156,7 +156,7 @@ class UtilisateurService extends GeneriqueService implements UtilisateurServiceI
                 "compte/modifier", "danger");
         }
 
-        if (!Validator::isValideMdp($mdp)) {
+        if (!empty($mdp) && !Validator::isValideMdp($mdp)) {
             throw new ServiceException("Le mot de passe ne respecte pas le modèle donné.",
                 "compte/modifier", "danger");
         }
