@@ -45,7 +45,10 @@ class ControleurDepense extends ControleurGenerique
         $montant = $_REQUEST["montant"] ?? null;
         $payeur = $_REQUEST["payeur"] ?? null;
         $participants = $_REQUEST["participants"] ?? null;
-        
+
+        if(is_null($participants)){
+            $participants=[];
+        }
         try {
             $codeSecret = self::getDepenseService()->creerDepense($idEvenement, $titre, $montant, $payeur, $participants);
         } catch (ServiceException $e) {
@@ -61,6 +64,8 @@ class ControleurDepense extends ControleurGenerique
     public static function afficherFormulaireMiseAJourDepense(int $idDepense): void {
         try {
             $depense = self::getDepenseService()->verifierAccesDepense($idDepense);
+            $evenement = self::getEvenementService()->verifierAccesEvenement($depense->getEvenement()->getId());
+            $participants=$depense->getParticipants();
         } catch (ServiceException $e) {
             self::gererException($e, "danger");
         }
@@ -68,6 +73,8 @@ class ControleurDepense extends ControleurGenerique
         self::afficherVue('vueGenerale.php', [
             "pagetitle" => "Edition d'une dépense",
             "cheminVueBody" => "depense/formulaireMiseAJourDepense.php",
+            "evenement" => $evenement,
+            "participants" => $participants,
             "depense" => $depense
         ]);
     }
@@ -79,6 +86,10 @@ class ControleurDepense extends ControleurGenerique
         $montant = $_REQUEST["montant"] ?? null;
         $payeur = $_REQUEST["payeur"] ?? null;
         $participants = $_REQUEST["participants"] ?? null;
+
+        if(is_null($participants)){
+            $participants=[];
+        }
 
         try {
             $codeSecret = self::getDepenseService()->mettreAJourDepense($idDepense, $titre, $montant, $payeur, $participants);
@@ -102,4 +113,39 @@ class ControleurDepense extends ControleurGenerique
         MessageFlash::ajouter("success", "Dépense supprimée avec succès.");
         self::redirection("evenements/$codeSecret");
     }
+
+
+    #[Route(path: "/depense/supprimerParticipant/{idDepense}/{login}", name: "SupprimerParticipant")]
+
+    public static function supprimerParticipant(int $idDepense, string $login): void
+    {
+        try {
+            self::getDepenseService()->supprimerParticipant($idDepense, $login);
+        } catch (ServiceException $e) {
+            self::gererException($e, "danger");
+        }
+
+        MessageFlash::ajouter("success", "Participant supprimé avec succès.");
+        self::redirection("depense/modifier/$idDepense");
+
+
+    }
+
+    #[Route(path: "/depense/ajouterParticipant/{idDepense}/{login}", name: "AjouterParticipant")]
+
+    public static function ajouterParticipant(int $idDepense, string $login): void
+    {
+        try {
+            self::getDepenseService()->ajouterParticipant($idDepense, $login);
+        } catch (ServiceException $e) {
+            self::gererException($e, "danger");
+        }
+
+        MessageFlash::ajouter("success", "Participant ajouté avec succès.");
+        self::redirection("depense/modifier/$idDepense");
+
+
+    }
+
+
 }

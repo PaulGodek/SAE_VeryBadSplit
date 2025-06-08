@@ -2,14 +2,16 @@
 
 namespace App\VeryBadSplit\Modele\Repository\Interface;
 
+use App\VeryBadSplit\Modele\DataObject\AbstractDataObject;
 use App\VeryBadSplit\Modele\DataObject\Depense;
+use App\VeryBadSplit\Modele\Repository\AbstractRepository;
 
 interface DepenseRepositoryInterface
 {
     public function ajouter(Depense $depense): bool;
     
-    public function recuperer(int $id): ?Depense;
-    
+    public function recuperer(): ?AbstractDataObject;
+
     /**
      * @return Depense[]
      */
@@ -17,9 +19,11 @@ interface DepenseRepositoryInterface
     
     public function mettreAJour(Depense $depense): void;
     
-    public function supprimer(int $id): bool;
+    public function supprimer(string $id): bool;
     
     public function getNextId(): int;
     
     public function compterNombreDepensesEvenement($idEvenement): int;
+
+    public function recupererParEvenement($idEvenement): ?array;
 }

@@ -4,10 +4,11 @@ namespace App\VeryBadSplit\Controleur;
 
 use App\VeryBadSplit\Lib\ConnexionUtilisateur;
 use App\VeryBadSplit\Lib\Conteneur;
-use App\VeryBadSplit\Lib\Helper;
 use App\VeryBadSplit\Lib\MessageFlash;
+use App\VeryBadSplit\Service\DepenseService;
 use App\VeryBadSplit\Service\EvenementService;
 use App\VeryBadSplit\Service\Exception\ServiceException;
+use App\VeryBadSplit\Service\UtilisateurService;
 use Symfony\Component\Routing\Attribute\Route;
 
 class ControleurEvenement extends ControleurGenerique
@@ -15,6 +16,14 @@ class ControleurEvenement extends ControleurGenerique
     private static function getEvenementService(): EvenementService
     {
         return Conteneur::recupererService("evenementService");
+    }
+    private static function getDepenseService(): DepenseService
+    {
+        return Conteneur::recupererService("depenseService");
+    }
+
+    private static function getUtilisateurService():UtilisateurService
+    {return Conteneur::recupererService("utilisateurService");
     }
     #[Route(path: "/evenements/{codeEvenement}", name:"Evenement", requirements: ['codeEvenement' => '[a-zA-Z0-9]{64}'])]
     public static function afficherEvenement(string $codeEvenement): void
@@ -24,14 +33,21 @@ class ControleurEvenement extends ControleurGenerique
             $evenement = $resultat["evenement"];
             $dettes = $resultat["dettes"];
             $coutTotal = $resultat["coutTotal"];
+            $depenses = self::getDepenseService()->recupererDepensesParEvenement($evenement->getId());
         } catch (ServiceException $e) {
             self::gererException($e, "warning");
+        }
+
+        if(is_null($depenses)){
+            $depenses=[];
+
         }
 
         self::afficherVue('vueGenerale.php', [
             "pagetitle" => $evenement->getTitre(),
             "cheminVueBody" => "evenement/evenement.php",
             "evenement" => $evenement,
+            "depenses" => $depenses,
             "coutTotal" => $coutTotal,
             "dettes" => $dettes,
         ]);
@@ -43,12 +59,14 @@ class ControleurEvenement extends ControleurGenerique
         $login = ConnexionUtilisateur::getLoginUtilisateurConnecte() ?? null;
         try {
             $evenements = self::getEvenementService()->recupererEvenementsUtilisateur($login);
+
         } catch (ServiceException $e) {
             self::gererException($e, "danger");
         }
         self::afficherVue('vueGenerale.php', [
             "pagetitle" => "Liste des événements de $login",
             "cheminVueBody" => "evenement/listeEvenementsUtilisateur.php",
+
             "evenements" => $evenements
         ]);
     }
@@ -190,4 +208,6 @@ class ControleurEvenement extends ControleurGenerique
         MessageFlash::ajouter("success", "Membre supprimé avec succès.");
         self::redirection("evenements/$codeSecret");
     }
+
+
 }

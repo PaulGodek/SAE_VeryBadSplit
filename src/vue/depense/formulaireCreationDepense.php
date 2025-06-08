@@ -44,12 +44,20 @@ use App\VeryBadSplit\Modele\DataObject\Evenement;
                             </div>
                             <div class="field">
                                 <label class="label is-size-4" for="participants">Participants</label>
-                                <div class="select is-multiple is-size-4 is-fullwidth">
-                                    <select required id="participants" name="participants[]" multiple size="<?= min(count($evenement->getMembres()), 4) ?>">
-                                        <?php foreach ($evenement->getMembres() as $membre) {?>
-                                            <option value="<?=htmlspecialchars($membre->getLogin())?>"><?=htmlspecialchars($membre->getPrenom()." ".$membre->getNom()." (".$membre->getLogin().")")?></option>
-                                        <?php }?>
-                                    </select>
+                                <div class="box" style="max-height: 200px; overflow-y: auto;">
+                                    <?php foreach ($evenement->getMembres() as $membre):
+                                        $login = htmlspecialchars($membre->getLogin());
+                                        $nomComplet = htmlspecialchars($membre->getPrenom() . " " . $membre->getNom() . " ($login)");
+                                        ?>
+                                        <div class="level mb-2">
+                                            <div class="level-left">
+                                                <label>
+                                                    <input class="mr-2" type="checkbox" name="participants[]" value="<?= $login ?>">
+                                                    <span class="is-size-5"><?= $nomComplet ?></span>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    <?php endforeach; ?>
                                 </div>
                             </div>
                         </div>

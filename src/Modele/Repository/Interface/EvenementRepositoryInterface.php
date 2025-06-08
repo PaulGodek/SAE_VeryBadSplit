@@ -2,12 +2,15 @@
 
 namespace App\VeryBadSplit\Modele\Repository\Interface;
 
+use App\VeryBadSplit\Modele\DataObject\AbstractDataObject;
 use App\VeryBadSplit\Modele\DataObject\Evenement;
+use App\VeryBadSplit\Modele\Repository\AbstractRepository;
 
 interface EvenementRepositoryInterface
 {
-    public function recuperer($id): ?Evenement;
-    
+    public function recuperer(): ?AbstractDataObject;
+
+
     public function recupererParCodeSecret($code): ?Evenement;
     
     /**
@@ -17,7 +20,7 @@ interface EvenementRepositoryInterface
     
     public function mettreAJour(Evenement $evenement): void;
     
-    public function supprimer(int $id): bool;
+    public function supprimer(string $id): bool;
     
     public function getNextId(): int;
     

@@ -1,7 +1,11 @@
 <?php
+
+use App\VeryBadSplit\Lib\Helper;
 use App\VeryBadSplit\Modele\DataObject\Depense;
-/** @var Depense $depense */
-$evenement = $depense->getEvenement();
+use App\VeryBadSplit\Modele\DataObject\Evenement;
+
+/** @var Depense $depense
+ * @var Evenement $evenement*/
 ?>
 
 <div class="hero-body pt-0 mt-0">
@@ -43,13 +47,38 @@ $evenement = $depense->getEvenement();
                             </div>
                             <div class="field">
                                 <label class="label is-size-4" for="participants">Participants</label>
-                                <div class="select is-multiple is-size-4 is-fullwidth">
-                                    <select required id="participants" name="participants[]" multiple size="<?= min(count($evenement->getMembres()), 4) ?>">
-                                        <option value="" disabled selected hidden></option>
-                                        <?php foreach ($evenement->getMembres() as $membre) {?>
-                                            <option <?= $depense->estParticipant($membre->getLogin()) ? "selected" : ""?> value="<?=htmlspecialchars($membre->getLogin())?>"><?=htmlspecialchars($membre->getPrenom()." ".$membre->getNom()." (".$membre->getLogin().")")?></option>
-                                        <?php }?>
-                                    </select>
+                                <div class="box" style="max-height: 200px; overflow-y: auto;">
+                                    <?php foreach ($evenement->getMembres() as $membre):
+                                        $login = htmlspecialchars($membre->getLogin());
+                                        $nomComplet = htmlspecialchars($membre->getPrenom() . " " . $membre->getNom() . " ($login)");
+                                        $isParticipant = $depense->estParticipant($membre->getLogin());
+                                        $isPayeur = $depense->estPayeur($membre);
+                                        ?>
+                                        <div class="level mb-2">
+                                            <div class="level-left">
+                                                <?php if (!$isParticipant): ?>
+                                                    <div class="level-right">
+                                                        <a class="is-size-4" title="Ajouter"
+                                                           href="<?= Helper::url("depense/ajouterParticipant/" . rawurlencode($depense->getId()) . "/" . rawurlencode($login)) ?>">
+                                                            <span class="icon is-left"><ion-icon name="add-circle"></ion-icon></span>
+                                                        </a>
+                                                        <span class="is-size-5"><?= $nomComplet ?></span>
+                                                    </div>
+
+                                                <?php else: ?>
+                                                    <span class="is-size-5"><?= $nomComplet ?></span>
+                                                <?php endif; ?>
+                                            </div>
+
+                                            <?php if ($isParticipant): ?>
+                                                <div class="level-right">
+                                                    <a class="delete is-medium" title="Supprimer"
+                                                       href="<?= Helper::url("depense/supprimerParticipant/" . rawurlencode($depense->getId()) . "/" . rawurlencode($login)) ?>">
+                                                    </a>
+                                                </div>
+                                            <?php endif; ?>
+                                        </div>
+                                    <?php endforeach; ?>
                                 </div>
                             </div>
                         </div>

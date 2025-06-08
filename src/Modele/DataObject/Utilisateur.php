@@ -2,7 +2,9 @@
 
 namespace App\VeryBadSplit\Modele\DataObject;
 
-class Utilisateur
+use App\VeryBadSplit\Modele\Repository\AbstractRepository;
+
+class Utilisateur extends AbstractDataObject
 {
     public function __construct(
         private string  $login,
@@ -10,7 +12,6 @@ class Utilisateur
         private ?string $prenom = null,
         private ?string $email = null,
         private ?string $mdpHache = null,
-        private ?string $mdp = null
     )
     {
     }
@@ -58,16 +59,6 @@ class Utilisateur
     public function setMdpHache(?string $mdpHache): void
     {
         $this->mdpHache = $mdpHache;
-    }
-
-    public function getMdp(): ?string
-    {
-        return $this->mdp;
-    }
-
-    public function setMdp(?string $mdp): void
-    {
-        $this->mdp = $mdp;
     }
 
     public static function construireUtilisateursDepuisListe(?array $liste): array
