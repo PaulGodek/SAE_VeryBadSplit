@@ -105,6 +105,11 @@ class UtilisateurService extends GeneriqueService implements UtilisateurServiceI
                 "inscription");
         }
 
+        if ($this->utilisateurRepository->recupererParEmail($email)) {
+            throw new ServiceException("Ce mail est déjà pris.",
+                "inscription");
+        }
+
         $utilisateur = new Utilisateur(
             login: $login,
             nom: $nom,

@@ -58,7 +58,7 @@ class Depense extends AbstractDataObject
         return $this->payeur;
     }
 
-    public function setpayeur(Utilisateur $payeur): void
+    public function setPayeur(Utilisateur $payeur): void
     {
         $this->payeur = $payeur;
     }

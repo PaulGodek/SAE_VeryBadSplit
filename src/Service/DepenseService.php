@@ -202,7 +202,7 @@ class DepenseService extends GeneriqueService implements DepenseServiceInterface
 
         $depense->setTitre($titre);
         $depense->setMontant($montant);
-        $depense->setpayeur($payeur);
+        $depense->setPayeur($payeur);
         $depense->setParticipants($participants);
 
 
