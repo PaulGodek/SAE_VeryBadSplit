@@ -131,5 +131,21 @@ class ControleurDepense extends ControleurGenerique
 
     }
 
+    #[Route(path: "/depense/ajouterParticipant/{idDepense}/{login}", name: "AjouterParticipant")]
+
+    public static function ajouterParticipant(int $idDepense, string $login): void
+    {
+        try {
+            self::getDepenseService()->ajouterParticipant($idDepense, $login);
+        } catch (ServiceException $e) {
+            self::gererException($e, "danger");
+        }
+
+        MessageFlash::ajouter("success", "Participant ajouté avec succès.");
+        self::redirection("depense/modifier/$idDepense");
+
+
+    }
+
 
 }

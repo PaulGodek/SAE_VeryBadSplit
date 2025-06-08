@@ -57,10 +57,14 @@ use App\VeryBadSplit\Modele\DataObject\Evenement;
                                         <div class="level mb-2">
                                             <div class="level-left">
                                                 <?php if (!$isParticipant): ?>
-                                                    <label>
-                                                        <input class="mr-2" type="checkbox" name="participants[]" value="<?= $login ?>">
+                                                    <div class="level-right">
+                                                        <a class="is-size-4" title="Ajouter"
+                                                           href="<?= Helper::url("depense/ajouterParticipant/" . rawurlencode($depense->getId()) . "/" . rawurlencode($login)) ?>">
+                                                            <span class="icon is-left"><ion-icon name="add-circle"></ion-icon></span>
+                                                        </a>
                                                         <span class="is-size-5"><?= $nomComplet ?></span>
-                                                    </label>
+                                                    </div>
+
                                                 <?php else: ?>
                                                     <span class="is-size-5"><?= $nomComplet ?></span>
                                                 <?php endif; ?>

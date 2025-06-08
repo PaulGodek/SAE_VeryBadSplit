@@ -279,9 +279,50 @@ class DepenseService extends GeneriqueService implements DepenseServiceInterface
                 "depense/modifier/$idDepense");
         }
 
+        if (count($depense->getParticipants())==1) {
+            throw new ServiceException("Cet utilisateur est le dernier participant, vous ne pouvez pas le supprimer.",
+                "depense/modifier/$idDepense");
+        }
+
 
 
         $this->depenseRepository->supprimerJointure($depense,$loginUtilisateur);
+        $this->depenseRepository->mettreAJour($depense);
+
+        return $codeSecret;
+
+    }
+
+
+    /**
+     * Ajoute un membre d'un événement.
+     *
+     * @param int $idDepense L'identifiant de la dépense.
+     * @param string $loginUtilisateur Le login de l'utilisateur à ajouter.
+     * @return string Le code secret de l'événement.
+     * @throws ServiceException Si la dépense ou l'utilisateur n'existe pas, ou si l'utilisateur n'est pas membre.
+     */
+    public function ajouterParticipant(int $idDepense, string $loginUtilisateur): string
+    {
+        $depense = $this->verifierAccesDepense($idDepense);
+
+        $utilisateurRepository = $this->utilisateurRepository;
+        $utilisateur = $utilisateurRepository->recupererParClePrimaire($loginUtilisateur);
+
+        $codeSecret = $depense->getEvenement()->getCodeSecret();
+        if (!$utilisateur) {
+            throw new ServiceException("Utilisateur inexistant.",
+                "depense/modifier/$idDepense");
+        }
+
+        if ($depense->estParticipant($loginUtilisateur)) {
+            throw new ServiceException("Cet utilisateur participe déjà à la dépense",
+                "depense/modifier/$idDepense");
+        }
+
+
+
+        $this->depenseRepository->ajouterJointure($depense,$loginUtilisateur);
         $this->depenseRepository->mettreAJour($depense);
 
         return $codeSecret;
