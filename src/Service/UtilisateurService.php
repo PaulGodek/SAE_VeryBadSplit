@@ -189,6 +189,49 @@ class UtilisateurService extends GeneriqueService implements UtilisateurServiceI
     }
 
     /**
+     * Met à jour les informations d'un utilisateur.
+     *
+     * @throws ServiceException
+     */
+    public function reinitialiserMotDePasse(
+        string $login,
+        string $mdp,
+        string $mdp2
+    ): void {
+
+        if (!Validator::hasValideLength($login,3,30)) {
+            throw new ServiceException("La longueur du nom d'utilisateur n'est pas valide.",
+                "reinitialisation", "danger");
+        }
+
+        $utilisateurRepository = $this->utilisateurRepository;
+        $utilisateur = $utilisateurRepository->recupererParClePrimaire($login);
+
+        if (!$utilisateur) {
+            throw new ServiceException("L'utilisateur n'existe pas.", "reinitialisation");
+        }
+
+        if ($mdp || $mdp2) {
+            if (!$mdp || !$mdp2) {
+                throw new ServiceException("Pour reinitialiser votre mot de passe, vous devez saisir les 2 champs correspondants.",
+                    "reinitialisation", "warning");
+            }
+            if ($mdp !== $mdp2) {
+                throw new ServiceException("Mots de passe distincts.", "reinitialisation", "warning");
+            }
+            // Stocke que le mot de passe haché. Pas le mot de passe en clair ni en en cookie.
+            $utilisateur->setMdpHache(MotDePasse::hacher($mdp));
+        }
+
+
+        $utilisateurRepository->mettreAJour($utilisateur);
+
+    }
+
+
+
+
+    /**
      * Supprime un utilisateur ainsi que toutes les données associées à son compte.
      *
      * @param string $login Le login de l'utilisateur à supprimer.
@@ -255,7 +298,8 @@ class UtilisateurService extends GeneriqueService implements UtilisateurServiceI
      * @throws ServiceException Si l'adresse email est manquante ou si aucun utilisateur n'est trouvé.
      */
     public function recupererUtilisateursParEmail(string $email): array {
-        $this->verifierConnexion();
+        //$this->verifierConnexion();
+        //Bah justement non du coup tu peux pas être connecté à ce moment la puisque t'as plus tes id
         
         if (empty($email)) {
             throw new ServiceException("Adresse email manquante.", "recuperation");
