@@ -5,19 +5,23 @@ namespace App\VeryBadSplit\Modele\Repository;
 use App\VeryBadSplit\Lib\MessageFlash;
 use App\VeryBadSplit\Modele\DataObject\AbstractDataObject;
 use App\VeryBadSplit\Modele\DataObject\Utilisateur;
+use App\VeryBadSplit\Modele\Repository\Interface\ConnexionBaseDeDonneesInterface;
 use App\VeryBadSplit\Modele\Repository\Interface\UtilisateurRepositoryInterface;
 use PDO;
 
 class UtilisateurRepository extends AbstractRepository implements UtilisateurRepositoryInterface
 {
 
+    public function __construct(ConnexionBaseDeDonneesInterface $connexionBaseDeDonnees){
+        parent::__construct($connexionBaseDeDonnees);
+    }
 
     /**
      * @return Utilisateur|null
      */
     public function recupererParEmail($email) : ?Utilisateur {
 
-        $pdoStatement = ConnexionBaseDeDonnees::getPdo()->prepare(
+        $pdoStatement = $this->getConnexionBaseDeDonnees()->getPdo()->prepare(
             "SELECT *
                         FROM ". $this->getNomTable() ."
                         WHERE email = :email");
@@ -44,7 +48,7 @@ class UtilisateurRepository extends AbstractRepository implements UtilisateurRep
      * @return Utilisateur[]
      */
     public function recupererUtilisateursOrdonnesPrenomNom() : array {
-        $pdoStatement = ConnexionBaseDeDonnees::getPdo()->prepare(
+        $pdoStatement = $this->getConnexionBaseDeDonnees()->getPdo()->prepare(
             "SELECT *
                         FROM ". $this->getNomTable() ."
                         ORDER BY prenom, nom");

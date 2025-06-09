@@ -6,6 +6,7 @@ use App\VeryBadSplit\Modele\DataObject\AbstractDataObject;
 use App\VeryBadSplit\Modele\DataObject\Depense;
 use App\VeryBadSplit\Modele\DataObject\Evenement;
 use App\VeryBadSplit\Modele\DataObject\Utilisateur;
+use App\VeryBadSplit\Modele\Repository\Interface\ConnexionBaseDeDonneesInterface;
 use App\VeryBadSplit\Modele\Repository\Interface\DepenseRepositoryInterface;
 use DateTime;
 use InvalidArgumentException;
@@ -14,12 +15,16 @@ use PDO;
 class DepenseRepository extends AbstractRepository implements DepenseRepositoryInterface
 {
 
+    public function __construct(ConnexionBaseDeDonneesInterface $connexionBaseDeDonnees){
+        parent::__construct($connexionBaseDeDonnees);
+    }
+
     /**
      * @return Depense[]
      */
     public function recupererDepensesPayeesOuParticipeUtilisateur(string $login): array
     {
-        $pdoStatement = ConnexionBaseDeDonnees::getPdo()->prepare(
+        $pdoStatement = $this->getConnexionBaseDeDonnees()->getPdo()->prepare(
             "SELECT d.*, 
                     upay.nom , upay.prenom, upay.email , upay.mdpHache,
         
@@ -138,7 +143,7 @@ class DepenseRepository extends AbstractRepository implements DepenseRepositoryI
         WHERE d.$critere = :valeur
     ";
 
-        $pdoStatement = ConnexionBaseDeDonnees::getPdo()->prepare($sql);
+        $pdoStatement = $this->getConnexionBaseDeDonnees()->getPdo()->prepare($sql);
         $pdoStatement->execute(["valeur" => $valeur]);
         $data = $pdoStatement->fetchAll(PDO::FETCH_ASSOC);
 
@@ -247,7 +252,7 @@ class DepenseRepository extends AbstractRepository implements DepenseRepositoryI
 
     public function getNextId() : int
     {
-        $query = ConnexionBaseDeDonnees::getPdo()->query("SELECT MAX(idDepense) FROM ".$this->getNomTable()."");
+        $query = $this->getConnexionBaseDeDonnees()->getPdo()->query("SELECT MAX(idDepense) FROM ".$this->getNomTable()."");
         $obj = $query->fetch();
         return $obj[0] === null ? 0 : $obj[0] + 1;
     }
@@ -255,7 +260,7 @@ class DepenseRepository extends AbstractRepository implements DepenseRepositoryI
     public function compterNombreDepensesEvenement($idEvenement): int
     {
         $sql = "SELECT COUNT(DISTINCT idDepense) FROM ".$this->getNomTable()." WHERE idEvenement=:idEvenement";
-        $pdoStatement = ConnexionBaseDeDonnees::getPDO()->prepare($sql);
+        $pdoStatement = $this->getConnexionBaseDeDonnees()->getPDO()->prepare($sql);
         $pdoStatement->execute(['idEvenement' => $idEvenement]);
         $obj = $pdoStatement->fetch();
         return $obj[0] === null ? 0 : $obj[0];
