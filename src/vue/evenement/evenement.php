@@ -8,6 +8,7 @@ use App\VeryBadSplit\Modele\DataObject\Evenement;
 /** @var Depense $depenses */
 /** @var int $coutTotal */
 /** @var array $dettes */
+/** @var array $transactions */
 
 $titreEvenementHTML = htmlspecialchars($evenement->getTitre());
 $dateEvenementHTML = htmlspecialchars($evenement->getDate()->format('d/m/Y'));
@@ -115,13 +116,14 @@ $coutTotalEvenementHTML = htmlspecialchars(number_format($coutTotal,2));
                                         <div class="box media">
                                             <div class="media-content">
                                                 <div class="is-size-4 is-wrapped">
-                                                    <span><strong><?=htmlspecialchars($membre->getPrenom()." ".$membre->getNom())?></strong></span>
+                                                    <span><strong><?= htmlspecialchars($membre->getPrenom() . " " . $membre->getNom()) ?></strong></span>
                                                 </div>
-                                                <?php foreach ($dettes[$membre->getLogin()] as $dette) { ?>
-                                                    <?php if(number_format($dette["montant"], 2) > 0) {?>
+
+                                                <?php foreach ($transactions as $transaction) { ?>
+                                                    <?php if ($transaction["from"] === $membre->getLogin()) { ?>
                                                         <div class="has-text-left is-size-5">
                                                             <span class="icon is-left"><ion-icon name="card"></ion-icon></span>
-                                                            <span>Doit <?=htmlspecialchars(number_format($dette["montant"],2))?>€ à <?=htmlspecialchars($dette["membre"]->getPrenom()." ".$dette["membre"]->getNom())?></span>
+                                                            <span>Doit <?= htmlspecialchars(number_format($transaction["montant"], 2)) ?>€ à <?= htmlspecialchars($evenement->getMembres()[$transaction["to"]]->getPrenom() . " " . $evenement->getMembres()[$transaction["to"]]->getNom()) ?></span>
                                                         </div>
                                                     <?php } ?>
                                                 <?php } ?>
