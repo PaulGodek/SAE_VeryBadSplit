@@ -3,14 +3,19 @@
 namespace App\VeryBadSplit\Service;
 
 use App\VeryBadSplit\Lib\ConnexionUtilisateur;
+use App\VeryBadSplit\Lib\MessageFlash;
 use App\VeryBadSplit\Lib\Validator;
+use App\VeryBadSplit\Modele\DataObject\Depense;
 use App\VeryBadSplit\Modele\DataObject\Evenement;
+use App\VeryBadSplit\Modele\Repository\DepenseRepository;
 use App\VeryBadSplit\Modele\Repository\Interface\DepenseRepositoryInterface;
 use App\VeryBadSplit\Modele\Repository\Interface\EvenementRepositoryInterface;
 use App\VeryBadSplit\Modele\Repository\Interface\UtilisateurRepositoryInterface;
 use App\VeryBadSplit\Service\Exception\ServiceException;
 use App\VeryBadSplit\Service\Interface\EvenementServiceInterface;
 use DateTime;
+use http\Message;
+use Symfony\Component\HttpFoundation\Response;
 
 class EvenementService extends GeneriqueService implements EvenementServiceInterface
 {
@@ -38,6 +43,7 @@ class EvenementService extends GeneriqueService implements EvenementServiceInter
     {
         if (!$evenement) {
             throw new ServiceException("Événement inexistant",
+                Response::HTTP_BAD_REQUEST,
                 "MesEvenements");
         }
     }
@@ -52,6 +58,7 @@ class EvenementService extends GeneriqueService implements EvenementServiceInter
         if (!$evenement->estMembre(ConnexionUtilisateur::getLoginUtilisateurConnecte())) {
             $codeSecret = $evenement->getCodeSecret();
             throw new ServiceException("Vous n'avez pas de droits d'éditions sur cet événement",
+                Response::HTTP_FORBIDDEN,
                 "Evenement", ["codeEvenement" => $codeSecret]);
         }
     }
@@ -90,6 +97,7 @@ class EvenementService extends GeneriqueService implements EvenementServiceInter
         self::verifierExistenceEvenement($evenement);
         if (!$evenement->estProprietaire(ConnexionUtilisateur::getLoginUtilisateurConnecte())) {
             throw new ServiceException("Vous n'êtes pas propriétaire de cet événement",
+                Response::HTTP_FORBIDDEN,
                 "MesEvenements");
         }
 
@@ -203,29 +211,6 @@ class EvenementService extends GeneriqueService implements EvenementServiceInter
         ];
     }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     /**
      * Récupère les événements associés à l'utilisateur connecté.
      *
@@ -254,10 +239,12 @@ class EvenementService extends GeneriqueService implements EvenementServiceInter
 
         if (empty($nomEvenement)) {
             throw new ServiceException("Le nom de l'événement est manquant.",
+                Response::HTTP_BAD_REQUEST,
                 "FormulaireCreationEvenement", [], "danger");
         }
         if (!Validator::hasValideLength($nomEvenement,3,30)) {
             throw new ServiceException("La longueur du nom de l'événement n'est pas valide.",
+                Response::HTTP_BAD_REQUEST,
                 "FormulaireCreationEvenement", [], "danger");
         }
 
@@ -302,10 +289,12 @@ class EvenementService extends GeneriqueService implements EvenementServiceInter
 
         if (empty($nomEvenement)) {
             throw new ServiceException("Le nom de l'événement est manquant.",
+                Response::HTTP_BAD_REQUEST,
                 "FormulaireMiseAJourEvenement", ["idEvenement" => $idEvenement]);
         }
         if (!Validator::hasValideLength($nomEvenement,3,30)) {
             throw new ServiceException("La longueur du nom de l'événement n'est pas valide.",
+                Response::HTTP_BAD_REQUEST,
                 "FormulaireMiseAJourEvenement", ["idEvenement" => $idEvenement]);
         }
 
@@ -342,7 +331,7 @@ class EvenementService extends GeneriqueService implements EvenementServiceInter
     public function recupererUtilisateursPourAjout(int $idEvenement): array
     {
         $evenement = $this->verifierAccesProprietaireEvenement($idEvenement);
-        
+
         $utilisateurs = $this->utilisateurRepository->recupererUtilisateursOrdonnesPrenomNom();
         $utilisateursDisponibles = array_filter($utilisateurs, function ($u) use ($evenement) {
             return !$evenement->estMembre($u->getLogin());
@@ -350,6 +339,7 @@ class EvenementService extends GeneriqueService implements EvenementServiceInter
 
         if (empty($utilisateursDisponibles)) {
             throw new ServiceException("Aucun utilisateur disponible à ajouter.",
+                Response::HTTP_BAD_REQUEST,
                 "Evenement", ["codeEvenement" => $evenement->getCodeSecret()], "warning");
         }
 
@@ -373,20 +363,23 @@ class EvenementService extends GeneriqueService implements EvenementServiceInter
         $codeSecret = $evenement->getCodeSecret();
 
         if($loginUtilisateur == null) {
-            throw new ServiceException("Login du membre à ajouter manquant", 
+            throw new ServiceException("Login du membre à ajouter manquant",
+                Response::HTTP_BAD_REQUEST,
                 "Evenement", ["codeEvenement" => $codeSecret]);
         }
-        
+
         $utilisateurRepository = $this->utilisateurRepository;
         $utilisateur = $utilisateurRepository->recupererParClePrimaire($loginUtilisateur);
 
         if (!$utilisateur) {
             throw new ServiceException("Utilisateur inexistant",
+                Response::HTTP_BAD_REQUEST,
                 "Evenement", ["codeEvenement" => $codeSecret]);
         }
 
         if ($evenement->estMembre($loginUtilisateur)) {
             throw new ServiceException("Cet utilisateur est déjà membre de l'événement",
+                Response::HTTP_BAD_REQUEST,
                 "Evenement", ["codeEvenement" => $codeSecret], "warning");
         }
 
@@ -419,11 +412,13 @@ class EvenementService extends GeneriqueService implements EvenementServiceInter
 
         if ($evenement->estProprietaire($loginUtilisateur)) {
             throw new ServiceException("Vous ne pouvez pas quitter cet événement car vous en êtes le propriétaire.",
+                Response::HTTP_FORBIDDEN,
                 "MesEvenements");
         }
 
         if (!$evenement->estMembre($loginUtilisateur)) {
-            throw new ServiceException("Vous n'êtes pas membre de cet événement.", 
+            throw new ServiceException("Vous n'êtes pas membre de cet événement.",
+                Response::HTTP_FORBIDDEN,
                 "MesEvenements");
         }
 
@@ -448,20 +443,23 @@ class EvenementService extends GeneriqueService implements EvenementServiceInter
 
         $codeSecret = $evenement->getCodeSecret();
         if (!$utilisateur) {
-            throw new ServiceException("Utilisateur inexistant.", 
+            throw new ServiceException("Utilisateur inexistant.",
+                Response::HTTP_NOT_FOUND,
                 "Evenement", ["codeEvenement" => $codeSecret]);
         }
 
         if (!$evenement->estMembre($loginUtilisateur)) {
             throw new ServiceException("Cet utilisateur n'est pas membre de l'événement.",
+                Response::HTTP_BAD_REQUEST,
                 "Evenement", ["codeEvenement" => $codeSecret]);
         }
 
         if ($evenement->estProprietaire($loginUtilisateur)) {
             throw new ServiceException("Vous ne pouvez pas supprimer le propriétaire de l'événement.",
+                Response::HTTP_BAD_REQUEST,
                 "Evenement", ["codeEvenement" => $codeSecret]);
         }
-        
+
         $this->mettreAJourMembresEtDepenses($evenement, $loginUtilisateur);
         $this->evenementRepository->supprimerJointure($evenement,$loginUtilisateur);
 

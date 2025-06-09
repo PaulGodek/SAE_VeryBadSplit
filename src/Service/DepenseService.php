@@ -12,6 +12,7 @@ use App\VeryBadSplit\Service\Interface\EvenementServiceInterface;
 use App\VeryBadSplit\Service\Exception\ServiceException;
 use App\VeryBadSplit\Service\Interface\DepenseServiceInterface;
 use DateTime;
+use Symfony\Component\HttpFoundation\Response;
 
 class DepenseService extends GeneriqueService implements DepenseServiceInterface
 {
@@ -44,13 +45,14 @@ class DepenseService extends GeneriqueService implements DepenseServiceInterface
         GeneriqueService::verifierConnexion();
         $depense = $this->depenseRepository->recupererParClePrimaire($idDepense);
         if (!$depense) {
-            throw new ServiceException("Dépense inexistante.", "accueil");
+            throw new ServiceException("Dépense inexistante.", Response::HTTP_NOT_FOUND, "acceuil");
         }
 
         $evenement = $this->evenementRepository->recupererParClePrimaire($depense->getEvenement()->getId());
         if (!$evenement->estMembre(ConnexionUtilisateur::getLoginUtilisateurConnecte())) {
             $codeSecret = $evenement->getCodeSecret();
             throw new ServiceException("Vous n'avez pas de droits d'éditions sur cet événement.",
+                Response::HTTP_FORBIDDEN,
                 "Evenement", ["codeEvenement" => $codeSecret]);
         }
 
@@ -74,16 +76,19 @@ class DepenseService extends GeneriqueService implements DepenseServiceInterface
 
         if (!Validator::allNotEmpty([$titre, $montant, $payeur, $loginsParticipants])) {
             throw new ServiceException("Attributs manquants.",
+                Response::HTTP_BAD_REQUEST,
                 "afficherFormulaireCreationDepense", ["idEvenement" => $idEvenement]);
         }
 
         if (empty($loginsParticipants)) {
             throw new ServiceException("Il faut au moins un participant.",
+                Response::HTTP_BAD_REQUEST,
                 "afficherFormulaireCreationDepense", ["idEvenement" => $idEvenement]);
         }
 
         if (!Validator::hasValideLength($titre,1,50)) {
             throw new ServiceException("La longueur du titre n'est pas valide.",
+                Response::HTTP_BAD_REQUEST,
                 "afficherFormulaireCreationDepense", ["idEvenement" => $idEvenement]);
         }
 
@@ -91,8 +96,10 @@ class DepenseService extends GeneriqueService implements DepenseServiceInterface
         $payeur = $utilisateurRepository->recupererParClePrimaire($payeur);
         if (!$payeur || !$evenement->estMembre($payeur->getLogin())) {
             throw new ServiceException("Le payeur n'existe pas ou n'est pas membre de l'événement.",
+                Response::HTTP_BAD_REQUEST,
                 "afficherFormulaireCreationDepense", ["idEvenement" => $idEvenement]);
         }
+
 
         $participants = [];
         foreach ($loginsParticipants as $loginParticipant) {
@@ -100,6 +107,7 @@ class DepenseService extends GeneriqueService implements DepenseServiceInterface
             $utilisateur = $utilisateurRepository->recupererParClePrimaire($loginParticipant);
             if (!$utilisateur || !$evenement->estMembre($utilisateur->getLogin())) {
                 throw new ServiceException("Un des participants n'existe pas ou n'est pas membre de l'événement.",
+                    Response::HTTP_BAD_REQUEST,
                     "afficherFormulaireCreationDepense", ["idEvenement" => $idEvenement]);
             }
             $participants[] = $utilisateur;
@@ -116,9 +124,12 @@ class DepenseService extends GeneriqueService implements DepenseServiceInterface
             participants: $participants
         );
 
+
         $depenseRepository->ajouter($depense);
         foreach ($participants as $participant) {
                 $depenseRepository->ajouterJointure($depense, $participant->getLogin());
+
+
         }
 
         return $evenement->getCodeSecret();
@@ -144,6 +155,7 @@ class DepenseService extends GeneriqueService implements DepenseServiceInterface
 
         if (!$depense) {
             throw new ServiceException("Dépense inexistante.",
+                Response::HTTP_NOT_FOUND,
                 "accueil");
         }
 
@@ -157,6 +169,7 @@ class DepenseService extends GeneriqueService implements DepenseServiceInterface
 
         if (!Validator::hasValideLength($titre,1,50)) {
             throw new ServiceException("La longueur du titre n'est pas valide.",
+                Response::HTTP_BAD_REQUEST,
                 "afficherFormulaireMiseAJourDepense", ["idDepense" => $idDepense]);
         }
 
@@ -164,6 +177,7 @@ class DepenseService extends GeneriqueService implements DepenseServiceInterface
         $payeur = $utilisateurRepository->recupererParClePrimaire($payeurLogin);
         if (!$payeur || !$evenement->estMembre($payeur->getLogin())) {
             throw new ServiceException("Le payeur n'existe pas ou n'est pas membre de l'événement.",
+                Response::HTTP_BAD_REQUEST,
                 "afficherFormulaireMiseAJourDepense", ["idDepense" => $idDepense]);
         }
 
@@ -178,6 +192,7 @@ class DepenseService extends GeneriqueService implements DepenseServiceInterface
                 $utilisateur = $utilisateurRepository->recupererParClePrimaire($loginParticipant);
                 if (!$utilisateur || !$evenement->estMembre($utilisateur->getLogin())) {
                     throw new ServiceException("Un des participants n'existe pas ou n'est pas membre de l'événement.",
+                        Response::HTTP_BAD_REQUEST,
                         "afficherFormulaireMiseAJourDepense", ["idDepense" => $idDepense]);
                 }
                 $participants[] = $utilisateur;
@@ -216,6 +231,7 @@ class DepenseService extends GeneriqueService implements DepenseServiceInterface
 
         if (!$depense) {
             throw new ServiceException("Dépense inexistante.",
+                Response::HTTP_NOT_FOUND,
                 "accueil");
         }
 
@@ -251,16 +267,19 @@ class DepenseService extends GeneriqueService implements DepenseServiceInterface
         $codeSecret = $depense->getEvenement()->getCodeSecret();
         if (!$utilisateur) {
             throw new ServiceException("Utilisateur inexistant.",
+                Response::HTTP_NOT_FOUND,
                 "afficherFormulaireMiseAJourDepense", ["idDepense" => $idDepense]);
         }
 
         if (!$depense->estParticipant($loginUtilisateur)) {
             throw new ServiceException("Cet utilisateur ne participe pas à la dépense.",
+                Response::HTTP_BAD_REQUEST,
                 "afficherFormulaireMiseAJourDepense", ["idDepense" => $idDepense]);
         }
 
         if (count($depense->getParticipants())==1) {
             throw new ServiceException("Cet utilisateur est le dernier participant, vous ne pouvez pas le supprimer.",
+                Response::HTTP_BAD_REQUEST,
                 "afficherFormulaireMiseAJourDepense", ["idDepense" => $idDepense]);
         }
 
@@ -288,11 +307,13 @@ class DepenseService extends GeneriqueService implements DepenseServiceInterface
         $codeSecret = $depense->getEvenement()->getCodeSecret();
         if (!$utilisateur) {
             throw new ServiceException("Utilisateur inexistant.",
+                Response::HTTP_NOT_FOUND,
                 "afficherFormulaireMiseAJourDepense", ["idDepense" => $idDepense]);
         }
 
         if ($depense->estParticipant($loginUtilisateur)) {
             throw new ServiceException("Cet utilisateur participe déjà à la dépense",
+                Response::HTTP_BAD_REQUEST,
                 "afficherFormulaireMiseAJourDepense", ["idDepense" => $idDepense]);
         }
 

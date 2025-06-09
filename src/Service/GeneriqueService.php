@@ -4,6 +4,7 @@ namespace App\VeryBadSplit\Service;
 
 use App\VeryBadSplit\Lib\ConnexionUtilisateur;
 use App\VeryBadSplit\Service\Exception\ServiceException;
+use Symfony\Component\HttpFoundation\Response;
 
 abstract class GeneriqueService
 {
@@ -17,6 +18,7 @@ abstract class GeneriqueService
     {
         if (!ConnexionUtilisateur::estConnecte()) {
             throw new ServiceException("Vous devez être connecté pour cela.",
+                Response::HTTP_UNAUTHORIZED,
                 "afficherFormulaireConnexion");
         }
     }
@@ -30,6 +32,7 @@ abstract class GeneriqueService
     {
         if (ConnexionUtilisateur::estConnecte()) {
             throw new ServiceException("Vous êtes déjà connecté.",
+                Response::HTTP_FORBIDDEN,
                 "MesEvenement", [], "warning");
         }
     }
