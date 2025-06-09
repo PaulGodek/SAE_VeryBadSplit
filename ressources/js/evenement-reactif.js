@@ -17,13 +17,8 @@ let evenement = reactive({
             fetch(`/web/api/depenses/${id}`, {method: 'DELETE'})
                 .then(response => {
                     if (response.status === 204) {
-                        button.closest("div.depense").remove();
-                        // Décrémenter le nombre de dépenses
-                        this.nbDepenses = this.nbDepenses - 1;
-                        // Supprimer le montant
-                        delete this.montantsDepenses[id];
-                        // Forcer la mise à jour
-                        this.montantsDepenses = {...this.montantsDepenses};
+                        // Recharger les listes pour mettre à jour les dépenses et dettes
+                        this.rechargerListes();
                     }
                 });
         }
@@ -52,7 +47,7 @@ let evenement = reactive({
         for (let id in this.montantsDepenses) {
             total += this.montantsDepenses[id];
         }
-        return total.toFixed(2) + '€';
+        return total.toFixed(2).replace('.', ',') + '€';
     },
     
     // Méthode pour afficher/masquer le formulaire
@@ -91,46 +86,67 @@ let evenement = reactive({
             })
         }).then(async response => {
             if (response.status === 201) {
-                // Succès - ajouter la dépense dynamiquement
+                // Succès — recharger les listes
                 const codeSecret = await response.json();
-                
-                // Créer un nouvel élément HTML pour la dépense
-                const nouvelleDepenseHTML = `
-                    <div class="depense box media">
-                        <div class="media-content">
-                            <div class="is-size-4">
-                                <span><strong>${titre}</strong></span>
-                            </div>
-                            <div class="has-text-left is-size-5">
-                                <span class="icon is-left"><ion-icon name="time"></ion-icon></span>
-                                <span>Le ${new Date().toLocaleDateString('fr-FR')}</span>
-                            </div>
-                            <div class="has-text-left is-size-5">
-                                <span class="icon is-left"><ion-icon name="card"></ion-icon></span>
-                                <span>${montant.toFixed(2)}€ payé par ${payeur}</span>
-                            </div>
-                        </div>
-                        <div class="media-right">
-                            <button class="delete" onclick="evenement.supprimerDepense(this)" data-id-depense="999999"></button>
-                        </div>
-                    </div>
-                `;
-                
-                // Ajouter au DOM
-                document.getElementById('liste-depenses').insertAdjacentHTML('beforeend', nouvelleDepenseHTML);
-                
-                // Mettre à jour les compteurs
-                this.nbDepenses = this.nbDepenses + 1;
-                this.montantsDepenses[999999] = montant; // ID temporaire
-                this.montantsDepenses = {...this.montantsDepenses};
                 
                 // Réinitialiser et fermer le formulaire
                 form.reset();
                 this.toggleFormulaireAjout();
+                
+                // Recharger les listes pour avoir les données à jour
+                this.rechargerListes();
             } else {
                 alert('Erreur lors de l\'ajout');
             }
         });
+    },
+    
+    // Méthode pour recharger les listes (dépenses et membres avec dettes)
+    rechargerListes: function() {
+        // Recharger la page de l'événement pour obtenir les nouvelles données
+        fetch(`/web/evenements/${window.location.pathname.split('/').pop()}`)
+            .then(response => response.text())
+            .then(html => {
+                // Parser le HTML pour extraire les listes
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                
+                // Remplacer la liste des dépenses
+                const nouvelleListeDepenses = doc.getElementById('liste-depenses');
+                if (nouvelleListeDepenses) {
+                    document.getElementById('liste-depenses').innerHTML = nouvelleListeDepenses.innerHTML;
+                    
+                    // Mettre à jour les compteurs et montants
+                    const depenses = nouvelleListeDepenses.querySelectorAll('.depense');
+                    this.nbDepenses = depenses.length;
+                    
+                    // Reconstruire l'objet des montants
+                    const nouveauxMontants = {};
+                    depenses.forEach(dep => {
+                        const montantText = dep.querySelector('.media-content .is-size-5:nth-child(3) span:nth-child(2)').textContent;
+                        // Regex pour capturer le format français : 10,00€ ou 1 000,50€
+                        const montantMatch = montantText.match(/([\d\s]+(?:,\d+)?)€/);
+                        if (montantMatch) {
+                            // Enlever les espaces et remplacer la virgule par un point
+                            const montantStr = montantMatch[1].replace(/\s/g, '').replace(',', '.');
+                            const montant = parseFloat(montantStr);
+                            const deleteButton = dep.querySelector('button.delete');
+                            if (deleteButton && deleteButton.dataset.idDepense) {
+                                nouveauxMontants[deleteButton.dataset.idDepense] = montant;
+                            }
+                        }
+                    });
+                    // Remplacer complètement l'objet pour déclencher la réactivité
+                    this.montantsDepenses = nouveauxMontants;
+                    
+                }
+                
+                // Remplacer la liste des membres (avec les dettes mises à jour)
+                const nouvelleListeMembres = doc.getElementById('liste-membres');
+                if (nouvelleListeMembres) {
+                    document.getElementById('liste-membres').innerHTML = nouvelleListeMembres.innerHTML;
+                }
+            });
     }
     
 }, "evenement");

@@ -1,25 +1,3 @@
 {% for depense in depenses %}
-    <div class="depense box media">
-        <div class="media-content">
-            <div class="is-size-4">
-                <span><strong>{{ depense.titre|e }}</strong></span>
-            </div>
-            <div class="has-text-left is-size-5">
-                <span class="icon is-left"><ion-icon name="time"></ion-icon></span>
-                <span>Le {{ depense.date.format('d/m/Y') }}</span>
-            </div>
-            <div class="has-text-left is-size-5">
-                <span class="icon is-left"><ion-icon name="card"></ion-icon></span>
-                <span>{{ depense.montant|number_format(2) }}€ payé par {{ depense.payeur.prenom|e~" "~depense.payeur.nom|e }}</span>
-            </div>
-        </div>
-        <div class="media-right">
-            {% if evenement.estMembre(loginConnecte) %}
-                <a class="icon-container" href="{{ route("afficherFormulaireMiseAJourDepense", {idDepense : depense.id}) }}">
-                    <span class="icon pb-3"><ion-icon name="pencil"></ion-icon></span>
-                </a>
-                <button class="delete" onclick="evenement.supprimerDepense(this)" data-id-depense="{{ depense.id }}"></button>
-            {% endif %}
-        </div>
-    </div>
+    {{ include('vues/depenses/composants/depense_item.html.twig', {depense: depense, evenement: evenement, loginConnecte: loginConnecte}) }}
 {% endfor %}

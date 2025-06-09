@@ -104,7 +104,7 @@
                                         {% endif %}
                                     {% endif %}
                                 </div>
-                                <div class="mt-5 has-background-black-ter is-overflow-y-auto scrollable-list pr-3">
+                                <div class="mt-5 has-background-black-ter is-overflow-y-auto scrollable-list pr-3" id="liste-membres">
                                     {{ include('vues/utilisateurs/composants/liste_membres.html.twig', {evenement: evenement, transactions: transactions, loginConnecte: loginConnecte}) }}
                                 </div>
                             </div>
@@ -126,9 +126,9 @@
             window.evenement.nbDepenses = {{ depenses|length }};
             window.evenement.nbMembres = {{ evenement.membres|length }};
             
-            // Initialiser les montants des dépenses
+            // Initialiser les montants des dépenses avec le bon format (nombre décimal)
             {% for depense in depenses %}
-                window.evenement.montantsDepenses[{{ depense.id }}] = {{ depense.montant }};
+                window.evenement.montantsDepenses[{{ depense.id }}] = {{ depense.montant|number_format(2, '.', '') }};
             {% endfor %}
             // Forcer la mise à jour
             window.evenement.montantsDepenses = {...window.evenement.montantsDepenses};
