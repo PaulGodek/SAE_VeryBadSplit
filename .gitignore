@@ -4,3 +4,6 @@ vendor/
 CLAUDE.md
 .env
 .env.*
+.phpunit.cache/
+.phpunit.result.cache
+/reports/

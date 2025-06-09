@@ -1,7 +1,7 @@
 # Le systeme de build multi-étapes a été proposé par l'IA Gemini pour optimiser la taille de l'image Docker
 
 # --- Étape de Build (builder) ---
-FROM php:8.2-apache AS builder
+FROM php:8.3-apache AS builder
 
 # Installer les dépendances système nécessaires pour le build
 RUN apt-get update && apt-get install -y \
@@ -28,7 +28,7 @@ COPY . /var/www/html
 
 
 # --- Étape de Production (final) ---
-FROM php:8.2-apache
+FROM php:8.3-apache
 
 # Installer les extensions PHP et les dépendances système MINIMALES pour l'exécution
 RUN apt-get update && apt-get install -y \
