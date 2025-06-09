@@ -106,7 +106,7 @@
                                                 <div class="is-size-4 is-wrapped">
                                                     <span><strong>{{ membre.prenom|e~" "~membre.nom|e }}</strong></span>
                                                 </div>
-                                                {% for dette in dettes[membre.login] %}
+                                                {% for dette in (dettes[membre.login] is defined ? dettes[membre.login] : []) %}
                                                     {% if (dette["montant"] > 0) %}
                                                         <div class="has-text-left is-size-5">
                                                             <span class="icon is-left"><ion-icon name="card"></ion-icon></span>

@@ -113,26 +113,31 @@ class EvenementService extends GeneriqueService implements EvenementServiceInter
 
         $dettes = [];
         $coutTotal = 0;
-        foreach ($evenement->getMembres() as $membre) {
-            $dettes[$membre->getLogin()] = [];
-            foreach ($evenement->getMembres() as $membreBis) {
-                if ($membre->getLogin() !== $membreBis->getLogin()) {
-                    $dettes[$membre->getLogin()][$membreBis->getLogin()] = ["membre" => $membreBis, "montant" => 0];
-                }
-            }
-        }
-
         $depenses = $this->depenseRepository->recupererParEvenement($evenement->getId());
-        if(!is_null($depenses)){
+
+        // La boucle initial pour initialiser dettes à 0 partout ne sert à rien et prend du temps pour rien
+
+        if (!is_null($depenses)) {
             foreach ($depenses as $depense) {
-            $coutTotal += $depense->getMontant();
-            $payeur = $depense->getPayeur();
-            $participants = $depense->getParticipants();
-            $montantAPayerParPersonne = $depense->getMontant() / count($participants);
+                $montantDepense = $depense->getMontant();
+
+                $coutTotal += $montantDepense;
+                $payeur = $depense->getPayeur();
+                $participants = $depense->getParticipants();
+                $montantAPayerParPersonne = $montantDepense / count($participants);
 
                 foreach ($participants as $participant) {
                     if ($participant->getLogin() !== $payeur->getLogin()) {
-                        $dettes[$participant->getLogin()][$payeur->getLogin()]["montant"] += $montantAPayerParPersonne;
+                        $loginParticipant = $participant->getLogin();
+                        $loginPayeur = $payeur->getLogin();
+
+                        // Plutôt que de boucler, si la dette n'existe pas, on la crée
+                        if (!isset($dettes[$loginParticipant]))
+                            $dettes[$loginParticipant] = [];
+                        if (!isset($dettes[$loginParticipant][$loginPayeur]))
+                            $dettes[$loginParticipant][$loginPayeur] = ["membre" => $payeur, "montant" => 0];
+
+                        $dettes[$loginParticipant][$loginPayeur]["montant"] += $montantAPayerParPersonne;
                     }
                 }
             }
