@@ -9,9 +9,9 @@ class ServiceException extends Exception{
     private string $redirectionRoute;
     private string $typeMessageFlash;
     private array $arguments;
-    
-    public function __construct(string $message, string $redirectionRoute, array $arguments = [], string $typeMessageFlash = "danger") {
-        parent::__construct($message);
+
+    public function __construct(string $message, int $code,string $redirectionRoute, array $arguments = [], string $typeMessageFlash = "danger") {
+        parent::__construct($message, $code);
         $this->redirectionRoute = $redirectionRoute;
         $this->arguments = $arguments;
         $this->typeMessageFlash = $typeMessageFlash;
@@ -28,5 +28,5 @@ class ServiceException extends Exception{
     public function getArguments(): array {
         return $this->arguments;
     }
-    
+
 }
