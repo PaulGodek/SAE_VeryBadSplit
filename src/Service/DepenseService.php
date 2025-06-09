@@ -228,7 +228,6 @@ class DepenseService extends GeneriqueService implements DepenseServiceInterface
     }
 
     public function recupererDepensesParEvenement(int $idEvenement): ?array{
-        $this->verifierConnexion();
         $depenseRepository = $this->depenseRepository;
         $depenses = $depenseRepository->recupererParEvenement($idEvenement);
         return $depenses;
