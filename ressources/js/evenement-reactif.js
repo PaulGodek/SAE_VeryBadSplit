@@ -56,7 +56,63 @@ let evenement = reactive({
     toggleEditionDepense: function(idDepense) {
         const form = document.getElementById(`formulaire-edition-depense-${idDepense}`);
         if (form) {
-            form.style.display = form.style.display === 'none' ? 'block' : 'none';
+            const wasHidden = form.style.display === 'none';
+            form.style.display = wasHidden ? 'block' : 'none';
+            
+            // Initialiser la conversion de devise si on affiche le formulaire
+            if (wasHidden) {
+                const montantInput = form.querySelector('.montantPasConverti');
+                const deviseInput = form.querySelector('.devise');
+                const montantVar = form.querySelector('.montant');
+                
+                // Faire une conversion initiale
+                if (montantInput && deviseInput && montantVar && window.toEuros) {
+                    const montant = parseFloat(montantInput.value) || 0;
+                    const devise = deviseInput.value || 'EUR';
+                    if (montant > 0) {
+                        window.toEuros(montant, devise, true).then(() => {
+                            montantVar.value = window.montantConverti || montant;
+                        });
+                    }
+                }
+                
+                if (montantInput && deviseInput && montantVar) {
+                    // Fonction pour gérer la conversion avec debounce
+                    let conversionTimer = null;
+                    const handleConversion = () => {
+                        clearTimeout(conversionTimer);
+                        conversionTimer = setTimeout(() => {
+                            const montant = parseFloat(montantInput.value) || 0;
+                            const devise = deviseInput.value || 'EUR';
+                            
+                            if (montant > 0 && window.toEuros) {
+                                window.toEuros(montant, devise, true).then(() => {
+                                    montantVar.value = window.montantConverti || montant;
+                                });
+                            }
+                        }, 500); // Attendre 500ms après la dernière frappe
+                    };
+                    
+                    montantInput.addEventListener('input', handleConversion);
+                    deviseInput.addEventListener('input', handleConversion);
+                    
+                    // Conversion immédiate au blur
+                    const handleBlur = () => {
+                        clearTimeout(conversionTimer);
+                        const montant = parseFloat(montantInput.value) || 0;
+                        const devise = deviseInput.value || 'EUR';
+                        
+                        if (montant > 0 && window.toEuros) {
+                            window.toEuros(montant, devise, true).then(() => {
+                                montantVar.value = window.montantConverti || montant;
+                            });
+                        }
+                    };
+                    
+                    montantInput.addEventListener('blur', handleBlur);
+                    deviseInput.addEventListener('blur', handleBlur);
+                }
+            }
         }
     },
     
@@ -130,27 +186,58 @@ let evenement = reactive({
     },
     
     // Modification d'une dépense
-    modifierDepense: function(event, idDepense) {
+    modifierDepense: async function(event, idDepense) {
         event.preventDefault();
         const form = event.target;
         const formData = new FormData(form);
         
+        // Vérifier la conversion de devise d'abord
+        const montantInput = form.querySelector('.montantPasConverti');
+        const deviseInput = form.querySelector('.devise');
+        const montant = parseFloat(montantInput.value) || 0;
+        const devise = deviseInput.value || 'EUR';
+        
+        // Faire la conversion avec validation
+        await window.toEuros(montant, devise, false);
+        
+        // Si la conversion a échoué, ne pas continuer
+        if (window.montantConverti === null) {
+            return;
+        }
+        
         const depense = {
             titre: formData.get('titre'),
-            montant: parseFloat(formData.get('montant')),
-            payeur: formData.get('payeur')
+            montant: window.montantConverti,
+            payeur: formData.get('payeur'),
+            participants: formData.getAll('participants')
         };
+        
+        if (depense.participants.length === 0) {
+            alert('Veuillez sélectionner au moins un participant');
+            return;
+        }
+        
+        console.log('Envoi de la modification:', depense);
         
         fetch(`/web/api/depenses/${idDepense}`, {
             method: 'PATCH',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify(depense)
         }).then(response => {
+            console.log('Réponse:', response.status);
             if (response.status === 200) {
                 this.toggleEditionDepense(idDepense);
                 this.actualiserListes();
                 this.afficherNotification('Dépense modifiée');
+            } else {
+                response.json().then(data => {
+                    console.error('Erreur:', data);
+                    this.afficherNotification(data.error || 'Erreur lors de la modification', 'danger');
+                });
             }
+        }).catch(error => {
+            console.error('Erreur réseau:', error);
+            this.afficherNotification('Erreur réseau', 'danger');
         });
     },
     

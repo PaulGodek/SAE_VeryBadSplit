@@ -80,14 +80,20 @@ class ControleurDepenseAPI extends ControleurGenerique{
     public function mettreAJourDepense(Request $request, int $idDepense): Response {
         try {
             $json = json_decode($request->getContent(), flags: JSON_THROW_ON_ERROR);
-            $titre = $json->titre ?? null;
-            $montant = $json->montant ? floatval($json->montant) : null;
-            $payeur = $json->payeur ?? null;
-            $participants = $json->participants ?? null;
+            
+            // Récupérer la dépense existante pour obtenir les valeurs actuelles
+            $depenseExistante = $this->depenseService->verifierAccesDepense($idDepense);
+            
+            // Utiliser les valeurs fournies ou garder les valeurs existantes
+            $titre = $json->titre ?? $depenseExistante->getTitre();
+            $montant = isset($json->montant) ? floatval($json->montant) : $depenseExistante->getMontant();
+            $payeur = $json->payeur ?? $depenseExistante->getPayeur()->getLogin();
+            $participants = $json->participants ?? array_map(fn($p) => $p->getLogin(), $depenseExistante->getParticipants());
 
             if(is_null($participants)){
                 $participants=[];
             }
+            
             $codeSecret = $this->depenseService->mettreAJourDepense($idDepense, $titre, $montant, $payeur, $participants);
             return new JsonResponse($codeSecret, Response::HTTP_OK);
         } catch (ServiceException $exception) {

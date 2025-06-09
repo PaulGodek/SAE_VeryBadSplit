@@ -1,19 +1,21 @@
 const ROOT_URL = "https://v6.exchangerate-api.com/v6/52d7662a97c4ef6e4b7f4adb/pair/"
 
 
-let montantConverti = null;
+window.montantConverti = null;
 let minuteur = 0;
 
-async function toEuros(montant, devise){
+window.toEuros = async function toEuros(montant, devise, silent = false){
     try {
         devise = devise.trim().toUpperCase();
         if (!devise || devise === "EUR") {
-            montantConverti = parseFloat(montant); // pas besoin de conversion
-            if (montantConverti < 1) {
-                messageFlash("La dépense doit couter au moins 1 euro");
-            }
-            else if ( montantConverti > 10000) {
-                messageFlash("La dépense ne doit pas couter plus de 10000 euros");
+            window.montantConverti = parseFloat(montant); // pas besoin de conversion
+            if (!silent) {
+                if (window.montantConverti < 1) {
+                    messageFlash("La dépense doit couter au moins 1 euro");
+                }
+                else if ( window.montantConverti > 10000) {
+                    messageFlash("La dépense ne doit pas couter plus de 10000 euros");
+                }
             }
             return;
         }
@@ -21,23 +23,26 @@ async function toEuros(montant, devise){
         let data = await req.json();
 
         if (data["conversion_result"] !== undefined) {
-            montantConverti = parseFloat(data["conversion_result"].toFixed(2));
-            if (montantConverti < 1) {
-                messageFlash("La dépense doit couter au moins 1 euro");
-            }
-            else if ( montantConverti > 10000) {
-                messageFlash("La dépense ne doit pas couter plus de 10000 euros");
+            window.montantConverti = parseFloat(data["conversion_result"].toFixed(2));
+            if (!silent) {
+                if (window.montantConverti < 1) {
+                    messageFlash("La dépense doit couter au moins 1 euro");
+                }
+                else if ( window.montantConverti > 10000) {
+                    messageFlash("La dépense ne doit pas couter plus de 10000 euros");
+                }
             }
         } else {
             console.warn("Conversion échouée : résultat invalide");
-            montantConverti = null;
+            window.montantConverti = null;
 
-            if (data["error-type"] === "unsupported-code") {
+            if (data["error-type"] === "unsupported-code" && !silent) {
                 messageFlash("La devise n'est pas correcte !")
             }
         }
     } catch (error) {
         console.log(error);
+        window.montantConverti = null;
     }
 }
 
@@ -53,7 +58,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const devise = deviseInput.value;
             if (!isNaN(montant)) {
                 toEuros(montant, devise).then(() => {
-                    montantVar.value = montantConverti ?? 0;
+                    montantVar.value = window.montantConverti ?? 0;
                 });
             }
         }, 500 );
