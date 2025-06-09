@@ -169,11 +169,6 @@ class ControleurUtilisateur extends ControleurGenerique
         return self::afficherTwig("utilisateur/formulaireRecuperationCompte.html.twig");
     }
 
-
-
-    /**
-     * @throws ServiceException
-     */
     #[Route(path: '/mail', name: 'envoiMail', methods: ['POST'])]
     public static function envoiMailOublieMdp(): Response {
         $email = $_REQUEST["email"] ?? null;
@@ -190,8 +185,4 @@ class ControleurUtilisateur extends ControleurGenerique
         MessageFlash::ajouter("success", "Le mail a été envoyé avec succès");
         return self::redirection("afficherFormulaireConnexion");
     }
-
-
-
-
 }
