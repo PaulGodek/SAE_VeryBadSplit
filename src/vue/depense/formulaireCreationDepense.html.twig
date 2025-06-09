@@ -8,7 +8,7 @@
         <div class="columns is-centered">
             <div class="column is-8 box has-background-black-ter">
                 <p class="is-size-2 has-text-centered has-text-white">Ajout d'une dépense</p>
-                <form action="{{ route("creerDepense" , {idEvenement : evenement.id}) }}" method="post">
+                <form action="{{ route("creerDepense" , { idEvenement : evenement.id }) }}" method="post">
                     <div class="field is-horizontal">
                         <div class="field-body">
                             <div class="field">
@@ -49,7 +49,7 @@
                                             <div class="level-left">
                                                 <label>
                                                     <input class="mr-2" type="checkbox" name="participants[]" value="{{ membre.login|e }}">
-                                                    <span class="is-size-5">{{ membre.prenom|e }} {{ membre.nom|e }} ({{ membre.login[=|e }})</span>
+                                                    <span class="is-size-5">{{ membre.prenom|e }} {{ membre.nom|e }} ({{ membre.login|e }})</span>
                                                 </label>
                                             </div>
                                         </div>

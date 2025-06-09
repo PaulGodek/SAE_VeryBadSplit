@@ -8,7 +8,7 @@
         <div class="columns is-centered">
             <div class="column is-8 box has-background-black-ter">
                 <p class="is-size-2 has-text-centered has-text-white">Edition d'une dépense</p>
-                <form action="{{ route("mettreAJourDepense", {depense : depense.id}) }}" method="post">
+                <form action="{{ route("mettreAJourDepense", { idDepense : depense.id }) }}" method="post">
                     <div class="field is-horizontal">
                         <div class="field-body">
                             <div class="field">
@@ -22,7 +22,7 @@
                             <div class="field">
                                 <label class="label is-size-4" for="montant">Montant (minimum 1€)</label>
                                 <div class="control has-icons-left">
-                                    <input id="montant" name="montant" class="input is-large" type="number" step="0.1" min="1" max="10000" value="{{ depense.montant }}" required>
+                                    <input id="montant" name="montant" class="input is-large" type="number" step="0.01" min="1" max="10000" value="{{ depense.montant }}" required>
                                     <span class="icon is-small is-left"><ion-icon name="card"></ion-icon></span>
                                 </div>
                             </div>
@@ -43,26 +43,26 @@
                             <div class="field">
                                 <label class="label is-size-4" for="participants">Participants</label>
                                 <div class="box" style="max-height: 200px; overflow-y: auto;">
-                                    {% for membre in evenement.membres %}
+                                    {% for membre in depense.evenement.membres %}
                                         <div class="level mb-2">
                                             <div class="level-left">
                                                 {% if not (depense.estParticipant(membre.login)) %}
                                                     <div class="level-right">
                                                         <a class="is-size-4" title="Ajouter"
-                                                           href="{{ route("AjouterParticipant", {idDepense : depense.id, login : membre.login}) }}">
+                                                           href="{{ route("AjouterParticipant", { idDepense : depense.id, login : membre.login }) }}">
                                                         <span class="icon is-left"><ion-icon name="add-circle"></ion-icon></span>
                                                         </a>
-                                                        <span class="is-size-5"><?= $nomComplet ?></span>
+                                                        <span class="is-size-5">{{ membre.prenom|e }} {{ membre.nom|e }} ({{ membre.login|e }})</span>
                                                     </div>
                                                 {% else %}
-                                                    <span class="is-size-5"><?= $nomComplet ?></span>
+                                                    <span class="is-size-5">{{ membre.prenom|e }} {{ membre.nom|e }} ({{ membre.login|e }})</span>
                                                 {% endif %}
                                             </div>
 
                                             {% if (depense.estParticipant(membre.login)) %}
                                                 <div class="level-right">
                                                     <a class="delete is-medium" title="Supprimer"
-                                                       href="{{ route("SupprimerParticipant", {idDepense : depense.id, login : membre.login}) }}">
+                                                       href="{{ route("SupprimerParticipant", { idDepense : depense.id, login : membre.login }) }}">
                                                     </a>
                                                 </div>
                                             {% endif %}

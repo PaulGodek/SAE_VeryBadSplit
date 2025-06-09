@@ -16,7 +16,7 @@
                             <span class="icon"><ion-icon name="time"></ion-icon></span>
                             <span>Date : {{ evenement.date.format('d/m/Y') }}</span>
                             <span class="icon"><ion-icon name="card"></ion-icon></span>
-                            <span>Coût total : {{ coupTotal|number_format(2) }}€</span>
+                            <span>Coût total : {{ coutTotal|number_format(2) }}€</span>
                         </div>
                         <div class="buttons is-centered mt-2">
                             {% if (evenement.estMembre(loginConnecte)) %}

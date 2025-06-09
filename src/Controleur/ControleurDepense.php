@@ -115,7 +115,7 @@ class ControleurDepense extends ControleurGenerique
         }
 
         MessageFlash::ajouter("success", "Participant supprimé avec succès.");
-        return self::redirection("formulaireModifierDepenseEDSRTFYGHJKHGYFTDRFYGHUJIOKHGFYDTFGCVBJHNK?LNBHVCGFXFDCGVHBJN?BVHCGXFCGVHBJNKBVHCGXFCGVHBJN?KLNBVHCGXVHBN?NBJVGH", ["idDepense" => $idDepense]);
+        return self::redirection("afficherFormulaireMiseAJourDepense", ["idDepense" => $idDepense]);
     }
 
     #[Route(path: "/depense/ajouterParticipant/{idDepense}/{login}", name: "AjouterParticipant")]
@@ -128,6 +128,6 @@ class ControleurDepense extends ControleurGenerique
         }
 
         MessageFlash::ajouter("success", "Participant ajouté avec succès.");
-        return self::redirection("formulaireModifierDepenseEDSRTFYGHJKHGYFTDRFYGHUJIOKHGFYDTFGCVBJHNK?LNBHVCGFXFDCGVHBJN?BVHCGXFCGVHBJNKBVHCGXFCGVHBJN?KLNBVHCGXVHBN?NBJVGH", ["idDepense" => $idDepense]);
+        return self::redirection("afficherFormulaireMiseAJourDepense", ["idDepense" => $idDepense]);
     }
 }

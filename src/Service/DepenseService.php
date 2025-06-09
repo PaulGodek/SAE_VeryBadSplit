@@ -72,7 +72,6 @@ class DepenseService extends GeneriqueService implements DepenseServiceInterface
     {
         $evenement = $this->evenementService->verifierAccesEvenement($idEvenement);
 
-
         if (!Validator::allNotEmpty([$titre, $montant, $payeur, $loginsParticipants])) {
             throw new ServiceException("Attributs manquants.",
                 "afficherFormulaireCreationDepense", ["idEvenement" => $idEvenement]);
@@ -153,11 +152,6 @@ class DepenseService extends GeneriqueService implements DepenseServiceInterface
 
         if (!Validator::allNotEmpty([$titre, $montant, $payeurLogin])) {
             throw new ServiceException("Attributs manquants.",
-                "afficherFormulaireMiseAJourDepense", ["idDepense" => $idDepense]);
-        }
-
-        if (empty($loginsParticipants)) {
-            throw new ServiceException("Il faut au moins un participant.",
                 "afficherFormulaireMiseAJourDepense", ["idDepense" => $idDepense]);
         }
 
