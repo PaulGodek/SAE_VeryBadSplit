@@ -53,6 +53,84 @@ let evenement = reactive({
             total += this.montantsDepenses[id];
         }
         return total.toFixed(2) + '€';
+    },
+    
+    // Méthode pour afficher/masquer le formulaire
+    toggleFormulaireAjout: function() {
+        const form = document.getElementById('formulaire-ajout');
+        form.style.display = form.style.display === 'none' ? 'block' : 'none';
+    },
+    
+    // Méthode pour ajouter une dépense
+    ajouterDepense: function(event) {
+        event.preventDefault();
+        const form = event.target;
+        const formData = new FormData(form);
+        
+        const titre = formData.get('titre');
+        const montant = parseFloat(formData.get('montant'));
+        const payeur = formData.get('payeur');
+        const participants = formData.getAll('participants');
+        
+        if (participants.length === 0) {
+            alert('Veuillez sélectionner au moins un participant');
+            return;
+        }
+        
+        // Appel API
+        fetch(`/web/api/evenements/${window.evenementId}/depenses`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                titre: titre,
+                montant: montant,
+                payeur: payeur,
+                participants: participants
+            })
+        }).then(async response => {
+            if (response.status === 201) {
+                // Succès - ajouter la dépense dynamiquement
+                const codeSecret = await response.json();
+                
+                // Créer un nouvel élément HTML pour la dépense
+                const nouvelleDepenseHTML = `
+                    <div class="depense box media">
+                        <div class="media-content">
+                            <div class="is-size-4">
+                                <span><strong>${titre}</strong></span>
+                            </div>
+                            <div class="has-text-left is-size-5">
+                                <span class="icon is-left"><ion-icon name="time"></ion-icon></span>
+                                <span>Le ${new Date().toLocaleDateString('fr-FR')}</span>
+                            </div>
+                            <div class="has-text-left is-size-5">
+                                <span class="icon is-left"><ion-icon name="card"></ion-icon></span>
+                                <span>${montant.toFixed(2)}€ payé par ${payeur}</span>
+                            </div>
+                        </div>
+                        <div class="media-right">
+                            <button class="delete" onclick="evenement.supprimerDepense(this)" data-id-depense="999999"></button>
+                        </div>
+                    </div>
+                `;
+                
+                // Ajouter au DOM
+                document.getElementById('liste-depenses').insertAdjacentHTML('beforeend', nouvelleDepenseHTML);
+                
+                // Mettre à jour les compteurs
+                this.nbDepenses = this.nbDepenses + 1;
+                this.montantsDepenses[999999] = montant; // ID temporaire
+                this.montantsDepenses = {...this.montantsDepenses};
+                
+                // Réinitialiser et fermer le formulaire
+                form.reset();
+                this.toggleFormulaireAjout();
+            } else {
+                alert('Erreur lors de l\'ajout');
+            }
+        });
     }
     
 }, "evenement");

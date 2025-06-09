@@ -22,19 +22,6 @@ class ControleurDepense extends ControleurGenerique
         return Conteneur::recupererService("evenementService");
     }
 
-    #[Route(path: "/evenements/nouvelleDepense/{idEvenement}", name: "afficherFormulaireCreationDepense",
-        requirements: ['idEvenement' => '\d+'], methods: ['GET'])]
-    public static function afficherFormulaireCreationDepense(int $idEvenement): Response
-    {
-        try {
-            $evenement = self::getEvenementService()->verifierAccesEvenement($idEvenement);
-        } catch (ServiceException $e) {
-            return self::gererException($e, "danger");
-        }
-
-        return self::afficherTwig("depense/formulaireCreationDepense.html.twig", ["evenement" => $evenement]);
-    }
-
     #[Route(path: "/evenements/nouvelleDepense/{idEvenement}", name: "creerDepense",
         requirements: ['idEvenement' => '\d+'], methods: ['POST'])]
     public static function creerDepense(int $idEvenement): Response {

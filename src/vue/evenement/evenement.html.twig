@@ -43,10 +43,43 @@
                             <div class="has-text-centered">
                                 <p class="is-size-4"><strong>Dépenses</strong> (<span data-textvar="evenement.nbDepenses">{{ depenses|length }}</span>)</p>
                                 {% if (evenement.estMembre(loginConnecte)) %}
-                                    <a class="button has-background-black has-text-white-ter is-size-4" href="{{ route("afficherFormulaireCreationDepense", {idEvenement : evenement.id}) }}">
+                                    <button class="button has-background-black has-text-white-ter is-size-4" onclick="evenement.toggleFormulaireAjout()">
                                         <span class="icon is-left"><ion-icon name="add-circle"></ion-icon></span>
                                         <span>Ajouter une dépense</span>
-                                    </a>
+                                    </button>
+                                    <div id="formulaire-ajout" class="box mt-3" style="display: none;">
+                                        <form onsubmit="evenement.ajouterDepense(event); return false;">
+                                            <div class="field">
+                                                <input class="input" type="text" name="titre" placeholder="Titre de la dépense" required>
+                                            </div>
+                                            <div class="field">
+                                                <input class="input" type="number" step="0.01" name="montant" placeholder="Montant" required>
+                                            </div>
+                                            <div class="field">
+                                                <select class="select is-fullwidth" name="payeur" required>
+                                                    <option value="">Qui a payé ?</option>
+                                                    {% for membre in evenement.membres %}
+                                                        <option value="{{ membre.login }}" {% if membre.login == loginConnecte %}selected{% endif %}>
+                                                            {{ membre.prenom }} {{ membre.nom }}
+                                                        </option>
+                                                    {% endfor %}
+                                                </select>
+                                            </div>
+                                            <div class="field">
+                                                <label class="label">Participants :</label>
+                                                {% for membre in evenement.membres %}
+                                                    <label class="checkbox">
+                                                        <input type="checkbox" name="participants" value="{{ membre.login }}" checked>
+                                                        {{ membre.prenom }} {{ membre.nom }}
+                                                    </label><br>
+                                                {% endfor %}
+                                            </div>
+                                            <div class="field is-grouped">
+                                                <button class="button is-link" type="submit">Ajouter</button>
+                                                <button class="button" type="button" onclick="evenement.toggleFormulaireAjout()">Annuler</button>
+                                            </div>
+                                        </form>
+                                    </div>
                                 {% endif %}
                             </div>
                             <div class="mt-5 is-overflow-y-auto scrollable-list pr-3" id="liste-depenses">
@@ -87,6 +120,8 @@
     <script type="module" src="{{ asset('../ressources/js/evenement-reactif.js') }}"></script>
     <script>
         // Initialiser les compteurs et montants
+        window.evenementId = {{ evenement.id }};
+        
         setTimeout(() => {
             window.evenement.nbDepenses = {{ depenses|length }};
             window.evenement.nbMembres = {{ evenement.membres|length }};
