@@ -61,8 +61,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     montantInput.addEventListener("keyup", handleBlur);
     deviseInput.addEventListener("keyup", handleBlur);
-    console.log(montantInput, deviseInput);
-
 });
 
 function messageFlash(content) {
