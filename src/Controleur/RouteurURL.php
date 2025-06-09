@@ -31,9 +31,9 @@ class RouteurURL
         $contexteRequete = (new RequestContext())->fromRequest($requete);
 
         $conteneur = new ContainerBuilder();
-//On indique au FileLocator de chercher à partir du dossier de configuration
+        // On indique au FileLocator de chercher à partir du dossier de configuration
         $loader = new YamlFileLoader($conteneur, new FileLocator(__DIR__."/../Configuration"));
-//On remplit le conteneur avec les données fournies dans le fichier de configuration
+        // On remplit le conteneur avec les données fournies dans le fichier de configuration
         $loader->load("conteneur.yml");
         $conteneur->setParameter('project_root', __DIR__.'/../..');
 
@@ -73,10 +73,8 @@ class RouteurURL
 
             $reponse = call_user_func_array($controleur, $arguments);
         } catch (MethodNotAllowedException $exception) {
-            // Remplacez xxx par le bon code d'erreur
             $reponse = $conteneur->get("App\VeryBadSplit\Controleur\ControleurBase")->afficherErreur($exception->getMessage(), 405);
         } catch (ResourceNotFoundException $exception) {
-            // Remplacez xxx par le bon code d'erreur
             $reponse = $conteneur->get("App\VeryBadSplit\Controleur\ControleurBase")->afficherErreur($exception->getMessage(), 404);
         } catch (\Exception $exception) {
             $reponse = $conteneur->get("App\VeryBadSplit\Controleur\ControleurBase")->afficherErreur($exception->getMessage());
