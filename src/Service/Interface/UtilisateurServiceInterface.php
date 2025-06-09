@@ -67,5 +67,5 @@ interface UtilisateurServiceInterface
      * @return Utilisateur[] Un tableau d'objets Utilisateur correspondant à l'email fourni.
      * @throws \App\VeryBadSplit\Service\Exception\ServiceException Si l'adresse email est manquante ou si aucun utilisateur n'est trouvé.
      */
-    public function recupererUtilisateursParEmail(string $email): array;
+    public function recupererUtilisateurParEmail(string $email): Utilisateur;
 }

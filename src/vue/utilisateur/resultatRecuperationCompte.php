@@ -2,7 +2,7 @@
 
 use App\VeryBadSplit\Lib\Helper;
 use App\VeryBadSplit\Modele\DataObject\Utilisateur;
-/** @var Utilisateur[] $utilisateurs */
+/** @var Utilisateur $utilisateur */
 ?>
 
 <div class="hero-body pt-0 mt-5 is-align-items-stretch">
@@ -12,7 +12,7 @@ use App\VeryBadSplit\Modele\DataObject\Utilisateur;
         </div>
         <div class="columns is-centered mt-5 has-text-white-ter">
             <div class="column is-4">
-                <?php foreach ($utilisateurs as $utilisateur) { ?>
+
                     <div class="box has-background-black">
                         <div class="has-text-centered is-size-3"><span><strong><?=htmlspecialchars($utilisateur->getPrenom()." ".$utilisateur->getNom())?></strong></span></div>
                         <div>
@@ -52,7 +52,7 @@ use App\VeryBadSplit\Modele\DataObject\Utilisateur;
 
                         </div>
                     </div>
-                <?php } ?>
+
             </div>
         </div>
     </div>

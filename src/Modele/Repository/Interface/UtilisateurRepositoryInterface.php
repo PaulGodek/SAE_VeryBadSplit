@@ -10,9 +10,9 @@ interface UtilisateurRepositoryInterface
     public function recuperer(): ?AbstractDataObject;
     public function recupererParClePrimaire(string $clePrimaire): ?AbstractDataObject;
     /**
-     * @return Utilisateur[]
+     * @return Utilisateur
      */
-    public function recupererParEmail($email): array;
+    public function recupererParEmail($email): ?AbstractDataObject;
 
     /**
      * @return Utilisateur[]

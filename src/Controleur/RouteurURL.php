@@ -2,6 +2,7 @@
 
 namespace App\VeryBadSplit\Controleur;
 
+use App\VeryBadSplit\Service\EmailService;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -58,12 +59,15 @@ class RouteurURL
         $utilisateurRepository = new UtilisateurRepository();
         $evenementRepository = new EvenementRepository();
         $depenseRepository = new DepenseRepository();
+        $emailService= new EmailService();
         
         // Ajout des repositories au conteneur
         Conteneur::ajouterService("utilisateurRepository", $utilisateurRepository);
         Conteneur::ajouterService("evenementRepository", $evenementRepository);
         Conteneur::ajouterService("depenseRepository", $depenseRepository);
-        
+        Conteneur::ajouterService("emailService", $emailService);
+
+
         // Initialisation des services avec injection de dépendances
         $utilisateurService = new UtilisateurService(
             $utilisateurRepository,
