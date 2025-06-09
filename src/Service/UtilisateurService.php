@@ -6,8 +6,6 @@ use App\VeryBadSplit\Controleur\ControleurGenerique;
 use App\VeryBadSplit\Lib\ConnexionUtilisateur;
 use App\VeryBadSplit\Lib\MotDePasse;
 use App\VeryBadSplit\Lib\Validator;
-use App\VeryBadSplit\Modele\DataObject\Depense;
-use App\VeryBadSplit\Modele\DataObject\Evenement;
 use App\VeryBadSplit\Modele\DataObject\Utilisateur;
 use App\VeryBadSplit\Modele\Repository\Interface\DepenseRepositoryInterface;
 use App\VeryBadSplit\Modele\Repository\Interface\EvenementRepositoryInterface;
@@ -42,7 +40,7 @@ class UtilisateurService extends GeneriqueService implements UtilisateurServiceI
         $this->verifierConnexion();
 
         $login = ConnexionUtilisateur::getLoginUtilisateurConnecte();
-        $utilisateur = $this->utilisateurRepository->recuperer($login);
+        $utilisateur = $this->utilisateurRepository->recupererParClePrimaire($login);
 
         if (!$utilisateur) {
             throw new ServiceException("Utilisateur introuvable.", "afficherFormulaireConnexion");
@@ -102,9 +100,14 @@ class UtilisateurService extends GeneriqueService implements UtilisateurServiceI
 
 
 
-        if ($this->utilisateurRepository->recuperer($login)) {
+        if ($this->utilisateurRepository->recupererParClePrimaire($login)) {
             throw new ServiceException("Le login est déjà pris.",
                 "afficherFormulaireCreation");
+        }
+
+        if ($this->utilisateurRepository->recupererParEmail($email)) {
+            throw new ServiceException("Ce mail est déjà pris.",
+                "inscription");
         }
 
         $utilisateur = new Utilisateur(
@@ -112,37 +115,11 @@ class UtilisateurService extends GeneriqueService implements UtilisateurServiceI
             nom: $nom,
             prenom: $prenom,
             email: $email,
-            mdpHache: MotDePasse::hacher($mdp),
-            mdp: $mdp
+            mdpHache: MotDePasse::hacher($mdp)
+
         );
 
-        $idEvenement = $this->evenementRepository->getNextId();
-
-        $depenseRepository = $this->depenseRepository;
-        $idDepense = $depenseRepository->getNextId();
-
-        $evenement = new Evenement(
-            id: $idEvenement,
-            codeSecret: hash("sha256", $login . $idEvenement),
-            titre: "Evenement d'exemple",
-            date: new \DateTime(),
-            proprietaire: $utilisateur,
-            membres: [$utilisateur]
-        );
-
-        $depense = new Depense(
-            id: $idDepense,
-            titre: "Exemple de dépense",
-            date: new \DateTime(),
-            montant: 50,
-            payeur: $utilisateur,
-            evenement: $evenement,
-            participants: [$utilisateur]
-        );
-
-        if(!$depenseRepository->ajouter($depense))
-            throw new ServiceException("Une erreur est survenue lors de la création de l'utilisateur.",
-                "afficherFormulaireCreation");
+        $this->utilisateurRepository->ajouter($utilisateur);
     }
 
     /**
@@ -184,13 +161,13 @@ class UtilisateurService extends GeneriqueService implements UtilisateurServiceI
                 "afficherFormulaireMiseAJour", [], "danger");
         }
 
-        if (!Validator::isValideMdp($mdp)) {
+        if (!empty($mdp) && !Validator::isValideMdp($mdp)) {
             throw new ServiceException("Le mot de passe ne respecte pas le modèle donné.",
                 "afficherFormulaireMiseAJour", [], "danger");
         }
 
         $utilisateurRepository = $this->utilisateurRepository;
-        $utilisateur = $utilisateurRepository->recuperer($login);
+        $utilisateur = $utilisateurRepository->recupererParClePrimaire($login);
 
         if (!$utilisateur) {
             throw new ServiceException("L'utilisateur n'existe pas.", "afficherFormulaireMiseAJour");
@@ -215,13 +192,46 @@ class UtilisateurService extends GeneriqueService implements UtilisateurServiceI
 
         $utilisateurRepository->mettreAJour($utilisateur);
 
-        $evenementRepository = $this->evenementRepository;
-        foreach ($evenementRepository->recupererEvenementsUtilisateur($login) as $evenement) {
-            $membres = array_filter($evenement->getMembres(), fn($u) => $u->getLogin() !== $login);
-            $membres[] = $utilisateur;
-            $evenement->setMembres($membres);
-            $evenementRepository->mettreAJour($evenement);
+    }
+
+    /**
+     * Met à jour les informations d'un utilisateur.
+     *
+     * @throws ServiceException
+     */
+    public function reinitialiserMotDePasse(
+        string $login,
+        string $mdp,
+        string $mdp2
+    ): void {
+
+        if (!Validator::hasValideLength($login,3,30)) {
+            throw new ServiceException("La longueur du nom d'utilisateur n'est pas valide.",
+                "reinitialisation", "danger");
         }
+
+        $utilisateurRepository = $this->utilisateurRepository;
+        $utilisateur = $utilisateurRepository->recupererParClePrimaire($login);
+
+        if (!$utilisateur) {
+            throw new ServiceException("L'utilisateur n'existe pas.", "reinitialisation");
+        }
+
+        if ($mdp || $mdp2) {
+            if (!$mdp || !$mdp2) {
+                throw new ServiceException("Pour reinitialiser votre mot de passe, vous devez saisir les 2 champs correspondants.",
+                    "reinitialisation", "warning");
+            }
+            if ($mdp !== $mdp2) {
+                throw new ServiceException("Mots de passe distincts.", "reinitialisation", "warning");
+            }
+            // Stocke que le mot de passe haché. Pas le mot de passe en clair ni en en cookie.
+            $utilisateur->setMdpHache(MotDePasse::hacher($mdp));
+        }
+
+
+        $utilisateurRepository->mettreAJour($utilisateur);
+
     }
 
     /**
@@ -245,14 +255,6 @@ class UtilisateurService extends GeneriqueService implements UtilisateurServiceI
         foreach ($depenseRepository->recupererDepensesPayeesOuParticipeUtilisateur($login) as $depense) {
             if ($depense->estPayeur($login)) {
                 $depenseRepository->supprimer($depense->getId());
-            } elseif ($depense->estParticipant($login)) {
-                $participants = array_filter($depense->getParticipants(), fn($u) => $u->getLogin() !== $login);
-                if (empty($participants)) {
-                    $depenseRepository->supprimer($depense->getId());
-                } else {
-                    $depense->setParticipants($participants);
-                    $depenseRepository->mettreAJour($depense);
-                }
             }
         }
         
@@ -277,7 +279,7 @@ class UtilisateurService extends GeneriqueService implements UtilisateurServiceI
             throw new ServiceException("Login ou mot de passe manquant.", "afficherFormulaireConnexion");
         }
         
-        $utilisateur = $this->utilisateurRepository->recuperer($login);
+        $utilisateur = $this->utilisateurRepository->recupererParClePrimaire($login);
 
         if (!$utilisateur) {
             throw new ServiceException("Login inconnu.", "afficherFormulaireConnexion");
@@ -299,7 +301,8 @@ class UtilisateurService extends GeneriqueService implements UtilisateurServiceI
      * @throws ServiceException Si l'adresse email est manquante ou si aucun utilisateur n'est trouvé.
      */
     public function recupererUtilisateursParEmail(string $email): array {
-        //$this->verifierConnexion(); euuuh non en fait, on ne peut accéder à la récup que si on est pas connecté.
+        //$this->verifierConnexion();
+        //Bah justement non du coup tu peux pas être connecté à ce moment la puisque t'as plus tes id
         
         if (empty($email)) {
             throw new ServiceException("Adresse email manquante.", "afficherFormulaireRecuperationCompte");
@@ -311,6 +314,12 @@ class UtilisateurService extends GeneriqueService implements UtilisateurServiceI
             throw new ServiceException("Aucun compte associé à cette adresse email.", "afficherFormulaireRecuperationCompte");
         }
 
+        return $utilisateurs;
+    }
+
+    public function recupererUtilisateurParClePrimaire(string $login) {
+        $this->verifierConnexion();
+        $utilisateurs = $this->utilisateurRepository->recupererParClePrimaire($login);
         return $utilisateurs;
     }
 

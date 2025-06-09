@@ -1,1 +1,4 @@
+<Files "favicon.ico">
+    Require all granted
+</Files>
 Require all denied

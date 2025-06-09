@@ -4,11 +4,12 @@ namespace App\VeryBadSplit\Controleur;
 
 use App\VeryBadSplit\Lib\ConnexionUtilisateur;
 use App\VeryBadSplit\Lib\Conteneur;
-
 use App\VeryBadSplit\Lib\MessageFlash;
+use App\VeryBadSplit\Service\DepenseService;
 use App\VeryBadSplit\Service\EvenementService;
 use App\VeryBadSplit\Service\Exception\ServiceException;
 use Symfony\Component\HttpFoundation\Response;
+use App\VeryBadSplit\Service\UtilisateurService;
 use Symfony\Component\Routing\Attribute\Route;
 
 class ControleurEvenement extends ControleurGenerique
@@ -17,6 +18,16 @@ class ControleurEvenement extends ControleurGenerique
     {
         return Conteneur::recupererService("evenementService");
     }
+    private static function getDepenseService(): DepenseService
+    {
+        return Conteneur::recupererService("depenseService");
+    }
+
+    private static function getUtilisateurService():UtilisateurService
+    {
+        return Conteneur::recupererService("utilisateurService");
+    }
+
     #[Route(path: "/evenements/{codeEvenement}", name:"Evenement", requirements: ['codeEvenement' => '[a-zA-Z0-9]{64}'])]
     public static function afficherEvenement(string $codeEvenement): Response
     {
@@ -25,13 +36,19 @@ class ControleurEvenement extends ControleurGenerique
             $evenement = $resultat["evenement"];
             $dettes = $resultat["dettes"];
             $coutTotal = $resultat["coutTotal"];
+            $depenses = self::getDepenseService()->recupererDepensesParEvenement($evenement->getId());
         } catch (ServiceException $e) {
             return self::gererException($e, "warning");
         }
 
+        if(is_null($depenses)){
+            $depenses=[];
+        }
+
         return self::afficherTwig("evenement/evenement.html.twig", [
             "evenement" => $evenement,
-            "coupTotal" => $coutTotal,
+            "depenses" => $depenses,
+            "coutTotal" => $coutTotal,
             "dettes" => $dettes,
             "loginConnecte" => ConnexionUtilisateur::getLoginUtilisateurConnecte()
         ]);

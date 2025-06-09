@@ -75,6 +75,7 @@ class RouteurURL
         $depenseService = new DepenseService(
             $depenseRepository,
             $utilisateurRepository,
+            $evenementRepository,
             $evenementService
         );
         

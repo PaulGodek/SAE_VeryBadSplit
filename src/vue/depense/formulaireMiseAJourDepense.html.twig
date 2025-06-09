@@ -42,13 +42,32 @@
                             </div>
                             <div class="field">
                                 <label class="label is-size-4" for="participants">Participants</label>
-                                <div class="select is-multiple is-size-4 is-fullwidth">
-                                    <select required id="participants" name="participants[]" multiple size="{{ min(depense.evenement.membres|length, 4) }}">
-                                        <option value="" disabled selected hidden></option>
-                                        {% for membre in depense.evenement.membres %}
-                                            <option {{ depense.estParticipant(membre.login|e) ? "selected" : "" }} value="{{ membre.login|e }}">{{ membre.prenom|e~" "~membre.nom|e~" ("~membre.login|e~")" }}</option>
-                                        {% endfor %}
-                                    </select>
+                                <div class="box" style="max-height: 200px; overflow-y: auto;">
+                                    {% for membre in evenement.membres %}
+                                        <div class="level mb-2">
+                                            <div class="level-left">
+                                                {% if not (depense.estParticipant(membre.login)) %}
+                                                    <div class="level-right">
+                                                        <a class="is-size-4" title="Ajouter"
+                                                           href="{{ route("AjouterParticipant", {idDepense : depense.id, login : membre.login}) }}">
+                                                        <span class="icon is-left"><ion-icon name="add-circle"></ion-icon></span>
+                                                        </a>
+                                                        <span class="is-size-5"><?= $nomComplet ?></span>
+                                                    </div>
+                                                {% else %}
+                                                    <span class="is-size-5"><?= $nomComplet ?></span>
+                                                {% endif %}
+                                            </div>
+
+                                            {% if (depense.estParticipant(membre.login)) %}
+                                                <div class="level-right">
+                                                    <a class="delete is-medium" title="Supprimer"
+                                                       href="{{ route("SupprimerParticipant", {idDepense : depense.id, login : membre.login}) }}">
+                                                    </a>
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    {% endfor %}
                                 </div>
                             </div>
                         </div>

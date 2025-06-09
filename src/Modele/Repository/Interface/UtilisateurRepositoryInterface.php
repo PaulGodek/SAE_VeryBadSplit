@@ -2,23 +2,24 @@
 
 namespace App\VeryBadSplit\Modele\Repository\Interface;
 
+use App\VeryBadSplit\Modele\DataObject\AbstractDataObject;
 use App\VeryBadSplit\Modele\DataObject\Utilisateur;
 
 interface UtilisateurRepositoryInterface
 {
-    public function recuperer($login): ?Utilisateur;
-    
+    public function recuperer(): ?AbstractDataObject;
+    public function recupererParClePrimaire(string $clePrimaire): ?AbstractDataObject;
     /**
      * @return Utilisateur[]
      */
     public function recupererParEmail($email): array;
-    
+
     /**
      * @return Utilisateur[]
      */
     public function recupererUtilisateursOrdonnesPrenomNom(): array;
-    
+
     public function mettreAJour(Utilisateur $utilisateur): void;
-    
+
     public function supprimer(string $login): bool;
 }

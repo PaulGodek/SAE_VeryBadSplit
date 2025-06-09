@@ -2,43 +2,23 @@
 
 namespace App\VeryBadSplit\Modele\Repository;
 
+use App\VeryBadSplit\Modele\DataObject\AbstractDataObject;
 use App\VeryBadSplit\Modele\DataObject\Utilisateur;
 use App\VeryBadSplit\Modele\Repository\Interface\UtilisateurRepositoryInterface;
 use PDO;
 
-class UtilisateurRepository implements UtilisateurRepositoryInterface
+class UtilisateurRepository extends AbstractRepository implements UtilisateurRepositoryInterface
 {
 
-    public function recuperer($login) : ?Utilisateur {
-        $pdoStatement = ConnexionBaseDeDonnees::getPdo()->prepare(
-            "SELECT DISTINCT 
-                        loginProprietaire, nomProprietaire, prenomProprietaire, emailProprietaire, mdpHacheProprietaire, mdpProprietaire
-                        FROM app_db
-                        WHERE loginProprietaire = :loginProprietaire");
-        $pdoStatement->execute(['loginProprietaire' => $login]);
-        $data = $pdoStatement->fetch(PDO::FETCH_ASSOC);
-        if(!$data) {
-            return null;
-        }
-        return new Utilisateur(
-            login: $data["loginProprietaire"],
-            nom: $data["nomProprietaire"],
-            prenom: $data["prenomProprietaire"],
-            email: $data["emailProprietaire"],
-            mdpHache: $data["mdpHacheProprietaire"],
-            mdp: $data["mdpProprietaire"]
-        );
-    }
 
     /**
      * @return Utilisateur[]
      */
     public function recupererParEmail($email) : array {
         $pdoStatement = ConnexionBaseDeDonnees::getPdo()->prepare(
-            "SELECT DISTINCT 
-                        loginProprietaire, nomProprietaire, prenomProprietaire, mdpProprietaire
-                        FROM app_db
-                        WHERE emailProprietaire = :email");
+            "SELECT *
+                        FROM ". $this->getNomTable() ."
+                        WHERE email = :email");
         $pdoStatement->execute(["email"=>$email]);
         $data = $pdoStatement->fetchAll(PDO::FETCH_ASSOC);
         if(!$data) {
@@ -47,10 +27,12 @@ class UtilisateurRepository implements UtilisateurRepositoryInterface
         $utilisateurs = [];
         foreach ($data as $utilisateur) {
             $utilisateurs[] = new Utilisateur(
-                login: $utilisateur["loginProprietaire"],
-                nom: $utilisateur["nomProprietaire"],
-                prenom: $utilisateur["prenomProprietaire"],
-                mdp: $utilisateur["mdpProprietaire"]
+                login: $utilisateur["login"],
+                nom: $utilisateur["nom"],
+                prenom: $utilisateur["prenom"],
+                email: $utilisateur["email"],
+                mdpHache: $utilisateur["mdpHache"]
+
             );
         }
         return $utilisateurs;
@@ -61,10 +43,9 @@ class UtilisateurRepository implements UtilisateurRepositoryInterface
      */
     public function recupererUtilisateursOrdonnesPrenomNom() : array {
         $pdoStatement = ConnexionBaseDeDonnees::getPdo()->prepare(
-            "SELECT DISTINCT 
-                        loginProprietaire, nomProprietaire, prenomProprietaire
-                        FROM app_db
-                        ORDER BY prenomProprietaire, nomProprietaire");
+            "SELECT *
+                        FROM ". $this->getNomTable() ."
+                        ORDER BY prenom, nom");
         $pdoStatement->execute();
         $data = $pdoStatement->fetchAll(PDO::FETCH_ASSOC);
         if(!$data) {
@@ -73,43 +54,47 @@ class UtilisateurRepository implements UtilisateurRepositoryInterface
         $utilisateurs = [];
         foreach ($data as $utilisateur) {
             $utilisateurs[] = new Utilisateur(
-                login: $utilisateur["loginProprietaire"],
-                nom: $utilisateur["nomProprietaire"],
-                prenom: $utilisateur["prenomProprietaire"]
-            );
+                login: $utilisateur["login"],
+                nom: $utilisateur["nom"],
+                prenom: $utilisateur["prenom"],
+                email: $utilisateur["email"],
+                mdpHache: $utilisateur["mdpHache"]);
         }
         return $utilisateurs;
     }
 
-    public function mettreAJour(Utilisateur $utilisateur): void
-    {
-        $map = [
-            "loginProprietaire" => $utilisateur->getLogin(),
-            "nomProprietaire" => $utilisateur->getNom(),
-            "prenomProprietaire" => $utilisateur->getPrenom(),
-            "emailProprietaire" => $utilisateur->getEmail(),
-            "mdpHacheProprietaire" => $utilisateur->getMdpHache(),
-            "mdpProprietaire" => $utilisateur->getMdp()
-        ];
 
-        $nomsColonnes = array_keys($map);
-        $setArray = array_map(function ($nomcolonne) {
-            return "$nomcolonne=:$nomcolonne";
-        }, $nomsColonnes);
-        $setString = join(', ', $setArray);
-        $sql = "UPDATE app_db SET $setString WHERE loginProprietaire=:loginProprietaire";
-        $pdoStatement = ConnexionBaseDeDonnees::getPdo()->prepare($sql);
-        $pdoStatement->execute($map);
+    protected function getNomTable(): string
+    {
+        return "Utilisateurs";
     }
 
-    public function supprimer(string $login): bool
+    protected function getNomClePrimaire(): string
     {
-        $sql = "DELETE FROM app_db WHERE loginProprietaire=:loginProprietaire";
-        $pdoStatement = ConnexionBaseDeDonnees::getPDO()->prepare($sql);
-        $pdoStatement->execute(['loginProprietaire' => $login]);
-        if (!($pdoStatement->rowCount() > 0)) {
-            return false;
-        }
-        return true;
+        return "login";
+    }
+
+    protected function construireDepuisTableauSQL(array $utilisateurFormatTableau): Utilisateur
+    {
+        return new Utilisateur($utilisateurFormatTableau['login'],
+            $utilisateurFormatTableau['nom'], $utilisateurFormatTableau['prenom'],
+            $utilisateurFormatTableau['email'],$utilisateurFormatTableau['mdpHache']
+        );
+    }
+
+    protected function getNomsColonnes(): array
+    {
+        return ["login", "nom", "prenom","email","mdpHache"];
+    }
+
+    protected function formatTableauSQL(AbstractDataObject $utilisateur): array
+    {
+        return array(
+            "loginTag" => $utilisateur->getLogin(),
+            "nomTag" => $utilisateur->getNom(),
+            "prenomTag" => $utilisateur->getPrenom(),
+            "emailTag" => $utilisateur->getEmail(),
+            "mdpHacheTag" => $utilisateur->getmdpHache(),
+        );
     }
 }

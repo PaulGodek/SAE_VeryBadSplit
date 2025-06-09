@@ -176,4 +176,20 @@ class ControleurUtilisateur extends ControleurGenerique
             "utilisateurs" => $utilisateurs
         ]);
     }
+
+    #[Route(path: '/reinitialisation', name: 'reinitialiserMdp', methods: ['POST'])]
+    public static function reinitialiserMdp(): Response {
+        $login = $_REQUEST["login"] ?? null;
+        $mdp = $_REQUEST["mdp"] ?? null;
+        $mdp2 = $_REQUEST["mdp2"] ?? null;
+
+        try {
+            self::getUtilisateurService()->reinitialiserMotDePasse($login, $mdp,$mdp2);
+        } catch (ServiceException $e) {
+            return self::gererException($e, "warning");
+        }
+
+        MessageFlash::ajouter("success", "Mot de passe réinitialisé avec succès !");
+        return self::redirection("connexion");
+    }
 }

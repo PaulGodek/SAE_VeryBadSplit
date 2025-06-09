@@ -9,7 +9,9 @@
         "symfony/http-foundation": "^7.2",
         "symfony/routing": "^7.2",
         "symfony/http-kernel": "^7.2",
-      "ext-pdo": "*",
-        "twig/twig": "^3.21"
+        "ext-pdo": "*",
+        "twig/twig": "^3.21",
+        "vlucas/phpdotenv": "^5.6"
+
     }
 }

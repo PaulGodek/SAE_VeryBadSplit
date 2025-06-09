@@ -4,32 +4,24 @@ namespace App\VeryBadSplit\Configuration;
 
 class ConfigurationBaseDeDonnees {
 
-    static private array $configurationBaseDeDonnees = array(
-        'nomHote' => 'webinfo.iutmontp.univ-montp2.fr',
-        'nomBaseDeDonnees' => 'godekp',
-        'port' => '3316',
-        'login' => 'godekp',
-        'motDePasse' => '100793528EF'
-    );
-
     static public function getLogin() : string {
-        return ConfigurationBaseDeDonnees::$configurationBaseDeDonnees['login'];
+        return $_ENV['DB_USER'] ?? 'verybadsplit_user';
     }
 
     static public function getNomBaseDeDonnees() : string {
-        return ConfigurationBaseDeDonnees::$configurationBaseDeDonnees['nomBaseDeDonnees'];
+        return $_ENV['DB_NAME'] ?? 'verybadsplit';
     }
 
     static public function getPort() : string {
-        return ConfigurationBaseDeDonnees::$configurationBaseDeDonnees['port'];
+        return $_ENV['DB_PORT'] ?? '3306';
     }
 
     static public function getNomHote() : string {
-        return ConfigurationBaseDeDonnees::$configurationBaseDeDonnees['nomHote'];
+        return $_ENV['DB_HOST'] ?? 'db';
     }
 
     static public function getMotDePasse() : string {
-        return ConfigurationBaseDeDonnees::$configurationBaseDeDonnees['motDePasse'];
+        return $_ENV['DB_PASSWORD'] ?? 'verybadsplit_pass';
     }
 
 }

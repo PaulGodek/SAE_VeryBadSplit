@@ -4,16 +4,16 @@ namespace App\VeryBadSplit\Modele\DataObject;
 
 use DateTime;
 
-class Depense
+class Depense extends AbstractDataObject
 {
     public function __construct(
         private int          $id,
-        private ?string      $titre = null,
-        private ?DateTime    $date = null,
-        private ?float      $montant = null,
-        private ?Utilisateur $payeur = null,
-        private ?Evenement   $evenement = null,
-        private ?array       $participants = [],
+        private string      $titre ,
+        private DateTime    $date ,
+        private float      $montant ,
+        private Utilisateur $payeur ,
+        private Evenement   $evenement ,
+        private array       $participants = [],
     )
     {
     }
@@ -53,22 +53,22 @@ class Depense
         $this->montant = $montant;
     }
 
-    public function getPayeur(): ?Utilisateur
+    public function getPayeur(): Utilisateur
     {
         return $this->payeur;
     }
 
-    public function setPayeur(?Utilisateur $payeur): void
+    public function setPayeur(Utilisateur $payeur): void
     {
         $this->payeur = $payeur;
     }
 
-    public function getEvenement(): ?Evenement
+    public function getEvenement(): Evenement
     {
         return $this->evenement;
     }
 
-    public function setEvenement(?Evenement $evenement): void
+    public function setEvenement(Evenement $evenement): void
     {
         $this->evenement = $evenement;
     }

@@ -42,7 +42,10 @@ class ControleurDepense extends ControleurGenerique
         $montant = $_REQUEST["montant"] ?? null;
         $payeur = $_REQUEST["payeur"] ?? null;
         $participants = $_REQUEST["participants"] ?? null;
-        
+
+        if(is_null($participants)){
+            $participants=[];
+        }
         try {
             $codeSecret = self::getDepenseService()->creerDepense($idEvenement, $titre, $montant, $payeur, $participants);
         } catch (ServiceException $e) {
@@ -62,7 +65,9 @@ class ControleurDepense extends ControleurGenerique
             return self::gererException($e, "danger");
         }
         
-        return self::afficherTwig("depense/formulaireMiseAJourDepense.html.twig", ["depense" => $depense]);
+        return self::afficherTwig("depense/formulaireMiseAJourDepense.html.twig", [
+            "depense" => $depense
+        ]);
     }
 
     #[Route(path: "/depense/modifier/{idDepense}", name: "mettreAJourDepense", 
@@ -72,6 +77,10 @@ class ControleurDepense extends ControleurGenerique
         $montant = $_REQUEST["montant"] ?? null;
         $payeur = $_REQUEST["payeur"] ?? null;
         $participants = $_REQUEST["participants"] ?? null;
+
+        if(is_null($participants)){
+            $participants=[];
+        }
 
         try {
             $codeSecret = self::getDepenseService()->mettreAJourDepense($idDepense, $titre, $montant, $payeur, $participants);
@@ -94,5 +103,31 @@ class ControleurDepense extends ControleurGenerique
         }
         MessageFlash::ajouter("success", "Dépense supprimée avec succès.");
         return self::redirection("Evenement", ["codeEvenement" => $codeSecret]);
+    }
+
+    #[Route(path: "/depense/supprimerParticipant/{idDepense}/{login}", name: "SupprimerParticipant")]
+    public static function supprimerParticipant(int $idDepense, string $login): Response
+    {
+        try {
+            self::getDepenseService()->supprimerParticipant($idDepense, $login);
+        } catch (ServiceException $e) {
+            return self::gererException($e, "danger");
+        }
+
+        MessageFlash::ajouter("success", "Participant supprimé avec succès.");
+        return self::redirection("formulaireModifierDepenseEDSRTFYGHJKHGYFTDRFYGHUJIOKHGFYDTFGCVBJHNK?LNBHVCGFXFDCGVHBJN?BVHCGXFCGVHBJNKBVHCGXFCGVHBJN?KLNBVHCGXVHBN?NBJVGH", ["idDepense" => $idDepense]);
+    }
+
+    #[Route(path: "/depense/ajouterParticipant/{idDepense}/{login}", name: "AjouterParticipant")]
+    public static function ajouterParticipant(int $idDepense, string $login): Response
+    {
+        try {
+            self::getDepenseService()->ajouterParticipant($idDepense, $login);
+        } catch (ServiceException $e) {
+            return self::gererException($e, "danger");
+        }
+
+        MessageFlash::ajouter("success", "Participant ajouté avec succès.");
+        return self::redirection("formulaireModifierDepenseEDSRTFYGHJKHGYFTDRFYGHUJIOKHGFYDTFGCVBJHNK?LNBHVCGFXFDCGVHBJN?BVHCGXFCGVHBJNKBVHCGXFCGVHBJN?KLNBVHCGXVHBN?NBJVGH", ["idDepense" => $idDepense]);
     }
 }
