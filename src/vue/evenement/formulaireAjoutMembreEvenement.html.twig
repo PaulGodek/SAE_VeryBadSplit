@@ -1,0 +1,33 @@
+{% extends "vueGenerale.html.twig" %}
+
+{% block page_title %}Ajout membre | Very Bad Split{% endblock %}
+
+{% block page_content %}
+    <div class="hero-body pt-0 mt-0">
+        <div class="container">
+            <div class="columns is-centered">
+                <div class="column is-6 box has-background-black-ter">
+                    <p class="is-size-2 has-text-centered has-text-white">Ajout d'un membre à l'événement</p>
+                    <form action="{{ route('ajouterMembre', { idEvenement: evenement.id }) }}" method="post">
+                        <div class="field">
+                            <label class="label is-size-4" for="login">Utilisateur à ajouter</label>
+                            <div class="select is-size-4 is-fullwidth">
+                                <select required id="login" name="login">
+                                    {% for utilisateur in utilisateurs %}
+                                        <option value="{{ utilisateur.login|e }}">{{ utilisateur.prenom|e }} {{ utilisateur.nom|e }} ({{ utilisateur.login|e }})</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="buttons is-centered">
+                            <button class="button has-background-black is-size-4">
+                                <span class="icon is-left"><ion-icon name="person-add"></ion-icon></span>
+                                <span>Ajouter à l'événement</span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

@@ -17,7 +17,7 @@ abstract class GeneriqueService
     {
         if (!ConnexionUtilisateur::estConnecte()) {
             throw new ServiceException("Vous devez être connecté pour cela.",
-                "connexion");
+                "afficherFormulaireConnexion");
         }
     }
 
@@ -30,7 +30,7 @@ abstract class GeneriqueService
     {
         if (ConnexionUtilisateur::estConnecte()) {
             throw new ServiceException("Vous êtes déjà connecté.",
-                "evenements", "warning");
+                "MesEvenement", [], "warning");
         }
     }
 }

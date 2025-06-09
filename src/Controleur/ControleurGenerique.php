@@ -3,45 +3,52 @@
 namespace App\VeryBadSplit\Controleur;
 
 use App\VeryBadSplit\Lib\Conteneur;
-use App\VeryBadSplit\Lib\Helper;
 use App\VeryBadSplit\Lib\MessageFlash;
 use App\VeryBadSplit\Service\Exception\ServiceException;
-use JetBrains\PhpStorm\NoReturn;
+use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Generator\UrlGenerator;
+use Twig\Environment;
 
 abstract class ControleurGenerique {
 
-    protected static function afficherVue(string $cheminVue, array $parametres = []): void
+    protected static function afficherVue(string $cheminVue, array $parametres = []): Response
     {
         extract($parametres);
         $messagesFlash = MessageFlash::lireTousMessages();
+        ob_start();
         require __DIR__ . "/../vue/$cheminVue";
-    }
-    
-    #[NoReturn]
-    protected static function redirection(string $url) : void
-    {
-        header("Location: " . Helper::url($url));
-        exit();
-    }
-    
-    #[NoReturn]
-    protected static function redirectionVersRoute(string $nomRoute, array $parametres = []) : void
-    {
-        /** @var UrlGenerator $generateurUrl */
-        $generateurUrl = Conteneur::recupererService("generateurUrl");
-        $url = $generateurUrl->generate($nomRoute, $parametres);
-        header("Location: " . $url);
-        exit();
+        $corpsResponse = ob_get_clean();
+        return new Response($corpsResponse);
     }
 
-    public static function afficherErreur($messageErreur = ""): void
+    protected static function afficherTwig(string $cheminVue, array $parametres = []): Response
     {
-        self::afficherVue('vueGenerale.php', [
-            "pagetitle" => "Problème",
-            "cheminVueBody" => "erreur.php",
+        /** @var Environment $twig */
+        $twig = Conteneur::recupererService("twig");
+        $corpsReponse = $twig->render($cheminVue, $parametres);
+        return new Response($corpsReponse);
+    }
+
+    protected static function redirection(string $routeName, array $arguments = []) : RedirectResponse
+    {
+        $generateurUrl = Conteneur::recupererService("generateurUrl");
+
+        /** @var UrlGenerator $generateurUrl */
+        $url = $generateurUrl->generate($routeName, $arguments);
+
+        return new RedirectResponse($url);
+    }
+
+    public static function afficherErreur($messageErreur = "",  $statusCode = 400): Response
+    {
+        $reponse = self::afficherTwig("erreur.html.twig", [
+            "statusCode" => $statusCode,
             "messageErreur" => $messageErreur
         ]);
+
+        $reponse->setStatusCode($statusCode);
+        return $reponse;
     }
 
     public static function issetAndNotNull(array $requestParams) : bool {
@@ -67,14 +74,11 @@ abstract class ControleurGenerique {
      * et en redirigeant vers une URL spécifiée.
      *
      * @param ServiceException $e L'exception à gérer. Contient le message et l'URL de redirection.
-     * @param string|null $type Le type de message flash (optionnel). Si null, utilise le type de l'exception.
-     *
-     * @return void
+     * @param string|null $type Le type de message flash (optionnel). Si null, utilise le type de l'exception
      */
-    #[NoReturn]
-    protected static function gererException(ServiceException $e, string $type = null): void
+    protected static function gererException(ServiceException $e, string $type = null): RedirectResponse
     {
         MessageFlash::ajouter($type ?? $e->getTypeMessageFlash(), $e->getMessage());
-        self::redirection($e->getRedirectionUrl());
+        return self::redirection($e->getRedirectionRoute(), $e->getArguments());
     }
 }

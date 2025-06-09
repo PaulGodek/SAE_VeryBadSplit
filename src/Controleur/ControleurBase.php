@@ -2,17 +2,15 @@
 
 namespace App\VeryBadSplit\Controleur;
 
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
 class ControleurBase extends ControleurGenerique
 {
     
     #[Route(path: '/', name: 'accueil', methods: ['GET'])]
-    public static function accueil(): void
+    public static function accueil(): Response
     {
-        self::afficherVue('vueGenerale.php', [
-            "pagetitle" => "Accueil",
-            "cheminVueBody" => "base/accueil.php"
-        ]);
+        return self::afficherTwig('base/accueil.html.twig');
     }
 }

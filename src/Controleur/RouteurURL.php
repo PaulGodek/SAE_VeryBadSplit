@@ -3,10 +3,16 @@
 namespace App\VeryBadSplit\Controleur;
 
 use App\VeryBadSplit\Service\EmailService;
+use App\VeryBadSplit\Lib\ConnexionUtilisateur;
+use App\VeryBadSplit\Lib\MessageFlash;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\UrlHelper;
+use Symfony\Component\Routing\Exception\MethodNotAllowedException;
+use Symfony\Component\Routing\Exception\NoConfigurationException;
+use Symfony\Component\Routing\Exception\ResourceNotFoundException;
 use Symfony\Component\Routing\Generator\UrlGenerator;
 use Symfony\Component\Routing\Loader\AttributeDirectoryLoader;
 use Symfony\Component\Routing\RequestContext;
@@ -21,51 +27,38 @@ use App\VeryBadSplit\Modele\Repository\DepenseRepository;
 use App\VeryBadSplit\Service\UtilisateurService;
 use App\VeryBadSplit\Service\EvenementService;
 use App\VeryBadSplit\Service\DepenseService;
+use Twig\Environment;
+use Twig\Loader\FilesystemLoader;
+use Twig\TwigFunction;
 
 class RouteurURL
 {
-    public static function traiterRequete(): void
+    public static function traiterRequete(Request $requete): Response
     {
-        $requete = Request::createFromGlobals();
+        // Contexte de la requête
+        $contexteRequete = (new RequestContext())->fromRequest($requete);
 
         // Chargement des routes
         $fileLocator = new FileLocator(__DIR__);
         $attrClassLoader = new AttributeRouteControllerLoader();
         $routes = (new AttributeDirectoryLoader($fileLocator, $attrClassLoader))->load(__DIR__);
-        
-        // Contexte de la requête
-        $contexteRequete = (new RequestContext())->fromRequest($requete);
 
-        // Association de l'URL à une route
-        $associateurUrl = new UrlMatcher($routes, $contexteRequete);
-        $donneesRoute = $associateurUrl->match($requete->getPathInfo());
-        $requete->attributes->add($donneesRoute);
-
-        // Résolution du contrôleur et des arguments
-        $resolveurDeControleur = new ControllerResolver();
-        $controleur = $resolveurDeControleur->getController($requete);
-
-        $resolveurDArguments = new ArgumentResolver();
-        $arguments = $resolveurDArguments->getArguments($requete, $controleur);
-        
         // Ajout des services au conteneur
         $generateurUrl = new UrlGenerator($routes, $contexteRequete);
         $assistantUrl = new UrlHelper(new RequestStack(), $contexteRequete);
 
         Conteneur::ajouterService("generateurUrl", $generateurUrl);
         Conteneur::ajouterService("assistantUrl", $assistantUrl);
-        
+
         // Initialisation des repositories
         $utilisateurRepository = new UtilisateurRepository();
         $evenementRepository = new EvenementRepository();
         $depenseRepository = new DepenseRepository();
-        $emailService= new EmailService();
-        
+
         // Ajout des repositories au conteneur
         Conteneur::ajouterService("utilisateurRepository", $utilisateurRepository);
         Conteneur::ajouterService("evenementRepository", $evenementRepository);
         Conteneur::ajouterService("depenseRepository", $depenseRepository);
-        Conteneur::ajouterService("emailService", $emailService);
 
 
         // Initialisation des services avec injection de dépendances
@@ -87,13 +80,56 @@ class RouteurURL
             $evenementRepository,
             $evenementService
         );
+
+        $emailService= new EmailService();
         
         // Ajout des services au conteneur
         Conteneur::ajouterService("utilisateurService", $utilisateurService);
         Conteneur::ajouterService("evenementService", $evenementService);
         Conteneur::ajouterService("depenseService", $depenseService);
+        Conteneur::ajouterService("emailService", $emailService);
+
+        // Ajout du moteur Twig
+        $twigLoader = new FilesystemLoader(__DIR__ . '/../vue/');
+        $twig = new Environment(
+            $twigLoader,
+            [
+                'autoescape' => 'html',
+                'strict_variables' => true,
+                'debug' => true
+            ]
+        );
+        Conteneur::ajouterService("twig", $twig);
+
+        // Ajout des variables globales et des méthodes Twig
+        $twig->addGlobal('messagesFlash', new MessageFlash());
+        $twig->addGlobal("estConnecte", ConnexionUtilisateur::estConnecte() ? ConnexionUtilisateur::getLoginUtilisateurConnecte() : null);
+        $twig->addFunction(new TwigFunction('route', $generateurUrl->generate(...)));
+        $twig->addFunction(new TwigFunction('asset', $assistantUrl->getAbsoluteUrl(...)));
 
         // Exécution du contrôleur
-        call_user_func_array($controleur, $arguments);
+        try {
+            // Association de l'URL à une route
+            $associateurUrl = new UrlMatcher($routes, $contexteRequete);
+            $donneesRoute = $associateurUrl->match($requete->getPathInfo());
+            $requete->attributes->add($donneesRoute);
+
+            // Résolution du contrôleur et des arguments
+            $resolveurDeControleur = new ControllerResolver();
+            $controleur = $resolveurDeControleur->getController($requete);
+
+            $resolveurDArguments = new ArgumentResolver();
+            $arguments = $resolveurDArguments->getArguments($requete, $controleur);
+
+            $reponse = call_user_func_array($controleur, $arguments);
+        } catch (MethodNotAllowedException $exception) {
+            $reponse = (new ControleurBase())->afficherErreur($exception->getMessage(), 403);
+        } catch (NoConfigurationException|ResourceNotFoundException $exception) {
+            $reponse = (new ControleurBase())->afficherErreur($exception->getMessage(), 404);
+        } catch (\Exception $exception) {
+            $reponse = (new ControleurBase())->afficherErreur($exception->getMessage());
+        }
+
+        return $reponse;
     }
 }

@@ -1,14 +1,14 @@
-<?php
-use App\VeryBadSplit\Modele\DataObject\Evenement;
-/** @var Evenement $evenement */
-?>
+{% extends "vueGenerale.html.twig" %}
 
+{% block page_title %}Ajouter Dépense | Very Bad Split{% endblock %}
+
+{% block page_content %}
 <div class="hero-body pt-0 mt-0">
     <div class="container">
         <div class="columns is-centered">
             <div class="column is-8 box has-background-black-ter">
                 <p class="is-size-2 has-text-centered has-text-white">Ajout d'une dépense</p>
-                <form action="<?= \App\VeryBadSplit\Lib\Helper::url("evenements/nouvelleDepense/" . htmlspecialchars($evenement->getId())) ?>" method="post">
+                <form action="{{ route("creerDepense" , { idEvenement : evenement.id }) }}" method="post">
                     <div class="field is-horizontal">
                         <div class="field-body">
                             <div class="field">
@@ -35,29 +35,25 @@ use App\VeryBadSplit\Modele\DataObject\Evenement;
                                 <div class="select is-size-4 is-fullwidth">
                                     <select required id="payeur" name="payeur">
                                         <option value="" disabled selected hidden></option>
-                                        <?php foreach ($evenement->getMembres() as $membre) {?>
-                                            <option value="<?=htmlspecialchars($membre->getLogin())?>"><?=htmlspecialchars($membre->getPrenom()." ".$membre->getNom()." (".$membre->getLogin().")")?></option>
-                                        <?php }?>
-
+                                        {% for membre in evenement.membres %}
+                                            <option value="{{ membre.login|e }}">{{ membre.prenom|e~" "~membre.nom|e~" ("~membre.login|e~")" }}</option>
+                                        {% endfor %}
                                     </select>
                                 </div>
                             </div>
                             <div class="field">
                                 <label class="label is-size-4" for="participants">Participants</label>
                                 <div class="box" style="max-height: 200px; overflow-y: auto;">
-                                    <?php foreach ($evenement->getMembres() as $membre):
-                                        $login = htmlspecialchars($membre->getLogin());
-                                        $nomComplet = htmlspecialchars($membre->getPrenom() . " " . $membre->getNom() . " ($login)");
-                                        ?>
+                                    {% for membre in evenement.membres %}
                                         <div class="level mb-2">
                                             <div class="level-left">
                                                 <label>
-                                                    <input class="mr-2" type="checkbox" name="participants[]" value="<?= $login ?>">
-                                                    <span class="is-size-5"><?= $nomComplet ?></span>
+                                                    <input class="mr-2" type="checkbox" name="participants[]" value="{{ membre.login|e }}">
+                                                    <span class="is-size-5">{{ membre.prenom|e }} {{ membre.nom|e }} ({{ membre.login|e }})</span>
                                                 </label>
                                             </div>
                                         </div>
-                                    <?php endforeach; ?>
+                                    {% endfor %}
                                 </div>
                             </div>
                         </div>
@@ -73,3 +69,4 @@ use App\VeryBadSplit\Modele\DataObject\Evenement;
         </div>
     </div>
 </div>
+{% endblock %}

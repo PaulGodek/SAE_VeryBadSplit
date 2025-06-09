@@ -48,5 +48,5 @@ class MotDePasse
         return $password;
     }
 
-    //Here was important, the unusefull method doing nothing
+    // Here was important, the unusefull method doing nothing
 }

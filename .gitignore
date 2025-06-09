@@ -1,6 +1,6 @@
 .idea/
 *.Identifier
-/vendor/
+vendor/
 CLAUDE.md
 .env
 .env.*

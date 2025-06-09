@@ -13,4 +13,6 @@ $dotenv->load();
 // Routage //
 /////////////
 
-\App\VeryBadSplit\Controleur\RouteurURL::traiterRequete();
+$requete = \Symfony\Component\HttpFoundation\Request::createFromGlobals();
+$reponse = \App\VeryBadSplit\Controleur\RouteurURL::traiterRequete($requete);
+$reponse->send();
