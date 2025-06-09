@@ -12,6 +12,7 @@ use App\VeryBadSplit\Modele\Repository\Interface\EvenementRepositoryInterface;
 use App\VeryBadSplit\Modele\Repository\Interface\UtilisateurRepositoryInterface;
 use App\VeryBadSplit\Service\Exception\ServiceException;
 use App\VeryBadSplit\Service\Interface\UtilisateurServiceInterface;
+use Symfony\Component\HttpFoundation\Response;
 
 class UtilisateurService extends GeneriqueService implements UtilisateurServiceInterface
 {
@@ -43,7 +44,7 @@ class UtilisateurService extends GeneriqueService implements UtilisateurServiceI
         $utilisateur = $this->utilisateurRepository->recupererParClePrimaire($login);
 
         if (!$utilisateur) {
-            throw new ServiceException("Utilisateur introuvable.", "connexion");
+            throw new ServiceException("Utilisateur introuvable.", Response::HTTP_FORBIDDEN, "connexion");
         }
 
         return $utilisateur;
@@ -65,48 +66,57 @@ class UtilisateurService extends GeneriqueService implements UtilisateurServiceI
 
         if (!ControleurGenerique::isNotNull([$login, $prenom, $nom, $email, $mdp, $mdp2])) {
             throw new ServiceException("Login, nom, prénom, email ou mot de passe manquant.",
-                "inscription", "danger");
+                Response::HTTP_BAD_REQUEST,
+                "inscription");
         }
 
         if ($mdp !== $mdp2) {
             throw new ServiceException("Mots de passe distincts.",
+                Response::HTTP_BAD_REQUEST,
                 "inscription");
         }
 
         if (!Validator::isValidEmail($email)) {
             throw new ServiceException("Email non valide.",
+                Response::HTTP_BAD_REQUEST,
                 "inscription");
         }
 
         if (!Validator::hasValideLength($login,3,30)) {
             throw new ServiceException("La longueur du nom d'utilisateur n'est pas valide.",
-                "inscrpition");
+                Response::HTTP_BAD_REQUEST,
+                "inscription");
         }
 
         if (!Validator::hasValideLength($nom,1,30)) {
             throw new ServiceException("La longueur du nom n'est pas valide.",
-                "inscrpition");
+                Response::HTTP_BAD_REQUEST,
+                "inscription");
         }
 
         if (!Validator::hasValideLength($prenom,1,30)) {
             throw new ServiceException("La longueur du prenom n'est pas valide.",
-                "inscrpition");
+                Response::HTTP_BAD_REQUEST,
+                "inscription");
         }
 
         if (!Validator::isValideMdp($mdp)) {
             throw new ServiceException("Le mot de passe ne respecte pas le modèle donné.",
-                "inscrpition");
+                Response::HTTP_BAD_REQUEST,
+                "inscription");
         }
 
 
 
         if ($this->utilisateurRepository->recupererParClePrimaire($login)) {
             throw new ServiceException("Le login est déjà pris.",
+                Response::HTTP_BAD_REQUEST,
                 "inscription");
         }
 
         if ($this->utilisateurRepository->recupererParEmail($email)) {
             throw new ServiceException("Ce mail est déjà pris.",
+                Response::HTTP_BAD_REQUEST,
                 "inscription");
         }
 
@@ -139,47 +149,53 @@ class UtilisateurService extends GeneriqueService implements UtilisateurServiceI
         $this->verifierConnexion();
 
         if (!ControleurGenerique::isNotNull([$login, $prenom, $nom, $email, $mdpActuel])) {
-            throw new ServiceException("Login, nom, prénom, email ou mot de passe actuel manquant.", "compte/modifier");
+            throw new ServiceException("Login, nom, prénom, email ou mot de passe actuel manquant.", Response::HTTP_BAD_REQUEST,"compte/modifier");
         }
 
         if (!Validator::isValidEmail($email)) {
-            throw new ServiceException("Email non valide.", "compte/modifier", "warning");
+            throw new ServiceException("Email non valide.", Response::HTTP_BAD_REQUEST, "compte/modifier", "warning");
         }
 
         if (!Validator::hasValideLength($login,3,30)) {
             throw new ServiceException("La longueur du nom d'utilisateur n'est pas valide.",
-                "compte/modifier", "danger");
+                Response::HTTP_BAD_REQUEST,
+                "compte/modifier");
         }
 
         if (!Validator::hasValideLength($nom,1,30)) {
             throw new ServiceException("La longueur du nom n'est pas valide.",
-                "compte/modifier", "danger");
+                Response::HTTP_BAD_REQUEST,
+                "compte/modifier");
         }
 
         if (!Validator::hasValideLength($prenom,1,30)) {
             throw new ServiceException("La longueur du prenom n'est pas valide.",
-                "compte/modifier", "danger");
+                Response::HTTP_BAD_REQUEST,
+                "compte/modifier");
         }
 
         if (!empty($mdp) && !Validator::isValideMdp($mdp)) {
             throw new ServiceException("Le mot de passe ne respecte pas le modèle donné.",
-                "compte/modifier", "danger");
+                Response::HTTP_BAD_REQUEST,
+                "compte/modifier");
         }
 
         $utilisateurRepository = $this->utilisateurRepository;
         $utilisateur = $utilisateurRepository->recupererParClePrimaire($login);
 
         if (!$utilisateur) {
-            throw new ServiceException("L'utilisateur n'existe pas.", "compte/modifier");
+            throw new ServiceException("L'utilisateur n'existe pas.", Response::HTTP_NOT_FOUND, "compte/modifier");
         }
 
         if ($mdp || $mdp2) {
             if (!$mdp || !$mdp2) {
                 throw new ServiceException("Pour modifier votre mot de passe, vous devez saisir les 2 champs correspondants.",
-                    "compte/modifier", "warning");
+                    Response::HTTP_BAD_REQUEST,
+                    "compte/modifier",
+                    "warning");
             }
             if ($mdp !== $mdp2) {
-                throw new ServiceException("Mots de passe distincts.", "compte/modifier", "warning");
+                throw new ServiceException("Mots de passe distincts.", Response::HTTP_BAD_REQUEST, "compte/modifier", "warning");
             }
             // Stocke que le mot de passe haché. Pas le mot de passe en clair ni en en cookie.
             $utilisateur->setMdpHache(MotDePasse::hacher($mdp));
@@ -206,23 +222,26 @@ class UtilisateurService extends GeneriqueService implements UtilisateurServiceI
 
         if (!Validator::hasValideLength($login,3,30)) {
             throw new ServiceException("La longueur du nom d'utilisateur n'est pas valide.",
-                "reinitialisation", "danger");
+                Response::HTTP_BAD_REQUEST,
+                "reinitialisation");
         }
 
         $utilisateurRepository = $this->utilisateurRepository;
         $utilisateur = $utilisateurRepository->recupererParClePrimaire($login);
 
         if (!$utilisateur) {
-            throw new ServiceException("L'utilisateur n'existe pas.", "reinitialisation");
+            throw new ServiceException("L'utilisateur n'existe pas.", Response::HTTP_NOT_FOUND,"reinitialisation");
         }
 
         if ($mdp || $mdp2) {
             if (!$mdp || !$mdp2) {
                 throw new ServiceException("Pour reinitialiser votre mot de passe, vous devez saisir les 2 champs correspondants.",
-                    "reinitialisation", "warning");
+                    Response::HTTP_BAD_REQUEST,
+                    "reinitialisation",
+                    "warning");
             }
             if ($mdp !== $mdp2) {
-                throw new ServiceException("Mots de passe distincts.", "reinitialisation", "warning");
+                throw new ServiceException("Mots de passe distincts.", Response::HTTP_BAD_REQUEST, "reinitialisation",  "warning");
             }
             // Stocke que le mot de passe haché. Pas le mot de passe en clair ni en en cookie.
             $utilisateur->setMdpHache(MotDePasse::hacher($mdp));
@@ -278,17 +297,17 @@ class UtilisateurService extends GeneriqueService implements UtilisateurServiceI
         $this->verifierNonConnecte();
         
         if ($login == null || $mdp == null) {
-            throw new ServiceException("Login ou mot de passe manquant.", "connexion");
+            throw new ServiceException("Login ou mot de passe manquant.", Response::HTTP_BAD_REQUEST, "connexion");
         }
         
         $utilisateur = $this->utilisateurRepository->recupererParClePrimaire($login);
 
         if (!$utilisateur) {
-            throw new ServiceException("Login inconnu.", "connexion");
+            throw new ServiceException("Login inconnu.", Response::HTTP_BAD_REQUEST, "connexion");
         }
 
         if (!MotDePasse::verifier($mdp, $utilisateur->getMdpHache())) {
-            throw new ServiceException("Mot de passe incorrect.", "connexion");
+            throw new ServiceException("Mot de passe incorrect.", Response::HTTP_BAD_REQUEST, "connexion");
         }
 
         ConnexionUtilisateur::connecter($utilisateur->getLogin());
@@ -307,13 +326,13 @@ class UtilisateurService extends GeneriqueService implements UtilisateurServiceI
         //Bah justement non du coup tu peux pas être connecté à ce moment la puisque t'as plus tes id
         
         if (empty($email)) {
-            throw new ServiceException("Adresse email manquante.", "recuperation");
+            throw new ServiceException("Adresse email manquante.", Response::HTTP_BAD_REQUEST, "recuperation");
         }
 
         $utilisateurs = $this->utilisateurRepository->recupererParEmail($email);
 
         if (empty($utilisateurs)) {
-            throw new ServiceException("Aucun compte associé à cette adresse email.", "recuperation");
+            throw new ServiceException("Aucun compte associé à cette adresse email.", Response::HTTP_BAD_REQUEST, "recuperation");
         }
 
         return $utilisateurs;

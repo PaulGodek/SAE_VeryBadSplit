@@ -8,9 +8,9 @@ class ServiceException extends Exception{
     
     private string $redirectionUrl;
     private string $typeMessageFlash;
-    
-    public function __construct(string $message, string $redirectionUrl, string $typeMessageFlash = "danger") {
-        parent::__construct($message);
+
+    public function __construct(string $message, int $code, string $redirectionUrl, string $typeMessageFlash = "danger") {
+        parent::__construct($message, $code);
         $this->redirectionUrl = $redirectionUrl;
         $this->typeMessageFlash = $typeMessageFlash;
     }
