@@ -1,5 +1,5 @@
 {% for membre in evenement.membres %}
-    <div class="box media">
+    <div class="membre box media">
         <div class="media-content">
             <div class="is-size-4 is-wrapped">
                 <span><strong>{{ membre.prenom|e~" "~membre.nom|e }}</strong></span>
@@ -15,7 +15,7 @@
         </div>
         <div class="media-right">
             {% if evenement.estProprietaire(loginConnecte) %}
-                <a class="delete" href="{{ route("SupprimerMembre", {idEvenement : evenement.id, login : membre.login}) }}"></a>
+                <button class="delete" onclick="evenement.supprimerMembre(this)" data-login-membre="{{ membre.login }}" data-id-evenement="{{ evenement.id }}"></button>
             {% endif %}
         </div>
     </div>

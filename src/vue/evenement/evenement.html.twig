@@ -16,7 +16,7 @@
                             <span class="icon"><ion-icon name="time"></ion-icon></span>
                             <span>Date : {{ evenement.date.format('d/m/Y') }}</span>
                             <span class="icon"><ion-icon name="card"></ion-icon></span>
-                            <span>Coût total : {{ coutTotal|number_format(2) }}€</span>
+                            <span>Coût total : <span data-textfun="evenement.calculerCoutTotal()">{{ coutTotal|number_format(2) }}€</span></span>
                         </div>
                         <div class="buttons is-centered mt-2">
                             {% if (evenement.estMembre(loginConnecte)) %}
@@ -41,7 +41,7 @@
                     <div class="columns">
                         <div class="column is-half">
                             <div class="has-text-centered">
-                                <p class="is-size-4"><strong>Dépenses</strong></p>
+                                <p class="is-size-4"><strong>Dépenses</strong> (<span data-textvar="evenement.nbDepenses">{{ depenses|length }}</span>)</p>
                                 {% if (evenement.estMembre(loginConnecte)) %}
                                     <a class="button has-background-black has-text-white-ter is-size-4" href="{{ route("afficherFormulaireCreationDepense", {idEvenement : evenement.id}) }}">
                                         <span class="icon is-left"><ion-icon name="add-circle"></ion-icon></span>
@@ -56,7 +56,7 @@
                         <div class="column is-half">
                             <div>
                                 <div class="has-text-centered">
-                                    <p class="is-size-4"><strong>Membres</strong></p>
+                                    <p class="is-size-4"><strong>Membres</strong> (<span data-textvar="evenement.nbMembres">{{ evenement.membres|length }}</span>)</p>
                                     {% if evenement.estMembre(loginConnecte) %}
                                         {% if evenement.estProprietaire(loginConnecte) %}
                                             <a class="button has-background-black has-text-white-ter is-size-4" href="{{ route("afficherFormulaireAjoutMembre", {idEvenement : evenement.id}) }}">
@@ -85,4 +85,11 @@
 {% endblock %}
 {% block page_scripts %}
     <script type="module" src="{{ asset('../ressources/js/evenement-reactif.js') }}"></script>
+    <script>
+        // Initialiser les compteurs
+        setTimeout(() => {
+            window.evenement.nbDepenses = {{ depenses|length }};
+            window.evenement.nbMembres = {{ evenement.membres|length }};
+        }, 100);
+    </script>
 {% endblock %}
