@@ -37,7 +37,7 @@ services:
       # Persiste les données même après arrêt du conteneur
       - db_data:/var/lib/mysql
       # Script SQL exécuté automatiquement au premier démarrage
-      - ./SAE4A_QC1.sql:/docker-entrypoint-initdb.d/01-init.sql
+      - ./SAE4A_Q1C.sql:/docker-entrypoint-initdb.d/01-init.sql
 
   # Interface d'administration de la base de données
   phpmyadmin:
