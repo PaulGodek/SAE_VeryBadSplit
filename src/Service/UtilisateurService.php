@@ -173,6 +173,10 @@ class UtilisateurService extends GeneriqueService implements UtilisateurServiceI
             throw new ServiceException("L'utilisateur n'existe pas.", "compte/modifier");
         }
 
+        if(!MotDePasse::verifier($mdpActuel,$utilisateur->getMdpHache())){
+            throw new ServiceException('Le mot de passe actuel entré incorrect','warning');
+        }
+
         if ($mdp || $mdp2) {
             if (!$mdp || !$mdp2) {
                 throw new ServiceException("Pour modifier votre mot de passe, vous devez saisir les 2 champs correspondants.",
