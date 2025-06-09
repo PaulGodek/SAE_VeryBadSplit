@@ -2,6 +2,7 @@
 
 namespace App\VeryBadSplit\Controleur;
 
+use App\VeryBadSplit\Service\EmailService;
 use App\VeryBadSplit\Lib\ConnexionUtilisateur;
 use App\VeryBadSplit\Lib\MessageFlash;
 use Symfony\Component\Config\FileLocator;
@@ -41,7 +42,7 @@ class RouteurURL
         $fileLocator = new FileLocator(__DIR__);
         $attrClassLoader = new AttributeRouteControllerLoader();
         $routes = (new AttributeDirectoryLoader($fileLocator, $attrClassLoader))->load(__DIR__);
-        
+
         // Ajout des services au conteneur
         $generateurUrl = new UrlGenerator($routes, $contexteRequete);
         $assistantUrl = new UrlHelper(new RequestStack(), $contexteRequete);
@@ -53,12 +54,13 @@ class RouteurURL
         $utilisateurRepository = new UtilisateurRepository();
         $evenementRepository = new EvenementRepository();
         $depenseRepository = new DepenseRepository();
-        
+
         // Ajout des repositories au conteneur
         Conteneur::ajouterService("utilisateurRepository", $utilisateurRepository);
         Conteneur::ajouterService("evenementRepository", $evenementRepository);
         Conteneur::ajouterService("depenseRepository", $depenseRepository);
-        
+
+
         // Initialisation des services avec injection de dépendances
         $utilisateurService = new UtilisateurService(
             $utilisateurRepository,
@@ -78,11 +80,14 @@ class RouteurURL
             $evenementRepository,
             $evenementService
         );
+
+        $emailService= new EmailService();
         
         // Ajout des services au conteneur
         Conteneur::ajouterService("utilisateurService", $utilisateurService);
         Conteneur::ajouterService("evenementService", $evenementService);
         Conteneur::ajouterService("depenseService", $depenseService);
+        Conteneur::ajouterService("emailService", $emailService);
 
         // Ajout du moteur Twig
         $twigLoader = new FilesystemLoader(__DIR__ . '/../vue/');

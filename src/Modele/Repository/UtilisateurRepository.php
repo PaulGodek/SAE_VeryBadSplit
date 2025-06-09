@@ -2,6 +2,7 @@
 
 namespace App\VeryBadSplit\Modele\Repository;
 
+use App\VeryBadSplit\Lib\MessageFlash;
 use App\VeryBadSplit\Modele\DataObject\AbstractDataObject;
 use App\VeryBadSplit\Modele\DataObject\Utilisateur;
 use App\VeryBadSplit\Modele\Repository\Interface\UtilisateurRepositoryInterface;
@@ -12,30 +13,31 @@ class UtilisateurRepository extends AbstractRepository implements UtilisateurRep
 
 
     /**
-     * @return Utilisateur[]
+     * @return Utilisateur|null
      */
-    public function recupererParEmail($email) : array {
+    public function recupererParEmail($email) : ?Utilisateur {
+
         $pdoStatement = ConnexionBaseDeDonnees::getPdo()->prepare(
             "SELECT *
                         FROM ". $this->getNomTable() ."
                         WHERE email = :email");
         $pdoStatement->execute(["email"=>$email]);
-        $data = $pdoStatement->fetchAll(PDO::FETCH_ASSOC);
-        if(!$data) {
-            return [];
-        }
-        $utilisateurs = [];
-        foreach ($data as $utilisateur) {
-            $utilisateurs[] = new Utilisateur(
-                login: $utilisateur["login"],
-                nom: $utilisateur["nom"],
-                prenom: $utilisateur["prenom"],
-                email: $utilisateur["email"],
-                mdpHache: $utilisateur["mdpHache"]
+        $data = $pdoStatement->fetch();
 
-            );
+        if(!$data) {
+            return null;
         }
-        return $utilisateurs;
+
+        $utilisateur = new Utilisateur(
+        login: $data["login"],
+        nom: $data["nom"],
+        prenom: $data["prenom"],
+        email: $data["email"],
+         mdpHache: $data["mdpHache"]
+
+        );
+
+        return $utilisateur;
     }
 
     /**

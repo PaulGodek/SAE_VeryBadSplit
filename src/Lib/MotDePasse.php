@@ -31,5 +31,22 @@ class MotDePasse
         return substr(base64_encode($octetsAleatoires), 0, $nbCaracteres);
     }
 
+    public static function genererMdpAleatoire() {
+        $chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&_=+-';
+        do {
+            $password = '';
+            for ($i = 0; $i < 12; $i++) {
+                $password .= $chars[random_int(0, strlen($chars) - 1)];
+            }
+        } while (
+            !preg_match('/[a-z]/', $password) ||
+            !preg_match('/[A-Z]/', $password) ||
+            !preg_match('/[0-9]/', $password) ||
+            !preg_match('/[!@#$%^&_=+\-]/', $password)
+        );
+
+        return $password;
+    }
+
     // Here was important, the unusefull method doing nothing
 }

@@ -6,6 +6,8 @@ use App\VeryBadSplit\Lib\ConnexionUtilisateur;
 use App\VeryBadSplit\Lib\Conteneur;
 use App\VeryBadSplit\Lib\MessageFlash;
 use App\VeryBadSplit\Modele\HTTP\Cookie;
+use App\VeryBadSplit\Lib\MotDePasse;
+use App\VeryBadSplit\Service\EmailService;
 use App\VeryBadSplit\Service\Exception\ServiceException;
 use App\VeryBadSplit\Service\UtilisateurService;
 use Symfony\Component\HttpFoundation\Response;
@@ -17,6 +19,11 @@ class ControleurUtilisateur extends ControleurGenerique
     {
         return Conteneur::recupererService("utilisateurService");
     }
+
+    public static function getEmailService():EmailService{
+        return Conteneur::recupererService("emailService");
+    }
+
     #[Route(path: '/compte', name: 'afficherDetail', methods: ['GET'])]
     public static function afficherDetail(): Response
     {
@@ -162,34 +169,29 @@ class ControleurUtilisateur extends ControleurGenerique
         return self::afficherTwig("utilisateur/formulaireRecuperationCompte.html.twig");
     }
 
-    #[Route(path: '/recuperation', name: 'recupererCompte', methods: ['POST'])]
-    public static function recupererCompte(): Response {
+
+
+    /**
+     * @throws ServiceException
+     */
+    #[Route(path: '/mail', name: 'envoiMail', methods: ['POST'])]
+    public static function envoiMailOublieMdp(): Response {
         $email = $_REQUEST["email"] ?? null;
-        
-        try {
-            $utilisateurs = self::getUtilisateurService()->recupererUtilisateursParEmail($email);
-        } catch (ServiceException $e) {
-            return self::gererException($e, "warning");
+
+        try{
+            $utilisateur=self::getUtilisateurService()->recupererUtilisateurParEmail($email);
+            $mdp=MotDePasse::genererMdpAleatoire();
+            self::getUtilisateurService()->reinitialiserMotDePasse($utilisateur->getLogin(),$mdp);
+            self::getEmailService()->envoyerMailMdpOublie($utilisateur,$mdp);
+        }catch(ServiceException $e){
+            return self::gererException($e, "danger");
         }
 
-        return self::afficherTwig("utilisateur/resultatRecuperationCompte.html.twig", [
-            "utilisateurs" => $utilisateurs
-        ]);
+        MessageFlash::ajouter("success", "Le mail a été envoyé avec succès");
+        return self::redirection("afficherFormulaireConnexion");
     }
 
-    #[Route(path: '/reinitialisation', name: 'reinitialiserMdp', methods: ['POST'])]
-    public static function reinitialiserMdp(): Response {
-        $login = $_REQUEST["login"] ?? null;
-        $mdp = $_REQUEST["mdp"] ?? null;
-        $mdp2 = $_REQUEST["mdp2"] ?? null;
 
-        try {
-            self::getUtilisateurService()->reinitialiserMotDePasse($login, $mdp,$mdp2);
-        } catch (ServiceException $e) {
-            return self::gererException($e, "warning");
-        }
 
-        MessageFlash::ajouter("success", "Mot de passe réinitialisé avec succès !");
-        return self::redirection("connexion");
-    }
+
 }
