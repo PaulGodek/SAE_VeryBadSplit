@@ -138,8 +138,8 @@
             {% for depense in depenses %}
                 window.evenement.montantsDepenses[{{ depense.id }}] = {{ depense.montant|number_format(2, '.', '') }};
             {% endfor %}
-            // Forcer la mise à jour
-            window.evenement.montantsDepenses = {...window.evenement.montantsDepenses};
+            // Calculer le coût total initial
+            window.evenement.mettreAJourCoutTotal();
         }, 100);
     </script>
 {% endblock %}
