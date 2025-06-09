@@ -49,36 +49,8 @@
                                     </a>
                                 {% endif %}
                             </div>
-                            <div class="mt-5 is-overflow-y-auto scrollable-list pr-3">
-                                {% for depense in depenses %}
-                                    <div class="box media">
-                                        <div class="media-content">
-                                            <div class="is-size-4">
-                                                <span><strong>{{ depense.titre|e }}</strong></span>
-                                            </div>
-                                            <div class="has-text-left is-size-5">
-                                                <span class="icon is-left"><ion-icon name="time"></ion-icon></span>
-                                                <span>Le {{ depense.date.format('d/m/Y') }}</span>
-                                            </div>
-                                            <div class="has-text-left is-size-5">
-                                                <span class="icon is-left"><ion-icon name="card"></ion-icon></span>
-                                                <span>{{ depense.montant|number_format(2) }}€ payé par {{ depense.payeur.prenom|e~" "~depense.payeur.nom|e }}</span>
-                                            </div>
-                                            <div class="has-text-left is-size-5 mt-2">
-                                                <span class="icon is-left"><ion-icon name="person"></ion-icon></span>
-                                                {% for participant in depense.participants %}
-                                                    <span class="liste-membre-item">{{ participant.prenom|slice(0, 1)|e~participant.nom|slice(0, 1)|e }}</span>
-                                                {% endfor %}
-                                            </div>
-                                        </div>
-                                        <div class="media-right">
-                                            {% if evenement.estMembre(loginConnecte) %}
-                                                <a class="icon-container" href="{{ route("afficherFormulaireMiseAJourDepense", {idDepense : depense.id}) }}"><span class="icon pb-3"><ion-icon name="pencil"></ion-icon></span></a>
-                                                <a class="delete" href="{{ route("supprimerDepense", {idDepense : depense.id}) }}"></a>
-                                            {% endif %}
-                                        </div>
-                                    </div>
-                                {% endfor %}
+                            <div class="mt-5 is-overflow-y-auto scrollable-list pr-3" id="liste-depenses">
+                                {{ include('vues/depenses/composants/liste_depenses.html.twig', {evenement: evenement, depenses: depenses, loginConnecte: loginConnecte}) }}
                             </div>
                         </div>
                         <div class="column is-half">
@@ -100,28 +72,7 @@
                                     {% endif %}
                                 </div>
                                 <div class="mt-5 has-background-black-ter is-overflow-y-auto scrollable-list pr-3">
-                                    {% for membre in evenement.membres %}
-                                        <div class="box media">
-                                            <div class="media-content">
-                                                <div class="is-size-4 is-wrapped">
-                                                    <span><strong>{{ membre.prenom|e~" "~membre.nom|e }}</strong></span>
-                                                </div>
-                                                {% for transaction in transactions %}
-                                                    {% if (transaction["from"] == membre.login) %}
-                                                        <div class="has-text-left is-size-5">
-                                                            <span class="icon is-left"><ion-icon name="card"></ion-icon></span>
-                                                            <span>Doit {{ transaction["montant"]|number_format(2) }}€ à {{ transaction["to"].prenom|e~" "~transaction["to"].nom|e }}</span>
-                                                        </div>
-                                                    {% endif %}
-                                                {% endfor %}
-                                            </div>
-                                            <div class="media-right">
-                                                {% if evenement.estProprietaire(loginConnecte) %}
-                                                    <a class="delete" href="{{ route("SupprimerMembre", {idEvenement : evenement.id, login : membre.login}) }}"></a>
-                                                {% endif %}
-                                            </div>
-                                        </div>
-                                    {% endfor %}
+                                    {{ include('vues/utilisateurs/composants/liste_membres.html.twig', {evenement: evenement, transactions: transactions, loginConnecte: loginConnecte}) }}
                                 </div>
                             </div>
                         </div>
@@ -131,4 +82,7 @@
         </div>
     </div>
 </div>
+{% endblock %}
+{% block page_scripts %}
+    <script type="module" src="{{ asset('../ressources/js/evenement-reactif.js') }}"></script>
 {% endblock %}
