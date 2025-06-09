@@ -9,23 +9,6 @@ let evenement = reactive({
     coutTotal: 0,
     montantsDepenses: {},
     
-    // Afficher une notification
-    afficherNotification: function(message, type = 'success') {
-        const container = document.getElementById('flashes-container');
-        if (!container) return;
-        
-        const notification = document.createElement('div');
-        notification.className = `notification mt-2 is-${type}`;
-        notification.innerHTML = `
-            <button class="delete" onclick="this.parentElement.remove()"></button>
-            ${message}
-        `;
-        container.appendChild(notification);
-        
-        // Auto-remove after 3 seconds
-        setTimeout(() => notification.remove(), 3000);
-    },
-    
     // Calcul du coût total pour l'affichage
     calculerCoutTotal: function() {
         return this.coutTotal.toFixed(2).replace('.', ',') + '€';
@@ -52,14 +35,6 @@ let evenement = reactive({
         form.style.display = form.style.display === 'none' ? 'block' : 'none';
     },
     
-    // Toggle édition d'une dépense
-    toggleEditionDepense: function(idDepense) {
-        const form = document.getElementById(`formulaire-edition-depense-${idDepense}`);
-        if (form) {
-            form.style.display = form.style.display === 'none' ? 'block' : 'none';
-        }
-    },
-    
     // Modification du titre
     modifierTitre: function(event) {
         event.preventDefault();
@@ -75,7 +50,6 @@ let evenement = reactive({
                 if (response.status === 200) {
                     this.titreEvenement = nouveauTitre;
                     this.toggleEditionTitre();
-                    this.afficherNotification('Titre modifié avec succès');
                 }
             });
         } else {
@@ -99,7 +73,6 @@ let evenement = reactive({
                         
                         // Recharger les dettes
                         this.actualiserDettes();
-                        this.afficherNotification('Dépense supprimée');
                     }
                 });
         }
@@ -116,35 +89,9 @@ let evenement = reactive({
                     if (response.status === 204) {
                         button.closest('.membre').remove();
                         this.nbMembres--;
-                        this.afficherNotification('Membre retiré');
                     }
                 });
         }
-    },
-    
-    // Modification d'une dépense
-    modifierDepense: function(event, idDepense) {
-        event.preventDefault();
-        const form = event.target;
-        const formData = new FormData(form);
-        
-        const depense = {
-            titre: formData.get('titre'),
-            montant: parseFloat(formData.get('montant')),
-            payeur: formData.get('payeur')
-        };
-        
-        fetch(`/web/api/depenses/${idDepense}`, {
-            method: 'PATCH',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify(depense)
-        }).then(response => {
-            if (response.status === 200) {
-                this.toggleEditionDepense(idDepense);
-                this.actualiserListes();
-                this.afficherNotification('Dépense modifiée');
-            }
-        });
     },
     
     // Ajout d'une dépense
@@ -174,7 +121,6 @@ let evenement = reactive({
                 form.reset();
                 this.toggleFormulaireAjout();
                 this.actualiserListes();
-                this.afficherNotification('Dépense ajoutée');
             }
         });
     },
