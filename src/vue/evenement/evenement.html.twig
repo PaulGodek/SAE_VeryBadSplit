@@ -107,7 +107,7 @@
                                                     <span><strong>{{ membre.prenom|e~" "~membre.nom|e }}</strong></span>
                                                 </div>
                                                 {% for transaction in transactions %}
-                                                    {% if (transaction["from"] === membre.login) %}
+                                                    {% if (transaction["from"] == membre.login) %}
                                                         <div class="has-text-left is-size-5">
                                                             <span class="icon is-left"><ion-icon name="card"></ion-icon></span>
                                                             <span>Doit {{ transaction["montant"]|number_format(2) }}€ à {{ transaction["to"].prenom|e~" "~transaction["to"].nom|e }}</span>

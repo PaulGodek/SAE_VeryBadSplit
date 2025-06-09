@@ -32,7 +32,7 @@ class ControleurEvenement extends ControleurGenerique
     public static function afficherEvenement(string $codeEvenement): Response
     {
         try {
-            $resultat = self::getEvenementService()->recupererEvenementAvecDettes2($codeEvenement);
+            $resultat = self::getEvenementService()->recupererEvenementAvecDettes($codeEvenement);
             $evenement = $resultat["evenement"];
             $dettes = $resultat["dettes"];
             $coutTotal = $resultat["coutTotal"];
