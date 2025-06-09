@@ -107,8 +107,15 @@ let evenement = reactive({
     
     // Suppression d'un membre
     supprimerMembre: function(button) {
+        const login = button.dataset.loginMembre;
+        
+        // Empêcher la suppression du propriétaire
+        if (login === window.proprietaireLogin) {
+            this.afficherNotification('Le propriétaire ne peut pas être retiré', 'danger');
+            return;
+        }
+        
         if (confirm('Êtes-vous sûr de vouloir retirer ce membre ?')) {
-            const login = button.dataset.loginMembre;
             const idEvenement = button.dataset.idEvenement;
             
             fetch(`/web/api/evenements/${idEvenement}/membres/${login}`, {method: 'DELETE'})

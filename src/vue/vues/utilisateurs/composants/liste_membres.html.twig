@@ -14,7 +14,7 @@
             {% endfor %}
         </div>
         <div class="media-right">
-            {% if evenement.estProprietaire(loginConnecte) %}
+            {% if evenement.estProprietaire(loginConnecte) and not evenement.estProprietaire(membre.login) %}
                 <button class="delete" onclick="evenement.supprimerMembre(this)" data-login-membre="{{ membre.login }}" data-id-evenement="{{ evenement.id }}"></button>
             {% endif %}
         </div>

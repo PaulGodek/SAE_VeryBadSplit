@@ -143,6 +143,7 @@
     <script>
         // Initialiser les compteurs et montants
         window.evenementId = {{ evenement.id }};
+        window.proprietaireLogin = "{{ evenement.proprietaire.login|e('js') }}";
         
         setTimeout(() => {
             window.evenement.titreEvenement = "{{ evenement.titre|e('js') }}";
