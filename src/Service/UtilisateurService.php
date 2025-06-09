@@ -64,7 +64,7 @@ class UtilisateurService extends GeneriqueService implements UtilisateurServiceI
     public function creerUtilisateur(string $login, string $prenom, string $nom, string $email, string $mdp, string $mdp2): void {
         $this->verifierNonConnecte();
 
-        if (!ControleurGenerique::isNotNull([$login, $prenom, $nom, $email, $mdp, $mdp2])) {
+        if (!$this->isNotNull([$login, $prenom, $nom, $email, $mdp, $mdp2])) {
             throw new ServiceException("Login, nom, prénom, email ou mot de passe manquant.",
                 Response::HTTP_BAD_REQUEST,
                 "afficherFormulaireCreation", [], "danger");
@@ -148,7 +148,7 @@ class UtilisateurService extends GeneriqueService implements UtilisateurServiceI
     ): void {
         $this->verifierConnexion();
 
-        if (!ControleurGenerique::isNotNull([$login, $prenom, $nom, $email, $mdpActuel])) {
+        if (!$this->isNotNull([$login, $prenom, $nom, $email, $mdpActuel])) {
             throw new ServiceException("Login, nom, prénom, email ou mot de passe actuel manquant.", Response::HTTP_BAD_REQUEST, "afficherFormulaireMiseAJour");
         }
 
@@ -246,14 +246,13 @@ class UtilisateurService extends GeneriqueService implements UtilisateurServiceI
     public function supprimerUtilisateur(string $login): void
     {
         $this->verifierConnexion();
-
-        $evenementRepository = $this->evenementRepository;
-        foreach ($evenementRepository->recupererEvenementsUtilisateur($login) as $evenement) {
+        
+        foreach ($this->evenementRepository->recupererEvenementsUtilisateur($login) as $evenement) {
             $membres = array_filter($evenement->getMembres(), fn($u) => $u->getLogin() !== $login);
             $evenement->setMembres($membres);
-            $evenementRepository->mettreAJour($evenement);
+            $this->evenementRepository->mettreAJour($evenement);
         }
-
+        
         $depenseRepository = $this->depenseRepository;
         foreach ($depenseRepository->recupererDepensesPayeesOuParticipeUtilisateur($login) as $depense) {
             if ($depense->estPayeur($login)) {
@@ -295,7 +294,6 @@ class UtilisateurService extends GeneriqueService implements UtilisateurServiceI
         ConnexionUtilisateur::connecter($utilisateur->getLogin());
     }
 
-
     /**
      * Récupère une liste d'utilisateurs associés à une adresse email donnée.
      *
@@ -324,6 +322,15 @@ class UtilisateurService extends GeneriqueService implements UtilisateurServiceI
         $this->verifierConnexion();
         $utilisateurs = $this->utilisateurRepository->recupererParClePrimaire($login);
         return $utilisateurs;
+    }
+
+    public function isNotNull(array $array) : bool {
+        foreach ($array as $value) {
+            if(!(isset($value) && $value != null)) {
+                return false;
+            }
+        }
+        return true;
     }
 
 }
