@@ -29,10 +29,11 @@ class ControleurEvenement extends ControleurGenerique
     public static function afficherEvenement(string $codeEvenement): void
     {
         try {
-            $resultat = self::getEvenementService()->recupererEvenementAvecDettes($codeEvenement);
+            $resultat = self::getEvenementService()->recupererEvenementAvecDettes2($codeEvenement);
             $evenement = $resultat["evenement"];
             $dettes = $resultat["dettes"];
             $coutTotal = $resultat["coutTotal"];
+            $transactions=$resultat["transactionsOptimisees"];
             $depenses = self::getDepenseService()->recupererDepensesParEvenement($evenement->getId());
         } catch (ServiceException $e) {
             self::gererException($e, "warning");
@@ -48,6 +49,7 @@ class ControleurEvenement extends ControleurGenerique
             "cheminVueBody" => "evenement/evenement.php",
             "evenement" => $evenement,
             "depenses" => $depenses,
+            "transactions" => $transactions,
             "coutTotal" => $coutTotal,
             "dettes" => $dettes,
         ]);
