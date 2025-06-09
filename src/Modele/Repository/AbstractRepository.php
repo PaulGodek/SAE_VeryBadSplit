@@ -5,9 +5,16 @@ namespace App\VeryBadSplit\Modele\Repository;
 
 
 use App\VeryBadSplit\Modele\DataObject\AbstractDataObject;
+use App\VeryBadSplit\Modele\Repository\Interface\ConnexionBaseDeDonneesInterface;
 
 abstract class AbstractRepository
 {
+    public function __construct(private ConnexionBaseDeDonneesInterface $connexionBaseDeDonnees){}
+
+    protected function getConnexionBaseDeDonnees(): ConnexionBaseDeDonneesInterface {
+        return $this->connexionBaseDeDonnees;
+    }
+
     public function mettreAJour(AbstractDataObject $objet): void
     {
         $leSet = [];
@@ -20,7 +27,7 @@ abstract class AbstractRepository
             ' WHERE ' . $this->getNomClePrimaire() . '= :' . $this->getNomClePrimaire() . 'Tag';
 
 
-        $pdoStatement = ConnexionBaseDeDonnees::getPdo()->prepare($sql);
+        $pdoStatement = $this->connexionBaseDeDonnees->getPdo()->prepare($sql);
 
         $values = $this->formatTableauSQL($objet);
         $pdoStatement->execute($values);
@@ -32,7 +39,7 @@ abstract class AbstractRepository
     {
 
             $sql = 'INSERT INTO ' . $this->getNomTable() . ' (' . join(',', $this->getNomsColonnes()) . ') VALUES (:' . join("Tag, :", $this->getNomsColonnes()) . 'Tag)';
-            $pdoStatement = ConnexionBaseDeDonnees::getPdo()->prepare($sql);
+            $pdoStatement = $this->connexionBaseDeDonnees->getPdo()->prepare($sql);
 
             $values = $this->formatTableauSQL($objet);
 
@@ -60,7 +67,7 @@ abstract class AbstractRepository
 
 
 
-        $pdoStatement = ConnexionBaseDeDonnees::getPdo()->prepare($sql);
+        $pdoStatement = $this->connexionBaseDeDonnees->getPdo()->prepare($sql);
 
         $pdoStatement->execute(['login' => $login,'id'=>$objet->getId()]);
 
@@ -85,7 +92,7 @@ abstract class AbstractRepository
 
 
 
-        $pdoStatement = ConnexionBaseDeDonnees::getPdo()->prepare($sql);
+        $pdoStatement = $this->connexionBaseDeDonnees->getPdo()->prepare($sql);
 
         $pdoStatement->execute(['login' => $login, 'id' => $objet->getId()]);
 
@@ -98,7 +105,7 @@ abstract class AbstractRepository
     {
 
         $sql = "DELETE from " . $this->getNomTable() . " WHERE " . $this->getNomClePrimaire() . " = :clePrimaireTag";
-        $pdoStatement = ConnexionBaseDeDonnees::getPdo()->prepare($sql);
+        $pdoStatement = $this->connexionBaseDeDonnees->getPdo()->prepare($sql);
         $values = array();
         $values["clePrimaireTag"] = $clePrimaire;
 
@@ -111,7 +118,7 @@ abstract class AbstractRepository
     {
         $sql = "SELECT * from " . $this->getNomTable() . " WHERE " . $this->getNomClePrimaire() . " = :clePrimaireTag";
         // Préparation de la requête
-        $pdoStatement = ConnexionBaseDeDonnees::getPdo()->prepare($sql);
+        $pdoStatement = $this->connexionBaseDeDonnees->getPdo()->prepare($sql);
 
 
         $values = array(
@@ -135,7 +142,7 @@ abstract class AbstractRepository
 
     {
         $objets = [];
-        $pdoStatement = ConnexionBaseDeDonnees::getPdo()->query("SELECT * FROM " . $this->getNomTable());
+        $pdoStatement = $this->connexionBaseDeDonnees->getPdo()->query("SELECT * FROM " . $this->getNomTable());
 
 
         foreach ($pdoStatement as $objetFormatTableau) {
