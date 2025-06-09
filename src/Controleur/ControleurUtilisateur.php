@@ -177,41 +177,6 @@ class ControleurUtilisateur extends ControleurGenerique
         ]);
     }
 
-    /*#[Route(path: '/recuperation', name: 'recupererCompte', methods: ['POST'])]
-    public static function recupererCompte(): void {
-        $email = $_REQUEST["email"] ?? null;
-        
-        try {
-            $utilisateur = self::getUtilisateurService()->recupererUtilisateurParEmail($email);
-        } catch (ServiceException $e) {
-            self::gererException($e, "warning");
-        }
-
-        self::afficherVue('vueGenerale.php', [
-            "pagetitle" => "Récupérer mon compte",
-            "cheminVueBody" => "utilisateur/resultatRecuperationCompte.php",
-            "utilisateur" => $utilisateur
-        ]);
-    }*/
-
-
-    /*#[Route(path: '/reinitialisation', name: 'reinitialiserMdp', methods: ['POST'])]
-    public static function reinitialiserMdp(): void {
-        $login = $_REQUEST["login"] ?? null;
-        $mdp = $_REQUEST["mdp"] ?? null;
-
-
-        try {
-            self::getUtilisateurService()->reinitialiserMotDePasse($login, $mdp,$mdp2);
-        } catch (ServiceException $e) {
-            self::gererException($e, "warning");
-        }
-        MessageFlash::ajouter("success", "Mot de passe réinitialisé avec succès !");
-
-        self::redirection("connexion");
-    }*/
-
-    //---------------------------------------------------------------------------------------------------------------------------
 
 
     /**
