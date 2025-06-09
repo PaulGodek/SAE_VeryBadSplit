@@ -2,9 +2,7 @@
 
 namespace App\VeryBadSplit\Lib;
 
-use App\VeryBadSplit\Modele\DataObject\Utilisateur;
 use App\VeryBadSplit\Modele\HTTP\Session;
-use App\VeryBadSplit\Modele\Repository\UtilisateurRepository;
 
 class ConnexionUtilisateur
 {

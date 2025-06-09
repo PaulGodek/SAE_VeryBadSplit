@@ -9,49 +9,52 @@ use App\VeryBadSplit\Modele\HTTP\Cookie;
 use App\VeryBadSplit\Lib\MotDePasse;
 use App\VeryBadSplit\Service\EmailService;
 use App\VeryBadSplit\Service\Exception\ServiceException;
+use App\VeryBadSplit\Service\Interface\EmailServiceInterface;
+use App\VeryBadSplit\Service\Interface\UtilisateurServiceInterface;
 use App\VeryBadSplit\Service\UtilisateurService;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
 class ControleurUtilisateur extends ControleurGenerique
 {
-    private static function getUtilisateurService(): UtilisateurService
-    {
-        return Conteneur::recupererService("utilisateurService");
-    }
 
-    public static function getEmailService():EmailService{
-        return Conteneur::recupererService("emailService");
+    public function __construct(
+        ContainerInterface $container,
+        private UtilisateurServiceInterface $utilisateurService,
+        private EmailServiceInterface $emailService)
+    {
+        parent::__construct($container);
     }
 
     #[Route(path: '/compte', name: 'afficherDetail', methods: ['GET'])]
-    public static function afficherDetail(): Response
+    public function afficherDetail(): Response
     {
         try {
-            $utilisateur = self::getUtilisateurService()->recupererUtilisateurConnecte();
+            $utilisateur = $this->utilisateurService->recupererUtilisateurConnecte();
         } catch (ServiceException $e) {
-            return self::gererException($e, 'danger');
+            return $this->gererException($e, 'danger');
         }
 
-        return self::afficherTwig("utilisateur/detail.html.twig", [
+        return $this->afficherTwig("utilisateur/detail.html.twig", [
             "utilisateur" => $utilisateur
         ]);
     }
 
     #[Route(path: '/inscription', name: 'afficherFormulaireCreation', methods: ['GET'])]
-    public static function afficherFormulaireCreation(): Response
+    public function afficherFormulaireCreation(): Response
     {
         try {
-            self::getUtilisateurService()->verifierNonConnecte();
+            $this->utilisateurService->verifierNonConnecte();
         } catch (ServiceException $e) {
-            return self::gererException($e);
+            return $this->gererException($e);
         }
 
-        return self::afficherTwig("utilisateur/formulaireCreation.html.twig");
+        return $this->afficherTwig("utilisateur/formulaireCreation.html.twig");
     }
 
     #[Route(path: '/inscription', name: 'creerDepuisFormulaire', methods: ['POST'])]
-    public static function creerDepuisFormulaire(): Response
+    public function creerDepuisFormulaire(): Response
     {
         $login = $_REQUEST["login"] ?? null;
         $prenom = $_REQUEST["prenom"] ?? null;
@@ -61,30 +64,30 @@ class ControleurUtilisateur extends ControleurGenerique
         $mdp2 = $_REQUEST["mdp2"] ?? null;
 
         try {
-            self::getUtilisateurService()->creerUtilisateur($login, $prenom, $nom, $email, $mdp, $mdp2);
+            $this->utilisateurService->creerUtilisateur($login, $prenom, $nom, $email, $mdp, $mdp2);
             MessageFlash::ajouter("success", "L'utilisateur a bien été créé !");
-            return self::redirection("afficherFormulaireConnexion");
+            return $this->redirection("afficherFormulaireConnexion");
         } catch (ServiceException $e) {
-            return self::gererException($e, "warning");
+            return $this->gererException($e, "warning");
         }
     }
 
     #[Route(path: '/compte/modifier', name: 'afficherFormulaireMiseAJour', methods: ['GET'])]
-    public static function afficherFormulaireMiseAJour(): Response
+    public function afficherFormulaireMiseAJour(): Response
     {
         try {
-            $utilisateur = self::getUtilisateurService()->recupererUtilisateurConnecte();
+            $utilisateur = $this->utilisateurService->recupererUtilisateurConnecte();
         } catch (ServiceException $e) {
-            return self::gererException($e);
+            return $this->gererException($e);
         }
 
-        return self::afficherTwig("utilisateur/formulaireMiseAJour.html.twig", [
+        return $this->afficherTwig("utilisateur/formulaireMiseAJour.html.twig", [
             "utilisateur" => $utilisateur
         ]);
     }
 
     #[Route(path: '/compte/modifier', name: 'modifierDepuisFormulaire', methods: ['POST'])]
-    public static function mettreAJour(): Response
+    public function mettreAJour(): Response
     {
         $login = $_REQUEST['login'] ?? null;
         $prenom = $_REQUEST['prenom'] ?? null;
@@ -95,61 +98,61 @@ class ControleurUtilisateur extends ControleurGenerique
         $mdp2 = $_REQUEST['mdp2'] ?? null;
 
         try {
-            self::getUtilisateurService()->mettreAJourUtilisateur($login, $prenom, $nom, $email, $mdpActuel, $mdp, $mdp2);
+            $this->utilisateurService->mettreAJourUtilisateur($login, $prenom, $nom, $email, $mdpActuel, $mdp, $mdp2);
         } catch (ServiceException $e) {
-            return self::gererException($e);
+            return $this->gererException($e);
         }
 
         MessageFlash::ajouter("success", "L'utilisateur a bien été modifié !");
-        return self::redirection("afficherDetail");
+        return $this->redirection("afficherDetail");
     }
 
     #[Route(path: '/compte/supprimer/{login}', name: 'supprimerCompte', methods: ['GET'])]
-    public static function supprimer(string $login): Response
+    public function supprimer(string $login): Response
     {
         try {
-            self::getUtilisateurService()->supprimerUtilisateur($login);
+            $this->utilisateurService->supprimerUtilisateur($login);
         } catch (ServiceException $e) {
-            return self::gererException($e);
+            return $this->gererException($e);
         }
 
         MessageFlash::ajouter("success", "Votre compte a bien été supprimé !");
-        return self::redirection("afficherFormulaireConnexion");
+        return $this->redirection("afficherFormulaireConnexion");
     }
 
     #[Route(path: '/connexion', name: 'afficherFormulaireConnexion', methods: ['GET'])]
-    public static function afficherFormulaireConnexion(): Response
+    public function afficherFormulaireConnexion(): Response
     {
         try {
-            self::getUtilisateurService()->verifierNonConnecte();
+            $this->utilisateurService->verifierNonConnecte();
         } catch (ServiceException $e) {
-            return self::gererException($e);
+            return $this->gererException($e);
         }
 
-        return self::afficherTwig("utilisateur/formulaireConnexion.html.twig", [
+        return $this->afficherTwig("utilisateur/formulaireConnexion.html.twig", [
             "login" => Cookie::contient("login") ? Cookie::lire("login") : "",
             "mdp" => Cookie::contient("mdp") ? Cookie::lire("mdp") : ""
         ]);
     }
 
     #[Route(path: '/connexion', name: 'connecter', methods: ['POST'])]
-    public static function connecter(): Response
+    public function connecter(): Response
     {
         $login = $_REQUEST["login"] ?? null;
         $mdp = $_REQUEST["mdp"] ?? null;
         
         try {
-            self::getUtilisateurService()->connecterUtilisateur($login, $mdp);
+            $this->utilisateurService->connecterUtilisateur($login, $mdp);
         } catch (ServiceException $e) {
-            return self::gererException($e, "danger");
+            return $this->gererException($e, "danger");
         }
 
         MessageFlash::ajouter("success", "Connexion réussie !");
-        return self::redirection("MesEvenements");
+        return $this->redirection("MesEvenements");
     }
 
     #[Route(path: '/deconnexion', name: 'deconnecter', methods: ['GET'])]
-    public static function deconnecter(): Response
+    public function deconnecter(): Response
     {
         if (ConnexionUtilisateur::estConnecte()) {
             ConnexionUtilisateur::deconnecter();
@@ -157,32 +160,32 @@ class ControleurUtilisateur extends ControleurGenerique
         } else {
             MessageFlash::ajouter("danger", "Utilisateur non connecté.");
         }
-        return self::redirection("accueil");
+        return $this->redirection("accueil");
     }
 
     #[Route(path: '/recuperation', name: 'afficherFormulaireRecuperationCompte', methods: ['GET'])]
-    public static function afficherFormulaireRecuperationCompte(): Response {
+    public function afficherFormulaireRecuperationCompte(): Response {
         if(ConnexionUtilisateur::estConnecte()) {
-            return self::redirection("MesEvenements");
+            return $this->redirection("MesEvenements");
         }
 
-        return self::afficherTwig("utilisateur/formulaireRecuperationCompte.html.twig");
+        return $this->afficherTwig("utilisateur/formulaireRecuperationCompte.html.twig");
     }
 
     #[Route(path: '/mail', name: 'envoiMail', methods: ['POST'])]
-    public static function envoiMailOublieMdp(): Response {
+    public function envoiMailOublieMdp(): Response {
         $email = $_REQUEST["email"] ?? null;
 
         try{
-            $utilisateur=self::getUtilisateurService()->recupererUtilisateurParEmail($email);
+            $utilisateur=$this->utilisateurService->recupererUtilisateurParEmail($email);
             $mdp=MotDePasse::genererMdpAleatoire();
-            self::getUtilisateurService()->reinitialiserMotDePasse($utilisateur->getLogin(),$mdp);
-            self::getEmailService()->envoyerMailMdpOublie($utilisateur,$mdp);
+            $this->utilisateurService->reinitialiserMotDePasse($utilisateur->getLogin(),$mdp);
+            $this->emailService->envoyerMailMdpOublie($utilisateur,$mdp);
         }catch(ServiceException $e){
-            return self::gererException($e, "danger");
+            return $this->gererException($e, "danger");
         }
 
         MessageFlash::ajouter("success", "Le mail a été envoyé avec succès");
-        return self::redirection("afficherFormulaireConnexion");
+        return $this->redirection("afficherFormulaireConnexion");
     }
 }

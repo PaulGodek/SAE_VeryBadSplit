@@ -7,6 +7,7 @@ use App\VeryBadSplit\Lib\MessageFlash;
 use App\VeryBadSplit\Modele\DataObject\AbstractDataObject;
 use App\VeryBadSplit\Modele\DataObject\Evenement;
 use App\VeryBadSplit\Modele\DataObject\Utilisateur;
+use App\VeryBadSplit\Modele\Repository\Interface\ConnexionBaseDeDonneesInterface;
 use App\VeryBadSplit\Modele\Repository\Interface\EvenementRepositoryInterface;
 use DateTime;
 
@@ -15,6 +16,11 @@ use PDO;
 
 class EvenementRepository extends AbstractRepository implements EvenementRepositoryInterface
 {
+
+    public function __construct(ConnexionBaseDeDonneesInterface $connexionBaseDeDonnees){
+        parent::__construct($connexionBaseDeDonnees);
+    }
+    
     private function recupererPar($critere, $valeur): ?array
     {
         if (!in_array($critere, $this->getNomsColonnes())) {
@@ -35,7 +41,7 @@ class EvenementRepository extends AbstractRepository implements EvenementReposit
         WHERE e.$critere = :valeur
     ";
 
-        $pdoStatement = ConnexionBaseDeDonnees::getPdo()->prepare($sql);
+        $pdoStatement = $this->getConnexionBaseDeDonnees()->getPdo()->prepare($sql);
         $pdoStatement->execute(["valeur" => $valeur]);
         $data = $pdoStatement->fetchAll(PDO::FETCH_ASSOC);
 
@@ -127,7 +133,7 @@ class EvenementRepository extends AbstractRepository implements EvenementReposit
         WHERE em.loginMembre = :login OR e.loginProprietaire = :login
     ";
 
-        $pdoStatement = ConnexionBaseDeDonnees::getPdo()->prepare($sql);
+        $pdoStatement = $this->getConnexionBaseDeDonnees()->getPdo()->prepare($sql);
         $pdoStatement->execute(['login' => $login]);
         $data = $pdoStatement->fetchAll(PDO::FETCH_ASSOC);
 
@@ -194,7 +200,7 @@ class EvenementRepository extends AbstractRepository implements EvenementReposit
 
     public function getNextId() : int
     {
-        $query = ConnexionBaseDeDonnees::getPdo()->query("SELECT MAX(idEvenement) FROM ".$this->getNomTable());
+        $query = $this->getConnexionBaseDeDonnees()->getPdo()->query("SELECT MAX(idEvenement) FROM ".$this->getNomTable());
         $query->execute();
         $obj = $query->fetch();
         return $obj[0] === null ? 0 : $obj[0] + 1;
@@ -203,7 +209,7 @@ class EvenementRepository extends AbstractRepository implements EvenementReposit
     public function compterNombreEvenementProprietaire($loginProprietaire): int
     {
         $sql = "SELECT COUNT(DISTINCT idEvenement) FROM ".$this->getNomTable()." WHERE loginProprietaire=:loginProprietaire";
-        $pdoStatement = ConnexionBaseDeDonnees::getPDO()->prepare($sql);
+        $pdoStatement = $this->getConnexionBaseDeDonnees()->getPDO()->prepare($sql);
         $pdoStatement->execute(["loginProprietaire" => $loginProprietaire]);
         $obj = $pdoStatement->fetch();
         return $obj[0] === null ? 0 : $obj[0];

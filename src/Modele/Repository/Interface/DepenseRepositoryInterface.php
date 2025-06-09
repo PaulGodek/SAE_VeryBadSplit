@@ -10,7 +10,7 @@ interface DepenseRepositoryInterface
 {
     public function ajouter(Depense $depense): bool;
     
-    public function recuperer(): ?AbstractDataObject;
+    public function recupererParClePrimaire(int $clePrimaire): ?AbstractDataObject;
 
     /**
      * @return Depense[]
@@ -23,7 +23,9 @@ interface DepenseRepositoryInterface
     
     public function getNextId(): int;
     
-    public function compterNombreDepensesEvenement($idEvenement): int;
-
     public function recupererParEvenement($idEvenement): ?array;
+    
+    public function ajouterJointure(Depense $depense, string $loginParticipant): bool;
+    
+    public function supprimerJointure(Depense $depense, string $loginParticipant): bool;
 }

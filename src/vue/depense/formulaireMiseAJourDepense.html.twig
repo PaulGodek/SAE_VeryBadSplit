@@ -20,10 +20,16 @@
                                 </div>
                             </div>
                             <div class="field">
-                                <label class="label is-size-4" for="montant">Montant (minimum 1€)</label>
-                                <div class="control has-icons-left">
-                                    <input id="montant" name="montant" class="input is-large" type="number" step="0.01" min="1" max="10000" value="{{ depense.montant }}" required>
-                                    <span class="icon is-small is-left"><ion-icon name="card"></ion-icon></span>
+                                <label class="label is-size-4" for="montantPasConverti">Montant</label>
+                                <div class="field has-addons">
+                                    <p class="control is-expanded has-icons-left">
+                                        <input id="montantPasConverti" name="montantPasConverti" class="input is-large" type="number" step="0.01" min="1" max="10000" value="1.0" required>
+                                        <input style="text-align:center;height:0;width:0;background:#1f2229 !important;border:none;" type="number" id="montant" name="montant" min="1" max="10000" value="1.0">
+                                        <span class="icon is-left"><ion-icon name="card"></ion-icon></span>
+                                    </p>
+                                    <p class="control">
+                                        <input id="devise" name="devise" class="input is-large" type="text" placeholder="EUR" maxlength="3" style="width: 90px;">
+                                    </p>
                                 </div>
                             </div>
                         </div>
@@ -83,4 +89,7 @@
         </div>
     </div>
 </div>
+{% endblock %}
+{% block scripts %}
+    <script src="{{ asset("../ressources/js/script-devises.js") }}" defer></script>
 {% endblock %}

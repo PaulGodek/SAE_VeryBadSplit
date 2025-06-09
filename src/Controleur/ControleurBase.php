@@ -2,15 +2,22 @@
 
 namespace App\VeryBadSplit\Controleur;
 
+use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
 class ControleurBase extends ControleurGenerique
 {
-    
-    #[Route(path: '/', name: 'accueil', methods: ['GET'])]
-    public static function accueil(): Response
+
+    public function __construct(ContainerInterface $container)
     {
-        return self::afficherTwig('base/accueil.html.twig');
+        parent::__construct($container);
+    }
+
+
+    #[Route(path: '/', name: 'accueil', methods: ['GET'])]
+    public function accueil(): Response
+    {
+        return $this->afficherTwig('base/accueil.html.twig');
     }
 }
