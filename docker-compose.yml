@@ -1,4 +1,8 @@
+# Configuration des services Docker pour VeryBadSplit
+# Ce fichier définit l'architecture multi-conteneurs de l'application
+
 services:
+  # Service principal : Application PHP/Apache
   app:
     build:
       context: .
@@ -6,36 +10,46 @@ services:
     restart: unless-stopped
     working_dir: /var/www/html
     volumes:
+      # Monte le code source dans le conteneur (modifications en temps réel)
       - ./:/var/www/html
     ports:
+      # Expose l'application sur le port 8080 de votre machine
       - "8080:80"
     depends_on:
+      # S'assure que la BD est démarrée avant l'application
       - db
     environment:
-      # Utilisation de DATABASE_URL pour Symfony, plus propre
+      # Configuration de la connexion à la base de données
+      # Les valeurs par défaut permettent de démarrer sans fichier .env
       DATABASE_URL: mysql://${DB_USER:-verybadsplit_user}:${DB_PASSWORD:-verybadsplit_pass}@db:3306/${DB_NAME:-verybadsplit}?serverVersion=8.0.32&charset=utf8mb4
 
+  # Service de base de données MySQL
   db:
     image: mysql:8.0
     restart: unless-stopped
     environment:
+      # Configuration MySQL avec valeurs par défaut
       MYSQL_DATABASE: ${DB_NAME:-verybadsplit}
       MYSQL_USER: ${DB_USER:-verybadsplit_user}
       MYSQL_PASSWORD: ${DB_PASSWORD:-verybadsplit_pass}
       MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-root_password}
     volumes:
+      # Persiste les données même après arrêt du conteneur
       - db_data:/var/lib/mysql
-      - ./docker/mysql-init:/docker-entrypoint-initdb.d
+      # Script SQL exécuté automatiquement au premier démarrage
+      - ./VeryBadSplit.sql:/docker-entrypoint-initdb.d/01-init.sql
 
-  # Optionnel : Pour une utilisation de verybadsplit indépendante de l'IUT
+  # Interface d'administration de la base de données
   phpmyadmin:
     image: phpmyadmin/phpmyadmin
     restart: unless-stopped
     environment:
-      PMA_HOST: db
+      # Configuration de la connexion à MySQL
+      PMA_HOST: db  # Nom du service de base de données
       PMA_PORT: 3306
       UPLOAD_LIMIT: 100M
     ports:
+      # Accessible sur http://localhost:8081
       - "8081:80"
     depends_on:
       - db
