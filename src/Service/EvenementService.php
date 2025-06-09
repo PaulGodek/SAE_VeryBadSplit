@@ -3,11 +3,8 @@
 namespace App\VeryBadSplit\Service;
 
 use App\VeryBadSplit\Lib\ConnexionUtilisateur;
-use App\VeryBadSplit\Lib\MessageFlash;
 use App\VeryBadSplit\Lib\Validator;
-use App\VeryBadSplit\Modele\DataObject\Depense;
 use App\VeryBadSplit\Modele\DataObject\Evenement;
-use App\VeryBadSplit\Modele\Repository\DepenseRepository;
 use App\VeryBadSplit\Modele\Repository\Interface\DepenseRepositoryInterface;
 use App\VeryBadSplit\Modele\Repository\Interface\EvenementRepositoryInterface;
 use App\VeryBadSplit\Modele\Repository\Interface\UtilisateurRepositoryInterface;
@@ -100,12 +97,12 @@ class EvenementService extends GeneriqueService implements EvenementServiceInter
     }
 
     /**
-     * Récupère un événement avec les dettes associées.
-     *
-     * @param string $codeEvenement Le code secret de l'événement.
-     * @return array Un tableau contenant l'événement, les dettes et le coût total.
-     * @throws ServiceException Si l'événement n'existe pas.
-     */
+    * Récupère un événement avec les dettes associées (brutes + optimisées).
+    *
+    * @param string $codeEvenement Le code secret de l'événement.
+     * @return array Un tableau contenant l'événement, les dettes brutes, les dettes optimisées et le coût total.
+    * @throws ServiceException Si l'événement n'existe pas.
+    */
     public function recupererEvenementAvecDettes(string $codeEvenement): array
     {
         $evenement = $this->evenementRepository->recupererParCodeSecret($codeEvenement);
@@ -113,42 +110,121 @@ class EvenementService extends GeneriqueService implements EvenementServiceInter
 
         $dettes = [];
         $coutTotal = 0;
+        foreach ($evenement->getMembres() as $membre) {
+            $dettes[$membre->getLogin()] = [];
+            foreach ($evenement->getMembres() as $membreBis) {
+                if ($membre->getLogin() !== $membreBis->getLogin()) {
+                    $dettes[$membre->getLogin()][$membreBis->getLogin()] = [
+                        "membre" => $membreBis,
+                        "montant" => 0
+                    ];
+                }
+            }
+        }
+
         $depenses = $this->depenseRepository->recupererParEvenement($evenement->getId());
-
-        // La boucle initial pour initialiser dettes à 0 partout ne sert à rien et prend du temps pour rien
-
         if (!is_null($depenses)) {
             foreach ($depenses as $depense) {
-                $montantDepense = $depense->getMontant();
-
-                $coutTotal += $montantDepense;
+                $coutTotal += $depense->getMontant();
                 $payeur = $depense->getPayeur();
                 $participants = $depense->getParticipants();
-                $montantAPayerParPersonne = $montantDepense / count($participants);
+                $montantAPayerParPersonne = $depense->getMontant() / count($participants);
 
                 foreach ($participants as $participant) {
                     if ($participant->getLogin() !== $payeur->getLogin()) {
-                        $loginParticipant = $participant->getLogin();
-                        $loginPayeur = $payeur->getLogin();
-
-                        // Plutôt que de boucler, si la dette n'existe pas, on la crée
-                        if (!isset($dettes[$loginParticipant]))
-                            $dettes[$loginParticipant] = [];
-                        if (!isset($dettes[$loginParticipant][$loginPayeur]))
-                            $dettes[$loginParticipant][$loginPayeur] = ["membre" => $payeur, "montant" => 0];
-
-                        $dettes[$loginParticipant][$loginPayeur]["montant"] += $montantAPayerParPersonne;
+                        $dettes[$participant->getLogin()][$payeur->getLogin()]["montant"] += $montantAPayerParPersonne;
                     }
                 }
             }
         }
 
+        $soldes = [];
+        foreach ($evenement->getMembres() as $membre) {
+            $login = $membre->getLogin();
+            $totalDoit = 0;
+            $totalRecu = 0;
+
+            foreach ($dettes[$login] as $autreLogin => $info) {
+                $totalDoit += $info["montant"];
+            }
+
+            foreach ($dettes as $autreLogin => $autresDettes) {
+                if (isset($autresDettes[$login])) {
+                    $totalRecu += $autresDettes[$login]["montant"];
+                }
+            }
+
+            $soldes[$login] = $totalRecu - $totalDoit;
+        }
+
+        $transactionsOptimisees = [];
+
+        $debit = [];
+        $credit = [];
+
+        foreach ($soldes as $login => $solde) {
+            $soldeArrondi = round($solde, 2);
+            if ($soldeArrondi > 0) {
+                $credit[$login] = $soldeArrondi;
+            } elseif ($soldeArrondi < 0) {
+                $debit[$login] = $soldeArrondi;
+            }
+        }
+
+        while (!empty($debit) && !empty($credit)) {
+            $debiteur = array_key_first($debit);
+            $creancier = array_key_first($credit);
+
+            $montantADonner = min(abs($debit[$debiteur]), $credit[$creancier]);
+
+            $transactionsOptimisees[] = [
+                "from" => $debiteur,
+                "to" => $creancier,
+                "montant" => $montantADonner
+            ];
+
+            $debit[$debiteur] += $montantADonner;
+            $credit[$creancier] -= $montantADonner;
+
+            if (round($debit[$debiteur], 2) == 0) {
+                unset($debit[$debiteur]);
+            }
+            if (round($credit[$creancier], 2) == 0) {
+                unset($credit[$creancier]);
+            }
+        }
+
+        // Résultat
         return [
             "evenement" => $evenement,
-            "dettes" => $dettes,
+            "dettes" => $dettes, // Dettes brutes par participant
+            "transactionsOptimisees" => $transactionsOptimisees, // Liste minimale de remboursements
             "coutTotal" => $coutTotal,
         ];
     }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     /**
      * Récupère les événements associés à l'utilisateur connecté.

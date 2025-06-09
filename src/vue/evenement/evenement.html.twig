@@ -106,11 +106,11 @@
                                                 <div class="is-size-4 is-wrapped">
                                                     <span><strong>{{ membre.prenom|e~" "~membre.nom|e }}</strong></span>
                                                 </div>
-                                                {% for dette in (dettes[membre.login] is defined ? dettes[membre.login] : []) %}
-                                                    {% if (dette["montant"] > 0) %}
+                                                {% for transaction in transactions %}
+                                                    {% if (transaction["from"] === membre.login) %}
                                                         <div class="has-text-left is-size-5">
                                                             <span class="icon is-left"><ion-icon name="card"></ion-icon></span>
-                                                            <span>Doit {{ dette["montant"]|number_format(2) }}€ à {{ dette["membre"].prenom|e~" "~dette["membre"].nom|e }}</span>
+                                                            <span>Doit {{ transaction["montant"]|number_format(2) }}€ à {{ transaction["to"].prenom|e~" "~transaction["to"].nom|e }}</span>
                                                         </div>
                                                     {% endif %}
                                                 {% endfor %}
