@@ -7,6 +7,7 @@ use App\VeryBadSplit\Lib\MessageFlash;
 use App\VeryBadSplit\Lib\Validator;
 use App\VeryBadSplit\Modele\DataObject\Depense;
 use App\VeryBadSplit\Modele\DataObject\Evenement;
+use App\VeryBadSplit\Modele\DataObject\Utilisateur;
 use App\VeryBadSplit\Modele\Repository\DepenseRepository;
 use App\VeryBadSplit\Modele\Repository\Interface\DepenseRepositoryInterface;
 use App\VeryBadSplit\Modele\Repository\Interface\EvenementRepositoryInterface;
@@ -74,6 +75,7 @@ class EvenementService extends GeneriqueService implements EvenementServiceInter
     {
         GeneriqueService::verifierConnexion();
 
+        /** @var Evenement $evenement */
         $evenement = $this->evenementRepository->recupererParClePrimaire($idEvenement);
 
         self::verifierExistenceEvenement($evenement);
@@ -93,6 +95,7 @@ class EvenementService extends GeneriqueService implements EvenementServiceInter
     {
         GeneriqueService::verifierConnexion();
 
+        /** @var Evenement $evenement */
         $evenement = $this->evenementRepository->recupererParClePrimaire($idEvenement);
         self::verifierExistenceEvenement($evenement);
         if (!$evenement->estProprietaire(ConnexionUtilisateur::getLoginUtilisateurConnecte())) {
@@ -105,12 +108,12 @@ class EvenementService extends GeneriqueService implements EvenementServiceInter
     }
 
     /**
-    * Récupère un événement avec les dettes associées (brutes + optimisées).
-    *
-    * @param string $codeEvenement Le code secret de l'événement.
+     * Récupère un événement avec les dettes associées (brutes + optimisées).
+     *
+     * @param string $codeEvenement Le code secret de l'événement.
      * @return array Un tableau contenant l'événement, les dettes brutes, les dettes optimisées et le coût total.
-    * @throws ServiceException Si l'événement n'existe pas.
-    */
+     * @throws ServiceException Si l'événement n'existe pas.
+     */
     public function recupererEvenementAvecDettes(string $codeEvenement): array
     {
         $evenement = $this->evenementRepository->recupererParCodeSecret($codeEvenement);
@@ -251,6 +254,7 @@ class EvenementService extends GeneriqueService implements EvenementServiceInter
         $evenementRepository = $this->evenementRepository;
         $idEvenement = $evenementRepository->getNextId();
 
+        /** @var Utilisateur $utilisateur */
         $utilisateur = $this->utilisateurRepository->recupererParClePrimaire($loginUtilisateur);
 
         $evenement = new Evenement(
@@ -265,10 +269,12 @@ class EvenementService extends GeneriqueService implements EvenementServiceInter
 
         if (!$evenementRepository->ajouter($evenement)) {
             throw new ServiceException("Une erreur est survenue lors de la création de l'événement",
+                Response::HTTP_INTERNAL_SERVER_ERROR,
                 "FormulaireCreationEvenement", [], "warning");
         }
         if (!$this->evenementRepository->ajouterJointure($evenement,$loginUtilisateur)) {
             throw new ServiceException("Une erreur est survenue lors de la création de l'événement",
+                Response::HTTP_INTERNAL_SERVER_ERROR,
                 "FormulaireCreationEvenement", [], "warning");
         }
 
@@ -317,6 +323,7 @@ class EvenementService extends GeneriqueService implements EvenementServiceInter
 
         if (!$evenementRepository->supprimer($idEvenement)) {
             throw new ServiceException("Une erreur est survenue lors de la suppression de l'événement.",
+                Response::HTTP_INTERNAL_SERVER_ERROR,
                 "MesEvenements");
         }
     }
@@ -368,9 +375,7 @@ class EvenementService extends GeneriqueService implements EvenementServiceInter
                 "Evenement", ["codeEvenement" => $codeSecret]);
         }
 
-        $utilisateurRepository = $this->utilisateurRepository;
-        $utilisateur = $utilisateurRepository->recupererParClePrimaire($loginUtilisateur);
-
+        $utilisateur = $this->utilisateurRepository->recupererParClePrimaire($loginUtilisateur);
         if (!$utilisateur) {
             throw new ServiceException("Utilisateur inexistant",
                 Response::HTTP_BAD_REQUEST,
@@ -378,7 +383,7 @@ class EvenementService extends GeneriqueService implements EvenementServiceInter
         }
 
         if ($evenement->estMembre($loginUtilisateur)) {
-            throw new ServiceException("Cet utilisateur est déjà membre de l'événement",
+            throw new ServiceException("Cet utilisateur est déjà membre de l'événement.",
                 Response::HTTP_BAD_REQUEST,
                 "Evenement", ["codeEvenement" => $codeSecret], "warning");
         }
@@ -394,39 +399,6 @@ class EvenementService extends GeneriqueService implements EvenementServiceInter
     }
 
     /**
-     * Permet à un utilisateur de quitter un événement.
-     *
-     * @param int $idEvenement L'identifiant de l'événement.
-     * @throws ServiceException Si l'utilisateur n'est pas membre ou propriétaire de l'événement.
-     */
-    public function quitterEvenement(int $idEvenement): void
-    {
-        $this->verifierConnexion();
-
-        $evenementRepository = $this->evenementRepository;
-        $evenement = $evenementRepository->recupererParClePrimaire($idEvenement);
-
-        $this->verifierExistenceEvenement($evenement);
-
-        $loginUtilisateur = ConnexionUtilisateur::getLoginUtilisateurConnecte();
-
-        if ($evenement->estProprietaire($loginUtilisateur)) {
-            throw new ServiceException("Vous ne pouvez pas quitter cet événement car vous en êtes le propriétaire.",
-                Response::HTTP_FORBIDDEN,
-                "MesEvenements");
-        }
-
-        if (!$evenement->estMembre($loginUtilisateur)) {
-            throw new ServiceException("Vous n'êtes pas membre de cet événement.",
-                Response::HTTP_FORBIDDEN,
-                "MesEvenements");
-        }
-
-        $this->mettreAJourMembresEtDepenses($evenement, $loginUtilisateur);
-        $this->evenementRepository->supprimerJointure($evenement,ConnexionUtilisateur::getLoginUtilisateurConnecte());
-    }
-
-    /**
      * Supprime un membre d'un événement.
      *
      * @param int $idEvenement L'identifiant de l'événement.
@@ -438,8 +410,7 @@ class EvenementService extends GeneriqueService implements EvenementServiceInter
     {
         $evenement = $this->verifierAccesProprietaireEvenement($idEvenement);
 
-        $utilisateurRepository = $this->utilisateurRepository;
-        $utilisateur = $utilisateurRepository->recupererParClePrimaire($loginUtilisateur);
+        $utilisateur = $this->utilisateurRepository->recupererParClePrimaire($loginUtilisateur);
 
         $codeSecret = $evenement->getCodeSecret();
         if (!$utilisateur) {
@@ -454,46 +425,68 @@ class EvenementService extends GeneriqueService implements EvenementServiceInter
                 "Evenement", ["codeEvenement" => $codeSecret]);
         }
 
-        if ($evenement->estProprietaire($loginUtilisateur)) {
-            throw new ServiceException("Vous ne pouvez pas supprimer le propriétaire de l'événement.",
-                Response::HTTP_BAD_REQUEST,
-                "Evenement", ["codeEvenement" => $codeSecret]);
+        // Supprimer toutes les dépenses où l'utilisateur est payeur
+        $depenses = $this->depenseRepository->recupererParEvenement($idEvenement);
+        if (!is_null($depenses)) {
+            foreach ($depenses as $depense) {
+                if ($depense->getPayeur()->getLogin() === $loginUtilisateur) {
+                    $this->depenseRepository->supprimer($depense->getId());
+                } else if ($depense->estParticipant($loginUtilisateur)) {
+                    // Si l'utilisateur participe à la dépense, le retirer des participants
+                    $this->depenseRepository->supprimerJointure($depense, $loginUtilisateur);
+                    
+                    // Si c'était le dernier participant, supprimer la dépense
+                    $participants = $depense->getParticipants();
+                    if (count($participants) === 1 && $participants[0]->getLogin() === $loginUtilisateur) {
+                        $this->depenseRepository->supprimer($depense->getId());
+                    }
+                }
+            }
         }
 
-        $this->mettreAJourMembresEtDepenses($evenement, $loginUtilisateur);
         $this->evenementRepository->supprimerJointure($evenement,$loginUtilisateur);
+        $this->evenementRepository->mettreAJour($evenement);
 
         return $codeSecret;
     }
 
     /**
-     * Met à jour les membres et les dépenses d'un événement après la suppression d'un membre.
+     * Quitte un événement en tant que membre.
      *
-     * @param Evenement $evenement L'événement à mettre à jour.
-     * @param string $loginUtilisateur Le login de l'utilisateur à supprimer.
+     * @param int $idEvenement L'identifiant de l'événement.
+     * @throws ServiceException Si l'événement n'existe pas, si l'utilisateur n'est pas membre ou s'il est propriétaire.
      */
-    private function mettreAJourMembresEtDepenses(Evenement $evenement, string $loginUtilisateur): void
+    public function quitterEvenement(int $idEvenement): void
     {
-        // Mise à jour des membres
-        $membres = array_filter($evenement->getMembres(), fn($membre) => $membre->getLogin() !== $loginUtilisateur);
-        $evenement->setMembres($membres);
-        $this->evenementRepository->mettreAJour($evenement);
+        $evenement = $this->verifierAccesEvenement($idEvenement);
+        $loginUtilisateur = ConnexionUtilisateur::getLoginUtilisateurConnecte();
 
-        // Gestion des dépenses
-        $depenseRepository = $this->depenseRepository;
-        foreach ($this->depenseRepository->recupererParEvenement($evenement->getId()) as $depense) {
-            if ($depense->estPayeur($loginUtilisateur)) {
-                $depenseRepository->supprimer($depense->getId());
-            } elseif ($depense->estParticipant($loginUtilisateur)) {
-                $depenseRepository->supprimerJointure($depense,$loginUtilisateur);
-                $participants = array_filter($depense->getParticipants(), fn($participant) => $participant->getLogin() !== $loginUtilisateur);
-                if (empty($participants)) {
-                    $depenseRepository->supprimer($depense->getId());
-                } else {
-                    $depense->setParticipants($participants);
-                    $depenseRepository->mettreAJour($depense);
+        if ($evenement->estProprietaire($loginUtilisateur)) {
+            throw new ServiceException("Le propriétaire ne peut pas quitter l'événement.",
+                Response::HTTP_FORBIDDEN,
+                "Evenement", ["codeEvenement" => $evenement->getCodeSecret()]);
+        }
+
+        // Supprimer toutes les dépenses où l'utilisateur est payeur
+        $depenses = $this->depenseRepository->recupererParEvenement($idEvenement);
+        if (!is_null($depenses)) {
+            foreach ($depenses as $depense) {
+                if ($depense->getPayeur()->getLogin() === $loginUtilisateur) {
+                    $this->depenseRepository->supprimer($depense->getId());
+                } else if ($depense->estParticipant($loginUtilisateur)) {
+                    // Si l'utilisateur participe à la dépense, le retirer des participants
+                    $this->depenseRepository->supprimerJointure($depense, $loginUtilisateur);
+                    
+                    // Si c'était le dernier participant, supprimer la dépense
+                    $participants = $depense->getParticipants();
+                    if (count($participants) === 1 && $participants[0]->getLogin() === $loginUtilisateur) {
+                        $this->depenseRepository->supprimer($depense->getId());
+                    }
                 }
             }
         }
+
+        $this->evenementRepository->supprimerJointure($evenement,$loginUtilisateur);
+        $this->evenementRepository->mettreAJour($evenement);
     }
 }

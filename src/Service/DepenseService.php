@@ -19,7 +19,7 @@ class DepenseService extends GeneriqueService implements DepenseServiceInterface
     private DepenseRepositoryInterface $depenseRepository;
     private UtilisateurRepositoryInterface $utilisateurRepository;
     private EvenementRepositoryInterface $evenementRepository;
-    private EvenementService $evenementService ;
+    private EvenementServiceInterface $evenementService ;
 
     public function __construct(
         DepenseRepositoryInterface $depenseRepository,
@@ -164,6 +164,7 @@ class DepenseService extends GeneriqueService implements DepenseServiceInterface
 
         if (!Validator::allNotEmpty([$titre, $montant, $payeurLogin])) {
             throw new ServiceException("Attributs manquants.",
+                Response::HTTP_BAD_REQUEST,
                 "afficherFormulaireMiseAJourDepense", ["idDepense" => $idDepense]);
         }
 
@@ -210,7 +211,7 @@ class DepenseService extends GeneriqueService implements DepenseServiceInterface
         $depense->setPayeur($payeur);
         $depense->setParticipants($participants);
 
-        $depenseRepository->mettreAJour($depense);
+        $this->depenseRepository->mettreAJour($depense);
 
         return $evenement->getCodeSecret();
     }
