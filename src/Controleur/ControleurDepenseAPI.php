@@ -88,7 +88,15 @@ class ControleurDepenseAPI extends ControleurGenerique{
             $titre = $json->titre ?? $depenseExistante->getTitre();
             $montant = isset($json->montant) ? floatval($json->montant) : $depenseExistante->getMontant();
             $payeur = $json->payeur ?? $depenseExistante->getPayeur()->getLogin();
-            $participants = $json->participants ?? array_map(fn($p) => $p->getLogin(), $depenseExistante->getParticipants());
+            
+            // Si les participants sont fournis, les utiliser, sinon garder les existants
+            if (isset($json->participants)) {
+                $participants = $json->participants;
+            } else {
+                // getParticipants retourne un tableau associatif indexé par login
+                $participantsExistants = $depenseExistante->getParticipants();
+                $participants = $participantsExistants ? array_keys($participantsExistants) : [];
+            }
 
             if(is_null($participants)){
                 $participants=[];
