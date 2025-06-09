@@ -28,7 +28,7 @@ use App\VeryBadSplit\Modele\HTTP\Cookie;
                         </div>
                     </div>
                     <div id="connexionOubli">
-                        <a href="./recuperation">Login
+                        <a href="<?= \App\VeryBadSplit\Lib\Helper::url("recuperation") ?>">Login
                             et/ou mot de passe oubliés ?</a>
                     </div>
                     <div class="buttons is-centered">

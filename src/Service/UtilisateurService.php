@@ -205,13 +205,7 @@ class UtilisateurService extends GeneriqueService implements UtilisateurServiceI
     public function reinitialiserMotDePasse(
         string $login,
         string $mdp,
-        string $mdp2
     ): void {
-
-        if (!Validator::hasValideLength($login,3,30)) {
-            throw new ServiceException("La longueur du nom d'utilisateur n'est pas valide.",
-                "reinitialisation", "danger");
-        }
 
         $utilisateurRepository = $this->utilisateurRepository;
         $utilisateur = $utilisateurRepository->recupererParClePrimaire($login);
@@ -220,18 +214,7 @@ class UtilisateurService extends GeneriqueService implements UtilisateurServiceI
             throw new ServiceException("L'utilisateur n'existe pas.", "reinitialisation");
         }
 
-        if ($mdp || $mdp2) {
-            if (!$mdp || !$mdp2) {
-                throw new ServiceException("Pour reinitialiser votre mot de passe, vous devez saisir les 2 champs correspondants.",
-                    "reinitialisation", "warning");
-            }
-            if ($mdp !== $mdp2) {
-                throw new ServiceException("Mots de passe distincts.", "reinitialisation", "warning");
-            }
-            // Stocke que le mot de passe haché. Pas le mot de passe en clair ni en en cookie.
-            $utilisateur->setMdpHache(MotDePasse::hacher($mdp));
-        }
-
+        $utilisateur->setMdpHache(MotDePasse::hacher($mdp));
 
         $utilisateurRepository->mettreAJour($utilisateur);
 
@@ -306,7 +289,7 @@ class UtilisateurService extends GeneriqueService implements UtilisateurServiceI
      * @return Utilisateur[] Un tableau d'objets Utilisateur correspondant à l'email fourni.
      * @throws ServiceException Si l'adresse email est manquante ou si aucun utilisateur n'est trouvé.
      */
-    public function recupererUtilisateursParEmail(string $email): array {
+    public function recupererUtilisateurParEmail(string $email): Utilisateur {
         //$this->verifierConnexion();
         //Bah justement non du coup tu peux pas être connecté à ce moment la puisque t'as plus tes id
         
@@ -314,13 +297,13 @@ class UtilisateurService extends GeneriqueService implements UtilisateurServiceI
             throw new ServiceException("Adresse email manquante.", "recuperation");
         }
 
-        $utilisateurs = $this->utilisateurRepository->recupererParEmail($email);
+        $utilisateur = $this->utilisateurRepository->recupererParEmail($email);
 
-        if (empty($utilisateurs)) {
+        if (!$utilisateur) {
             throw new ServiceException("Aucun compte associé à cette adresse email.", "recuperation");
         }
 
-        return $utilisateurs;
+        return $utilisateur;
     }
 
     public function recupererUtilisateurParClePrimaire(string $login) {
@@ -328,5 +311,7 @@ class UtilisateurService extends GeneriqueService implements UtilisateurServiceI
         $utilisateurs = $this->utilisateurRepository->recupererParClePrimaire($login);
         return $utilisateurs;
     }
+
+
 
 }
