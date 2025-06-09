@@ -20,6 +20,10 @@ let evenement = reactive({
                         button.closest("div.depense").remove();
                         // Décrémenter le nombre de dépenses
                         this.nbDepenses = this.nbDepenses - 1;
+                        // Supprimer le montant
+                        delete this.montantsDepenses[id];
+                        // Forcer la mise à jour
+                        this.montantsDepenses = {...this.montantsDepenses};
                     }
                 });
         }
@@ -40,6 +44,15 @@ let evenement = reactive({
                     }
                 });
         }
+    },
+    
+    // Méthode pour calculer le coût total
+    calculerCoutTotal: function() {
+        let total = 0;
+        for (let id in this.montantsDepenses) {
+            total += this.montantsDepenses[id];
+        }
+        return total.toFixed(2) + '€';
     }
     
 }, "evenement");

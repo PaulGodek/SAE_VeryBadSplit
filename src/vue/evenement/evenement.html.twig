@@ -86,10 +86,17 @@
 {% block page_scripts %}
     <script type="module" src="{{ asset('../ressources/js/evenement-reactif.js') }}"></script>
     <script>
-        // Initialiser les compteurs
+        // Initialiser les compteurs et montants
         setTimeout(() => {
             window.evenement.nbDepenses = {{ depenses|length }};
             window.evenement.nbMembres = {{ evenement.membres|length }};
+            
+            // Initialiser les montants des dépenses
+            {% for depense in depenses %}
+                window.evenement.montantsDepenses[{{ depense.id }}] = {{ depense.montant }};
+            {% endfor %}
+            // Forcer la mise à jour
+            window.evenement.montantsDepenses = {...window.evenement.montantsDepenses};
         }, 100);
     </script>
 {% endblock %}
