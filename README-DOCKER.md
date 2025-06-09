@@ -138,6 +138,15 @@ docker-compose down -v  # Supprime les volumes
 docker-compose up -d    # Recrée tout
 ```
 
+## Import de la base de données
+
+La base est automatiquement créée au premier démarrage de Docker grâce au fichier `VeryBadSplit.sql` à la racine du projet.
+
+Pour réimporter manuellement :
+```bash
+docker-compose exec db mysql -u verybadsplit_user -p verybadsplit < VeryBadSplit.sql
+```
+
 ## Dépannage
 
 ### L'application ne se connecte pas à la base de données
@@ -172,11 +181,10 @@ Le code est monté en volume, les modifications sont instantanées. Si ce n'est 
 sae4/
 ├── docker-compose.yml      # Configuration des conteneurs
 ├── Dockerfile             # Image personnalisée PHP/Apache
+├── VeryBadSplit.sql      # Script d'initialisation de la BD
 ├── .env.example          # Variables d'environnement exemple
 ├── docker/
-│   ├── apache.conf       # Configuration Apache
-│   └── mysql-init/       # Scripts d'initialisation BD
-│       └── 01-init.sql   # Création des tables
+│   └── apache.conf       # Configuration Apache
 ├── src/                  # Code source PHP
 └── web/                  # Point d'entrée de l'application
 ```
