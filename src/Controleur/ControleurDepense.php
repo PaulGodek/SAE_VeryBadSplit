@@ -39,7 +39,7 @@ class ControleurDepense extends ControleurGenerique
         requirements: ['idEvenement' => '\d+'], methods: ['POST'])]
     public static function creerDepense(int $idEvenement): Response {
         $titre = $_REQUEST["titre"] ?? null;
-        $montant = $_REQUEST["montant"] ?? null;
+        $montant = $_REQUEST["montant"] ? floatval($_REQUEST["montant"]) : null;
         $payeur = $_REQUEST["payeur"] ?? null;
         $participants = $_REQUEST["participants"] ?? null;
 
@@ -74,7 +74,7 @@ class ControleurDepense extends ControleurGenerique
         requirements: ['idDepense' => '\d+'], methods: ['POST'])]
     public static function mettreAJourDepense(int $idDepense): Response {
         $titre = $_REQUEST["titre"] ?? null;
-        $montant = $_REQUEST["montant"] ?? null;
+        $montant = $_REQUEST["montant"] ? floatval($_REQUEST["montant"]) : null;
         $payeur = $_REQUEST["payeur"] ?? null;
         $participants = $_REQUEST["participants"] ?? null;
 

@@ -70,7 +70,7 @@ class ControleurDepenseAPI extends ControleurGenerique{
         try {
             $json = json_decode($request->getContent(), flags: JSON_THROW_ON_ERROR);
             $titre = $json->titre ?? null;
-            $montant = $json->montant ?? null;
+            $montant = $json->montant ? floatval($json->montant) : null;
             $payeur = $json->payeur ?? null;
             $participants = $json->participants ?? null;
             if(is_null($participants)){
@@ -94,7 +94,7 @@ class ControleurDepenseAPI extends ControleurGenerique{
         try {
             $json = json_decode($request->getContent(), flags: JSON_THROW_ON_ERROR);
             $titre = $json->titre ?? null;
-            $montant = $json->montant ?? null;
+            $montant = $json->montant ? floatval($json->montant) : null;
             $payeur = $json->payeur ?? null;
             $participants = $json->participants ?? null;
 
