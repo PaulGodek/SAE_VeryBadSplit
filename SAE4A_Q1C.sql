@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Hôte : localhost
--- Généré le : jeu. 05 juin 2025 à 17:54
+-- Généré le : lun. 09 juin 2025 à 18:52
 -- Version du serveur : 10.5.15-MariaDB-0+deb11u1
 -- Version de PHP : 8.3.8
 
@@ -55,7 +55,7 @@ CREATE TABLE `EtreMembre` (
 
 CREATE TABLE `Evenements` (
   `idEvenement` int(11) NOT NULL,
-  `codeSecret` varchar(255) CHARACTER SET utf8 NOT NULL,
+  `codeSecretEvenement` varchar(255) CHARACTER SET utf8 NOT NULL,
   `titreEvenement` varchar(50) CHARACTER SET utf8 NOT NULL,
   `dateEvenement` date NOT NULL,
   `loginProprietaire` varchar(30) CHARACTER SET utf8 NOT NULL
