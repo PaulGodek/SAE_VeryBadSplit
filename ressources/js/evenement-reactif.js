@@ -2,7 +2,8 @@ import { reactive, startReactiveDom } from './reactive.js';
 
 // Objet réactif comme dans le TD7
 let evenement = reactive({
-    // Compteurs
+    // Données
+    titreEvenement: '',
     nbDepenses: 0,
     nbMembres: 0,
     coutTotal: 0,
@@ -26,6 +27,34 @@ let evenement = reactive({
     toggleFormulaireAjout: function() {
         const form = document.getElementById('formulaire-ajout');
         form.style.display = form.style.display === 'none' ? 'block' : 'none';
+    },
+    
+    // Toggle édition du titre
+    toggleEditionTitre: function() {
+        const form = document.getElementById('formulaire-edition-titre');
+        form.style.display = form.style.display === 'none' ? 'block' : 'none';
+    },
+    
+    // Modification du titre
+    modifierTitre: function(event) {
+        event.preventDefault();
+        const form = event.target;
+        const nouveauTitre = form.nouveauTitre.value.trim();
+        
+        if (nouveauTitre && nouveauTitre !== this.titreEvenement) {
+            fetch(`/web/api/evenements/${window.evenementId}`, {
+                method: 'PATCH',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({nomEvenement: nouveauTitre})
+            }).then(response => {
+                if (response.status === 200) {
+                    this.titreEvenement = nouveauTitre;
+                    this.toggleEditionTitre();
+                }
+            });
+        } else {
+            this.toggleEditionTitre();
+        }
     },
     
     // Suppression d'une dépense
