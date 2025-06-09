@@ -246,14 +246,13 @@ class UtilisateurService extends GeneriqueService implements UtilisateurServiceI
     public function supprimerUtilisateur(string $login): void
     {
         $this->verifierConnexion();
-
-        $evenementRepository = $this->evenementRepository;
-        foreach ($evenementRepository->recupererEvenementsUtilisateur($login) as $evenement) {
+        
+        foreach ($this->evenementRepository->recupererEvenementsUtilisateur($login) as $evenement) {
             $membres = array_filter($evenement->getMembres(), fn($u) => $u->getLogin() !== $login);
             $evenement->setMembres($membres);
-            $evenementRepository->mettreAJour($evenement);
+            $this->evenementRepository->mettreAJour($evenement);
         }
-
+        
         $depenseRepository = $this->depenseRepository;
         foreach ($depenseRepository->recupererDepensesPayeesOuParticipeUtilisateur($login) as $depense) {
             if ($depense->estPayeur($login)) {
@@ -294,7 +293,6 @@ class UtilisateurService extends GeneriqueService implements UtilisateurServiceI
 
         ConnexionUtilisateur::connecter($utilisateur->getLogin());
     }
-
 
     /**
      * Récupère une liste d'utilisateurs associés à une adresse email donnée.

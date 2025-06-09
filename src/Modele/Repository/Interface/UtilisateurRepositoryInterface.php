@@ -7,8 +7,8 @@ use App\VeryBadSplit\Modele\DataObject\Utilisateur;
 
 interface UtilisateurRepositoryInterface
 {
-    public function recuperer(): ?AbstractDataObject;
     public function recupererParClePrimaire(string $clePrimaire): ?AbstractDataObject;
+    
     /**
      * @return Utilisateur
      */
@@ -18,6 +18,8 @@ interface UtilisateurRepositoryInterface
      * @return Utilisateur[]
      */
     public function recupererUtilisateursOrdonnesPrenomNom(): array;
+    
+    public function ajouter(Utilisateur $utilisateur): bool;
 
     public function mettreAJour(Utilisateur $utilisateur): void;
 
