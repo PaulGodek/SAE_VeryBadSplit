@@ -1,5 +1,23 @@
 import { reactive, startReactiveDom } from './reactive.js';
 
+/**
+ * URL de l'API
+ */
+let BASE_URL = window.location.origin;
+
+let currentURL = window.location.href.split('?')[0];
+let shatteredURL = currentURL.split('/');
+if (shatteredURL.includes('web')) {
+    while (shatteredURL[shatteredURL.length - 1] !== 'web') {
+        shatteredURL.pop();
+    }
+    BASE_URL = shatteredURL.join('/');
+} else {
+    console.error("Le segment 'web' est introuvable dans l'URL.");
+}
+const API_URL = BASE_URL + '/api';
+
+
 // Objet réactif comme dans le TD7
 let evenement = reactive({
     // Données
@@ -123,7 +141,7 @@ let evenement = reactive({
         const nouveauTitre = form.nouveauTitre.value.trim();
         
         if (nouveauTitre && nouveauTitre !== this.titreEvenement) {
-            fetch(`/web/api/evenements/${window.evenementId}`, {
+            fetch(`${API_URL}/evenements/${window.evenementId}`, {
                 method: 'PATCH',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({nomEvenement: nouveauTitre})
@@ -144,7 +162,7 @@ let evenement = reactive({
         if (confirm('Êtes-vous sûr de vouloir supprimer cette dépense ?')) {
             const id = button.dataset.idDepense;
             
-            fetch(`/web/api/depenses/${id}`, {method: 'DELETE'})
+            fetch(`${API_URL}/depenses/${id}`, {method: 'DELETE'})
                 .then(response => {
                     if (response.status === 204) {
                         // Mise à jour visuelle et des données
@@ -174,7 +192,7 @@ let evenement = reactive({
         if (confirm('Êtes-vous sûr de vouloir retirer ce membre ?')) {
             const idEvenement = button.dataset.idEvenement;
             
-            fetch(`/web/api/evenements/${idEvenement}/membres/${login}`, {method: 'DELETE'})
+            fetch(`${API_URL}/evenements/${idEvenement}/membres/${login}`, {method: 'DELETE'})
                 .then(response => {
                     if (response.status === 204) {
                         button.closest('.membre').remove();
@@ -219,7 +237,7 @@ let evenement = reactive({
         
         console.log('Envoi de la modification:', depense);
         
-        fetch(`/web/api/depenses/${idDepense}`, {
+        fetch(`${API_URL}/depenses/${idDepense}`, {
             method: 'PATCH',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify(depense)
@@ -259,7 +277,7 @@ let evenement = reactive({
             return;
         }
         
-        fetch(`/web/api/evenements/${window.evenementId}/depenses`, {
+        fetch(`${API_URL}/evenements/${window.evenementId}/depenses`, {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify(depense)
