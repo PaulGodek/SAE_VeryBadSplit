@@ -1,6 +1,7 @@
 # Guide d'installation Docker - VeryBadSplit
 
 Ce guide vous accompagne pas à pas pour installer et configurer VeryBadSplit avec Docker.
+Instructions SIMPLIFIEES dans [instructionsDocker.md](./instructionsDocker.md)
 
 ## Prérequis
 
