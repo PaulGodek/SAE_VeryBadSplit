@@ -1,6 +1,6 @@
 # Le systeme de build multi-étapes a été proposé par l'IA Gemini pour optimiser la taille de l'image Docker
 # En tant que Paul, j'ai vérifié que tout fonctionnait et réglé ce qui ne fonctionnait pas
-# J'ai pratiqué Docker durant ma deuxime année, ce projet est un des gros projets de mon année précédente
+# J'ai pratiqué Docker durant ma deuxième année, ce projet est un des gros projets de mon année précédente
 
 # --- Étape de Build (builder) ---
 FROM php:8.3-apache AS builder
