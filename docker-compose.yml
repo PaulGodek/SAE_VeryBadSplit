@@ -12,8 +12,11 @@ services:
     volumes:
       # Monte le code source dans le conteneur (modifications en temps réel)
       - ./:/var/www/html
+      # Exclut le dossier vendor pour éviter l'écrasement (si vendor en local)
+      - /var/www/html/vendor
     ports:
       # Expose l'application sur le port 8080 de votre machine
+      # Accessible sur http://localhost:8080
       - "8080:80"
     depends_on:
       # S'assure que la BD est démarrée avant l'application

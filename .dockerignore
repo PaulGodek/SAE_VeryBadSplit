@@ -7,7 +7,7 @@
 .env.* # pour plusieurs environnements
 
 # Dépendances
-vendor/
+# vendor (il est exclut dans le compose désormais)
 node_modules/
 
 # Logs et caches

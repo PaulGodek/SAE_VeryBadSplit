@@ -20,8 +20,9 @@ WORKDIR /var/www/html
 # Copier les fichiers Composer AVANT le reste du code pour optimiser le cache Docker
 COPY composer.json composer.lock ./
 
-# Installer les dépendances Composer (sans les dev pour la production)
-RUN composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader
+# Installer les dépendances Composer en ajoutant de la verbose pour 
+# savoir ce qu'il se passe (aka pk ça marche pas)
+RUN composer install --no-interaction --prefer-dist --optimize-autoloader --verbose
 
 # Copier le reste de l'application
 COPY . /var/www/html
@@ -32,7 +33,7 @@ FROM php:8.3-apache
 
 # Installer les extensions PHP et les dépendances système MINIMALES pour l'exécution
 RUN apt-get update && apt-get install -y \
-    # Garder git et unzip est rarement nécessaire pour l'exécution en prod
+    # git et unzip non nécessaire en prod
     && rm -rf /var/lib/apt/lists/*
 
 # Installer les extensions PHP nécessaires
@@ -44,7 +45,7 @@ RUN a2enmod rewrite
 # Copier uniquement les fichiers nécessaires depuis l'étape de build
 COPY --from=builder /var/www/html /var/www/html
 
-# Copier la configuration Apache spécifique (si tu as besoin de la modifier)
+# Copier la configuration Apache spécifique (merci GPT)
 COPY docker/apache.conf /etc/apache2/sites-available/000-default.conf
 
 # Donner les droits appropriés
