@@ -6,7 +6,7 @@ lang: fr
 
 ### Adresse du site : 
 
-https://webinfo.iutmontp.univ-montp2.fr/~dipasqualem/very-bad-split-code-de-base/web/
+https://webinfo.iutmontp.univ-montp2.fr/~dipasqualem/very-bad-split-code-de-base/web/ (plus hébergé, à host/dockeriser soit-même)
 
 ### Améliorations : 
 
